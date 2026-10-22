@@ -179,7 +179,7 @@ mod tests {
     use super::*;
     const GOLDEN: &[u8] = include_bytes!(concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/../../../contracts/ready-metadata.json"
+        "/../../../api/ready-metadata.json"
     ));
     #[test]
     fn current_swift_metadata_fields_and_iso8601_roundtrip_without_new_fields() {

@@ -1,6 +1,6 @@
 # ArkTrace Phase 7 任务清单
 
-> 状态：**Completed，13/13**（2026-08-18）。gate `scripts/test_phase7.sh` 全绿，30 条上游对齐断言
+> 状态：**Completed，13/13**（2026-08-18）。gate `hack/test_phase7.sh` 全绿，30 条上游对齐断言
 > 逐条实测「破坏 → 失败」。仍有两条验收因环境而未做，均已在 P7-T13 写明并保留为 `[ ]`：
 > large benchmark（缺 >500 MB 的签名 provenance fixture）与两处窗口内交互的人眼确认（本机屏幕休眠
 > 导致截图全黑、System Events 取不到窗口）。
@@ -24,14 +24,14 @@
 `hashFunc` 会剥掉数字，所以只在数字上不同的名字**故意**同色）。
 
 **Parser 缺失的处理**：新 worktree 不携带被 Git 忽略的
-`ThirdParty/TraceStreamer/macx/trace_streamer`。需要真实 parser 时按
+`third_party/TraceStreamer/macx/trace_streamer`。需要真实 parser 时按
 [TRACE_STREAMER.md](../design/TRACE_STREAMER.md) 构建并校验；无法取得时记录受影响检查。
 只有 `.github/workflows/ci.yml` 明列的 parser-dependent 排除和 skip 可用于 hosted CI；
 不要按历史失败数量或整个测试类豁免，其他失败仍需排查。App 构建和 Phase 7 gate 需要真实 parser。
 
 **移植上游代码即触发 Apache-2.0 署名义务**：需在 `THIRD_PARTY_NOTICES.md` 记录，而这会连带触发三处
-digest re-pin（`Sources/ArkTraceCLI/CLILicenseResources.swift`、`scripts/verify_licenses.sh`、
-`scripts/verify_phase5_cli_distribution.py`，整数字面量格式还各不相同），否则 fail-closed 的
+digest re-pin（`Sources/ArkTraceCLI/CLILicenseResources.swift`、`hack/verify_licenses.sh`、
+`hack/verify_phase5_cli_distribution.py`，整数字面量格式还各不相同），否则 fail-closed 的
 `licenses` 命令会拒绝出输出。**逐字移植上游算法的任务必须把这三处 re-pin 写进自己的验收。**
 
 ## 1. 进入条件
@@ -112,7 +112,7 @@ ArkTrace 从 `measure` 读。四个真机库 `measure` 全为 0 行、`process_m
 
 `schemaFingerprint` 不受影响：它由**解析库里的全部表**算出（`TraceSchemaAdapter.swift:124-135`
 遍历 `db.tableNames()`），不是由 ArkTrace 的 required 集合算出，所以增加读表不改 fingerprint，
-`Fixtures/databases/trace_streamer_4.3.7.schema-evidence.json` 的 `schemaFingerprint` 无需 re-pin。
+`test/fixtures/databases/trace_streamer_4.3.7.schema-evidence.json` 的 `schemaFingerprint` 无需 re-pin。
 
 本任务必须**显式选择并记录**其中一条，不得默认沉默处理：
 
@@ -193,7 +193,7 @@ limit 取页 —— 两条路径不是「实现得一样」，而是**同一份�
 
 附带的访问级放开：`TraceThreadStateDistribution` 与 `TraceThreadState` 由 `package` 改为 `public`，
 因为 App target 在 SPM package 之外，`TraceRangeAnalysis` 是 `public` 且要携带它们；新符号已加进
-`scripts/api-baseline` 的消费者，收紧会在该 gate 上失败。
+`hack/api-baseline` 的消费者，收紧会在该 gate 上失败。
 
 **优先级：P0。**
 **关联：AT-APP-006；AUDIT G06。**
@@ -359,7 +359,7 @@ loader 也没传 depth（`Sources/ArkTraceRendering/TimelineSnapshotLoader.swift
 - [x] 深栈 track 上 20k detail snapshot 的绘制批次数仍受调色板规模约束 ——
       `testDeepStackKeepsFillBatchesBoundedByThePalette`：20 000 图元铺在 16 层深度上，
       `pathCacheBuildHook` 报告一次构建且批次数 ≤ `TimelinePalette.funcColors.count`；
-- [x] **medium benchmark 已跑（P7-T13）**：`scripts/fetch_phase3_fixtures.sh` 取回并三重校验
+- [x] **medium benchmark 已跑（P7-T13）**：`hack/fetch_phase3_fixtures.sh` 取回并三重校验
       265 MB `pbreader.htrace` 后实测 —— 查询侧净变快（loader p95 92.15 → 42.98 ms），帧侧变慢是
       depth 分层多画的直接代价（同 2 000 图元下 1.64 → 2.98 ms，标签几乎不贡献），仍在 60 fps 预算内。
       逐项数字见 P7-T13。**这次运行同时抓到两条 Phase 7 自引入的真回归**，都已修复；
@@ -883,7 +883,7 @@ docs-only、跳过 SwiftPM lane —— 也就是「只改 README」这个断言�
 
 ### P7-T13 — Phase 7 gate、上游对齐回归与文档收口
 
-**状态：Completed（2026-08-18）。** `scripts/test_phase7.sh` 建立并全绿，30 条上游对齐断言逐条实测
+**状态：Completed（2026-08-18）。** `hack/test_phase7.sh` 建立并全绿，30 条上游对齐断言逐条实测
 「破坏 → 失败」。本任务在 pin 版上游 medium fixture 上抓到**两条 Phase 7 自己引入的真回归**，两条都已
 修好并各自补了断言 —— 这是本阶段最有价值的产出，记录在下面。
 
@@ -907,7 +907,7 @@ docs-only、跳过 SwiftPM lane —— 也就是「只改 README」这个断言�
    修后计划与 Phase 7 之前的基线逐字节一致，p95 回到 3.19 ms。
 
 **medium fixture 的性能对照**（pin 版上游 `pbreader.htrace`，20 采样 p95，基线为
-`Fixtures/release-evidence/phase3-medium-performance.json`）
+`test/fixtures/release-evidence/phase3-medium-performance.json`）
 
 | 指标 | Phase 7 前 | Phase 7 后 | 变化 |
 |---|---:|---:|---|
@@ -923,7 +923,7 @@ docs-only、跳过 SwiftPM lane —— 也就是「只改 README」这个断言�
 
 **交付**
 
-1. `scripts/test_phase7.sh`：继承 Phase 1（真 parser、锁定 fixture、零 skip）与 Phase 6（离线证据），
+1. `hack/test_phase7.sh`：继承 Phase 1（真 parser、锁定 fixture、零 skip）与 Phase 6（离线证据），
    加 API baseline、CI planner、许可证契约与**构建告警检查**（CI 把 `swift build` 的任何 `warning:`
    当作错误，而在此之前**没有任何本地 gate 检查这一点** —— `swift build` / `swift test` 遇到告警照样
    退出 0，于是一条告警可以通过全部本地 gate 之后才在 CI 上炸掉。本阶段就这么把一条
@@ -947,14 +947,14 @@ docs-only、跳过 SwiftPM lane —— 也就是「只改 README」这个断言�
 
 **验收记录**
 
-- [x] `scripts/test_phase7.sh` 在构建过 parser 的环境上全绿 —— `alignment=30`，evidence 见 gate 输出；
+- [x] `hack/test_phase7.sh` 在构建过 parser 的环境上全绿 —— `alignment=30`，evidence 见 gate 输出；
 - [x] 上游对齐回归全部存在且会因故意引入偏差而失败 —— 逐条实测 6 类代表性断言（上游 hash 向量、
       jank 色表、process counter 来源表、App/CLI state 分布等价、counter 探针降级语义、depth 行
       draw/hit-test 同源），全部「破坏 → 失败」。**其中一条实测发现断言不够敏感**：state 分布等价性
       在 fake repository 忽略 range 时，即使把 App 侧查询范围整体挪 1 ns 仍然通过；已让 double 按
       range 过滤，并直接断言两条路径的 **query shape（range + limit）相同**，再测即「破坏 → 失败」；
 - [x] 若动过 adapter version…… —— **未动**，三个字面量由 gate 钉住，无 ArkDeck 侧动作；
-- [x] `scripts/verify_licenses.sh` 通过；`arktrace licenses` 的资源层（字节数 + SHA-256）由
+- [x] `hack/verify_licenses.sh` 通过；`arktrace licenses` 的资源层（字节数 + SHA-256）由
       `CLITests.testLicensesCommandReturnsBundledReviewedResources…` 对实际打包字节断言并通过。
       **可执行层未跑**：裸 `swift build` 产物按设计不携带 license 资源（README 已明写），
       要跑得出输出必须构建签名的 `ArkTraceCLI.app`，本环境无签名身份；
@@ -968,7 +968,7 @@ docs-only、跳过 SwiftPM lane —— 也就是「只改 README」这个断言�
       在上行，depth 1 的 `H:PerfRequestEx,cmdId[10007],…`（绿）在下行且落在父的时间范围内，
       两行几何一致。**不是在 App 窗口里看的**：本环境屏幕休眠导致 `screencapture` 全黑、
       System Events 取不到窗口；离屏渲染走的是 App 窗口同一条绘制代码，且可复现；
-- [x] **medium benchmark**（P7-T04 / P7-T11）—— 见上表。fixture 由 `scripts/fetch_phase3_fixtures.sh`
+- [x] **medium benchmark**（P7-T04 / P7-T11）—— 见上表。fixture 由 `hack/fetch_phase3_fixtures.sh`
       按 lock 取回并三重校验（byte count / SHA-256 / git blob）；
 - [ ] **large benchmark 未跑** —— 需要 `ARKTRACE_LARGE_TRACE` 指向一份独立采集、可再分发的 >500 MB
       trace 加签名的 provenance，本环境没有该 fixture。medium 已覆盖同一批查询计划与帧预算断言；
@@ -1000,7 +1000,7 @@ docs-only、跳过 SwiftPM lane —— 也就是「只改 README」这个断言�
 「上游有」而补上**：
 
 1. **用户自定义配色**（上游 `CustomThemeColor.ts`）—— 仍不做，但**理由已于 2026-08-24 更换**，以
-   UPSTREAM_ALIGNMENT_AUDIT §6 为准：色值本就是 ArkTrace 的设计产物并由 `scripts/verify_palette.py`
+   UPSTREAM_ALIGNMENT_AUDIT §6 为准：色值本就是 ArkTrace 的设计产物并由 `hack/verify_palette.py`
    按阈值把关，用户覆盖会绕过校验。（原理由「会摧毁同一 slice 两工具同色这个移植调色板的唯一目的」
    在 2026-08-19 换掉 20 色表时就已失效，锁定的向量钉的是 slot 而非色值。）
 2. **event 多选 / shift 扩展选择** —— pin 版上游并不存在该能力，种子清单这条是误判；
@@ -1030,7 +1030,7 @@ docs-only、跳过 SwiftPM lane —— 也就是「只改 README」这个断言�
 - [x] medium benchmark 无回归 —— 查询侧净变快（loader p95 92.15 → 42.98 ms），帧侧变慢是多画的
       直接代价且仍在 60 fps 预算内，逐项数字见 P7-T13；
 - [ ] **large benchmark 未跑** —— 缺 `ARKTRACE_LARGE_TRACE` 与签名 provenance；
-- [x] `scripts/test_phase7.sh` 全绿，上游对齐回归可失败可通过；
+- [x] `hack/test_phase7.sh` 全绿，上游对齐回归可失败可通过；
 - [x] 未动过 schema adapter version / index version / parser adapter version，因此无 ArkDeck 侧动作，
       三个字面量由 gate 钉住；
 - [x] 许可证义务与三处 digest re-pin 已完成（`ColorUtils.JANK_COLOR` 补进移植清单）；

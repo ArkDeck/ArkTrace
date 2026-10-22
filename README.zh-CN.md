@@ -24,7 +24,7 @@ ArkTrace 可从用户明确选择的 OpenHarmony 设备采集 Trace，也可打�
 - **本地运行、保护隐私。** 一切都在你的 Mac 上完成。解析结果存于 content-addressed 本地缓存；`--no-cache` 切换为 session-owned 临时数据库。
 - **可复现的 parser。** 捆绑的 TraceStreamer 锁定到确切的上游 revision，构建配方逐字节可复现，license 清单完整可追溯。
 - **证据驱动的发布。** 每个阶段都由 fail-closed 验证门把守，并以真机（DAYU 200）证据而非口头声明关闭。
-- **按 SmartPerf Host 的方式读 trace。** 哪个 slice 拿哪个颜色、调用深度嵌套、jank 标记与导航键位都跟随 pin 版上游，在上游同色的两个 slice 在这里也同色 —— 而且每一条都是 `scripts/test_phase7.sh` 里的断言，不是口头承诺。颜色本身是 ArkTrace 自己的，由 CI 里的 `scripts/verify_palette.py` 实测把关。
+- **按 SmartPerf Host 的方式读 trace。** 哪个 slice 拿哪个颜色、调用深度嵌套、jank 标记与导航键位都跟随 pin 版上游，在上游同色的两个 slice 在这里也同色 —— 而且每一条都是 `hack/test_phase7.sh` 里的断言，不是口头承诺。颜色本身是 ArkTrace 自己的，由 CI 里的 `hack/verify_palette.py` 实测把关。
 
 ## 环境要求
 
@@ -42,10 +42,10 @@ ArkTrace 可从用户明确选择的 OpenHarmony 设备采集 Trace，也可打�
 TraceStreamer 二进制是本机构建产物，已被 `.gitignore` 排除——只 clone 仓库是不够的：
 
 ```bash
-scripts/build_trace_streamer.sh
+hack/build_trace_streamer.sh
 ```
 
-该脚本生成 `ThirdParty/TraceStreamer/macx/trace_streamer` 及其 identity manifest。pinned revision 与构建配方见 [docs/design/TRACE_STREAMER.md](docs/design/TRACE_STREAMER.md)。
+该脚本生成 `third_party/TraceStreamer/macx/trace_streamer` 及其 identity manifest。pinned revision 与构建配方见 [docs/design/TRACE_STREAMER.md](docs/design/TRACE_STREAMER.md)。
 
 ### 2. 构建与测试
 
@@ -58,9 +58,9 @@ swift test
 按内容校验的源码镜像，以及共享的构建、依赖和模块缓存；源码未变化时不会重新编译：
 
 ```bash
-sh scripts/run-swiftpm.sh build
-sh scripts/run-swiftpm.sh test
-sh scripts/run-xcodebuild.sh
+sh hack/run-swiftpm.sh build
+sh hack/run-swiftpm.sh test
+sh hack/run-xcodebuild.sh
 ```
 
 ### 3. 用 CLI 查询 Trace
@@ -68,13 +68,13 @@ sh scripts/run-xcodebuild.sh
 仓库自带一个小型示例 Trace，以下命令开箱即用：
 
 ```bash
-PARSER="$PWD/ThirdParty/TraceStreamer/macx/trace_streamer"
-.build/release/arktrace --trace-streamer "$PARSER" inspect Fixtures/traces/zlib.htrace
-.build/release/arktrace --trace-streamer "$PARSER" --json summary Fixtures/traces/zlib.htrace
-.build/release/arktrace --trace-streamer "$PARSER" --json processes Fixtures/traces/zlib.htrace --limit 100
-.build/release/arktrace --trace-streamer "$PARSER" --json query Fixtures/traces/zlib.htrace --view cpu-slices --start-ns 0 --end-ns 1000000
-.build/release/arktrace --trace-streamer "$PARSER" --json context Fixtures/traces/zlib.htrace --timestamp-ns 500000 --window-ms 1
-.build/release/arktrace --trace-streamer "$PARSER" --json analyze Fixtures/traces/zlib.htrace --kind range --start-ns 0 --end-ns 1000000
+PARSER="$PWD/third_party/TraceStreamer/macx/trace_streamer"
+.build/release/arktrace --trace-streamer "$PARSER" inspect test/fixtures/traces/zlib.htrace
+.build/release/arktrace --trace-streamer "$PARSER" --json summary test/fixtures/traces/zlib.htrace
+.build/release/arktrace --trace-streamer "$PARSER" --json processes test/fixtures/traces/zlib.htrace --limit 100
+.build/release/arktrace --trace-streamer "$PARSER" --json query test/fixtures/traces/zlib.htrace --view cpu-slices --start-ns 0 --end-ns 1000000
+.build/release/arktrace --trace-streamer "$PARSER" --json context test/fixtures/traces/zlib.htrace --timestamp-ns 500000 --window-ms 1
+.build/release/arktrace --trace-streamer "$PARSER" --json analyze test/fixtures/traces/zlib.htrace --kind range --start-ns 0 --end-ns 1000000
 ```
 
 > **注意** —— 裸 `swift build` 产物只是开发构建：不携带 reviewed parser 与 license 资源，因此 `doctor --self-test` 与 `licenses` 会 typed fail closed，且 parser 必须显式传入（CLI 从不搜索 `PATH`）。完整安装单位是 [docs/guides/CLI_DISTRIBUTION.md](docs/guides/CLI_DISTRIBUTION.md) 定义的签名、notarized `ArkTraceCLI.app`；生产与 ArkDeck 直接执行其 `Contents/MacOS/arktrace`，它能自行定位捆绑的 parser。
@@ -129,27 +129,27 @@ Sidebar 控制轨道显隐，并可按进程名或 PID 过滤出某个进程；T
 
 Slice 的**配色分配**与 SmartPerf Host 一致：CPU slice 取所属进程身份，named slice 用自身名称（去掉数字后）散列进一张二十槽的表，因此 `ipc::41` 与 `ipc::42` 同色；thread state 走上游的状态链。在上游同色的两个 slice 在这里也同色。
 
-二十个槽里的色值、以及状态色，是 ArkTrace 自己的。设计依据是「上游 hash 有 74% 的概率只落在其中五个槽」这一实测事实，每一项都由 `scripts/verify_palette.py` 按阈值把关——两两 ΔE、对浅色与深色画布均 ≥ 3:1、对自己的 label ≥ 4.5:1——该脚本在 CI 中运行。细节见 [docs/design/DESIGN.md](docs/design/DESIGN.md) §13.5。
+二十个槽里的色值、以及状态色，是 ArkTrace 自己的。设计依据是「上游 hash 有 74% 的概率只落在其中五个槽」这一实测事实，每一项都由 `hack/verify_palette.py` 按阈值把关——两两 ΔE、对浅色与深色画布均 ≥ 3:1、对自己的 label ≥ 4.5:1——该脚本在 CI 中运行。细节见 [docs/design/DESIGN.md](docs/design/DESIGN.md) §13.5。
 
 ## 测试与发布门
 
 `swift test` 覆盖常规 regression。发布由逐级累积、fail-closed 的 phase gate 把守，验证真实 parser 输出、CLI contract、benchmark、签名/notarization 与端到端证据——每级继承之前的全部门槛，所需外部输入缺失时直接失败：
 
 ```bash
-scripts/test_phase1.sh   # clean build、真实 parser 与 fixture、零 skip
-scripts/test_phase2.sh   # + Release CLI contract、signal 与 benchmark gate
-scripts/test_phase3.sh   # + 签名 App、document types、notarization、large-trace gate
-scripts/test_phase4.sh   # + Agent CLI contract、medium/large 性能 gate
-scripts/test_phase5.sh   # + CLI distribution 与真实 ArkDeck Artifact 链路
-scripts/test_phase6.sh   # 离线复核真实闭环证据
-scripts/test_phase7.sh   # 上游对齐回归 + 真机 medium fixture 的 viewport 性能
+hack/test_phase1.sh   # clean build、真实 parser 与 fixture、零 skip
+hack/test_phase2.sh   # + Release CLI contract、signal 与 benchmark gate
+hack/test_phase3.sh   # + 签名 App、document types、notarization、large-trace gate
+hack/test_phase4.sh   # + Agent CLI contract、medium/large 性能 gate
+hack/test_phase5.sh   # + CLI distribution 与真实 ArkDeck Artifact 链路
+hack/test_phase6.sh   # 离线复核真实闭环证据
+hack/test_phase7.sh   # 上游对齐回归 + 真机 medium fixture 的 viewport 性能
 ```
 
 CI 会在每个 pull request 上构建、测试并运行离线 gate，但托管 runner 无法构建 pinned parser，parser 集成测试在其上会 skip——phase 脚本仍是发布的最终裁决。
 
 ## 项目状态
 
-Phase 0–7 全部完成，**10 个发布门全部关闭**。Phase 7（上游对齐，13/13）把 [docs/archive/UPSTREAM_ALIGNMENT_AUDIT.md](docs/archive/UPSTREAM_ALIGNMENT_AUDIT.md) 里每一条可动手的 GAP 关闭在 `scripts/test_phase7.sh` 之后。最后一道门以 DAYU 200 真机闭合了一次真实调试闭环——typed capture → structured analysis → Agent 判断 → typed 复验——目标 App 的 CPU 占用判定为 `improved`（−87.09%）。完整任务索引见 [docs/archive/TASKS.md](docs/archive/TASKS.md)，最终报告见 [docs/archive/PHASE_6_VERIFICATION.md](docs/archive/PHASE_6_VERIFICATION.md)。
+Phase 0–7 全部完成，**10 个发布门全部关闭**。Phase 7（上游对齐，13/13）把 [docs/archive/UPSTREAM_ALIGNMENT_AUDIT.md](docs/archive/UPSTREAM_ALIGNMENT_AUDIT.md) 里每一条可动手的 GAP 关闭在 `hack/test_phase7.sh` 之后。最后一道门以 DAYU 200 真机闭合了一次真实调试闭环——typed capture → structured analysis → Agent 判断 → typed 复验——目标 App 的 CPU 占用判定为 `improved`（−87.09%）。完整任务索引见 [docs/archive/TASKS.md](docs/archive/TASKS.md)，最终报告见 [docs/archive/PHASE_6_VERIFICATION.md](docs/archive/PHASE_6_VERIFICATION.md)。
 
 共享引擎正在迁入 Rust 工作区（[rust/README.md](rust/README.md)）：精确 Rust 1.99.0、edition 2024，目标为 macOS arm64 与 Windows x64。macOS App 仍是 Apple silicon、macOS 26 及以上的 SwiftUI 产品。Windows x64 CLI 在原生 Windows CI 车道构建和测试，并包含 clean-host acceptance workflow；它不替代 macOS App。
 
@@ -178,10 +178,10 @@ ArkDeck 通过 typed operation `analyzer.summarize-trace@1` 与 `analyzer.analyz
 
 ## TraceStreamer 来源
 
-ArkTrace 不重写 parser，而是复用 pinned 的上游 TraceStreamer：[openharmony/developtools_smartperf_host @ GitCode](https://gitcode.com/openharmony/developtools_smartperf_host)。`source-lock.json` 锁定上游、13 个 source dependency 与 GN/Ninja artifact；独立 patch 与构建脚本共同生成 content-derived recipe identity，`scripts/test_trace_streamer_reproducibility.sh` 要求两个 fresh worktree 产出逐字节一致的二进制。
+ArkTrace 不重写 parser，而是复用 pinned 的上游 TraceStreamer：[openharmony/developtools_smartperf_host @ GitCode](https://gitcode.com/openharmony/developtools_smartperf_host)。`source-lock.json` 锁定上游、13 个 source dependency 与 GN/Ninja artifact；独立 patch 与构建脚本共同生成 content-derived recipe identity，`hack/test_trace_streamer_reproducibility.sh` 要求两个 fresh worktree 产出逐字节一致的二进制。
 
 ## License
 
 ArkTrace 以 [MIT License](LICENSE) 发布。
 
-捆绑 TraceStreamer 的 14 个 source components、2 个 build tools、许可证表达式与 exact license bytes 记录于 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 与 `ThirdParty/TraceStreamer/license-inventory.json`；`scripts/verify_licenses.sh` 对清单、source lock 与文件 SHA fail-closed 校验。App 内 **Settings → Licenses** 展示的与 `arktrace licenses` 输出的是同一组经锁定的资源。
+捆绑 TraceStreamer 的 14 个 source components、2 个 build tools、许可证表达式与 exact license bytes 记录于 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 与 `third_party/TraceStreamer/license-inventory.json`；`hack/verify_licenses.sh` 对清单、source lock 与文件 SHA fail-closed 校验。App 内 **Settings → Licenses** 展示的与 `arktrace licenses` 输出的是同一组经锁定的资源。

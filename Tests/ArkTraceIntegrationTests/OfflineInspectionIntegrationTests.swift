@@ -8,7 +8,7 @@ final class OfflineInspectionIntegrationTests: XCTestCase {
     func testRealSmallFixturesReturnPathFreeReportsAndCleanEphemeralStorage() async throws {
         let root = URL(filePath: #filePath).deletingLastPathComponent()
             .deletingLastPathComponent().deletingLastPathComponent()
-        let parser = root.appending(path: "ThirdParty/TraceStreamer/macx/trace_streamer")
+        let parser = root.appending(path: "third_party/TraceStreamer/macx/trace_streamer")
         guard FileManager.default.isExecutableFile(atPath: parser.path) else {
             throw XCTSkip("Pinned parser bytes are required for offline inspection integration")
         }
@@ -38,7 +38,7 @@ final class OfflineInspectionIntegrationTests: XCTestCase {
         )
         let service = TraceOfflineInspectionService(configuration: configuration)
         for name in ["zlib.htrace", "hiprofiler_data_ability.htrace", "trace_small_10.systrace"] {
-            let source = root.appending(path: "Fixtures/traces/\(name)")
+            let source = root.appending(path: "test/fixtures/traces/\(name)")
             let original = try Data(contentsOf: source)
             let sha = SHA256.hash(data: original).map { String(format: "%02x", $0) }.joined()
             let report = try await service.inspect(

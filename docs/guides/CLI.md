@@ -13,10 +13,10 @@
 `ArkTraceCLI.app`；生产和 ArkDeck 均直接执行其 `Contents/MacOS/arktrace`。构建候选使用：
 
 ```bash
-scripts/build_trace_streamer.sh
+hack/build_trace_streamer.sh
 ARKTRACE_DEVELOPER_ID_APPLICATION='Developer ID Application: …' \
 ARKTRACE_DEVELOPMENT_TEAM='…' \
-scripts/build_phase5_cli_distribution_candidate.sh
+hack/build_phase5_cli_distribution_candidate.sh
 ```
 
 `swift build -c release --product arktrace` 仍可用于编译和测试核心 executable，但其裸产物不是
@@ -29,11 +29,11 @@ identity 校验。CLI 不搜索 `PATH`。
 Phase 4 Agent 批次验收使用：
 
 ```bash
-scripts/test_phase4_batch1.sh
+hack/test_phase4_batch1.sh
 ```
 
 该 gate 继承 Phase 1～3 本地候选验证，并执行真实 medium Trace 的 Agent CLI 问题、
-determinism/privacy 负例与 Context/Analysis 20-sample 性能门。完整 `scripts/test_phase4.sh`
+determinism/privacy 负例与 Context/Analysis 20-sample 性能门。完整 `hack/test_phase4.sh`
 还复验 Phase 3 已提交的 signed-App accessibility 与 Developer ID/notary evidence，并要求
 独立 large trace；任一缺失时 fail closed，不把本地候选误报为 Phase Exit。
 
@@ -264,12 +264,12 @@ Windows 的无扩展名输入使用 parser 的内容识别，与 Artifact ID 存
 stderr 格式，stdout 为空。
 
 - 每个 image 均以 `.exe` 命名（`CreateProcessW` 会为无扩展名补 `.exe`，从而执行另一个文件）。
-- parser identity 取自 `ThirdParty/TraceStreamer/windows-x86_64/manifest.json`，`architecture` 为
+- parser identity 取自 `third_party/TraceStreamer/windows-x86_64/manifest.json`，`architecture` 为
   `x86_64`；Machine envelope 中 parser 名称仍为 `trace_streamer`。
 - 信任：`development-resources` 构建只按整文件 SHA-256 pin；release 构建另外要求 Authenticode
   签名者等于编译时 `ARKTRACE_WINDOWS_PUBLISHER` 指定的 publisher（按 publisher 身份，不钉会轮换的
   leaf 证书），缺失时 fail closed。
-- 开发候选：`python scripts/stage_windows_cli_candidate.py --output <absent absolute dir> --parser
+- 开发候选：`python hack/stage_windows_cli_candidate.py --output <absent absolute dir> --parser
   <recipe-built trace_streamer.exe>`；parser SHA 必须等于提交的 Windows manifest，binary 不入 Git。
 
 **存储根**：默认使用 known folder `LocalAppData` 下的私有产品目录。以私有子进程运行本 CLI 的宿主

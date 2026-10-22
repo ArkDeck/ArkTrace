@@ -222,13 +222,13 @@
     },
     {
       "path": "rust/crates/arktrace-store/oracle/run_event_oracle.py",
-      "sha256": "2ee3393a920d2197afdc54792c78d56ad684c228ca4e5a9686559eb61f64e7e8",
-      "byteCount": 5929
+      "sha256": "74f3ad0d16331c84c3588f47a4b9782da855d2d7f97e45a77f8f2e2af6c7279b",
+      "byteCount": 5918
     },
     {
-      "path": "scripts/run-swiftpm.sh",
-      "sha256": "fac7ca17ad065d576c0caa3fde681c95bf4375d7f41b964288a2d472ede285ce",
-      "byteCount": 8418
+      "path": "hack/run-swiftpm.sh",
+      "sha256": "2142e140b142129e391a5ce1398b28045320a15dd300b98a2e8ee7bd90b0bc3d",
+      "byteCount": 8415
     },
     {
       "path": "rust/crates/arktrace-store/tests/fixtures/event-pages-input.json",

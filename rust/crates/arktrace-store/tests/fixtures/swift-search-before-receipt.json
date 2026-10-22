@@ -178,7 +178,7 @@
       "byteCount": 6246
     },
     {
-      "path": "scripts/run-swiftpm.sh",
+      "path": "hack/run-swiftpm.sh",
       "sha256": "38c6cc1c75c264bf956606bb661f62cc10c9603a53d682e43e0e278ca5af3e77",
       "byteCount": 7525
     },

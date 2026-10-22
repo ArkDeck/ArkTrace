@@ -38,7 +38,7 @@ def main():
         if target.exists():
             shutil.rmtree(target)
         shutil.copytree(ROOT / "Sources" / name, target)
-    shutil.copytree(ROOT / "scripts", source / "scripts", dirs_exist_ok=True)
+    shutil.copytree(ROOT / "hack", source / "hack", dirs_exist_ok=True)
     target = source / "Sources/ArgumentOracle"
     target.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(CRATE / "oracle/ArgumentOracle.swift", target / "ArgumentOracle.swift")
@@ -55,7 +55,7 @@ let package = Package(name: "ArkTrace", platforms: [.macOS(.v26)], targets: [
     environment = os.environ.copy()
     environment["ARKTRACE_SWIFTPM_CACHE_ROOT"] = str(CACHE)
     with (CACHE / "oracle-build.log").open("w") as log:
-        result = subprocess.run(["sh", "scripts/run-swiftpm.sh", "build", "--disable-sandbox", "--config-path", str(CACHE / "configuration"), "--security-path", str(CACHE / "security"), "--product", "ArgumentOracle"], cwd=source, env=environment, stdout=log, stderr=subprocess.STDOUT)
+        result = subprocess.run(["sh", "hack/run-swiftpm.sh", "build", "--disable-sandbox", "--config-path", str(CACHE / "configuration"), "--security-path", str(CACHE / "security"), "--product", "ArgumentOracle"], cwd=source, env=environment, stdout=log, stderr=subprocess.STDOUT)
     if result.returncode:
         print((CACHE / "oracle-build.log").read_text()[-12000:])
         result.check_returncode()
@@ -63,7 +63,7 @@ let package = Package(name: "ArkTrace", platforms: [.macOS(.v26)], targets: [
     executable = CACHE / "build/out/Products/Debug/ArgumentOracle"
     executable_pin = hashlib.sha256(executable.read_bytes()).hexdigest()
     inputs = json.loads(INPUT.read_text())
-    manifest = json.loads((ROOT / "ThirdParty/TraceStreamer/macx/manifest.json").read_text())
+    manifest = json.loads((ROOT / "third_party/TraceStreamer/macx/manifest.json").read_text())
     parser = {k: manifest[k] for k in ("name", "reportedVersion", "binarySHA256", "upstreamRepository", "upstreamRevision", "architecture", "adapterVersion", "buildRecipeVersion")}
     records, databases = [], []
     with tempfile.TemporaryDirectory(prefix="arktrace-event-oracle-", dir="/private/tmp") as directory:
@@ -92,7 +92,7 @@ let package = Package(name: "ArkTrace", platforms: [.macOS(.v26)], targets: [
     paths = []
     for name in ("ArkTraceCore", "ArkTraceStore", "ArkTraceAnalysis"):
         paths += sorted((ROOT / "Sources" / name).rglob("*.swift"))
-    paths += [CRATE / "oracle/ArgumentOracle.swift", Path(__file__), ROOT / "scripts/run-swiftpm.sh", INPUT, OUTPUT]
+    paths += [CRATE / "oracle/ArgumentOracle.swift", Path(__file__), ROOT / "hack/run-swiftpm.sh", INPUT, OUTPUT]
     receipt = {"oracle": "actual Swift SQLiteTraceRepository arguments + opt-in slice handle", "scope": "controlled SQL query semantics; no real parser/corpus/Viewer acceptance", "xcode": xcode, "swift": subprocess.check_output(["/usr/bin/swift", "--version"], text=True).strip(), "vectors": len(records), "inspectorLookups": sum(c.get("lookup") is not None for c in inputs["cases"]), "executableSHA256": executable_pin, "databases": databases, "sourceDigests": [digest(p) for p in paths]}
     (CRATE / ("tests/fixtures/swift-arguments-before-receipt.json" if "--before" in sys.argv else "tests/fixtures/swift-argument-pages-receipt.json")).write_text(json.dumps(receipt, indent=2) + "\n")
     print(f"Actual Swift argument oracle: {len(records)} controlled cases; databases unchanged and temporary root removed")

@@ -21,7 +21,7 @@ keep only its Artifact/Runtime bridge and product UI locally; it should not main
 copies of those shared modules.
 
 The 2026-10-06 native Rendering migration uses ABI/snapshot format **2**.
-The contract file is `contracts/ffi-v2.json`. An SDK consumer must rebuild with
+The contract file is `api/ffi-v2.json`. An SDK consumer must rebuild with
 the matching generated headers/records and static library; format 1 is rejected. The current ArkTrace App and public consumer were checked against
 the new SDK. No ArkDeck SDK cutover or App acceptance is implied by that result;
 see the [native rendering run](../migration-runs/AT-RUST-011-013-2026-10-06-native-rendering.md).
@@ -90,7 +90,7 @@ records do not prove the new candidate compatible. See the
 [current migration record](../migration-runs/AT-RUST-007-013-2026-10-06-medium-queries.md).
 
 ArkTrace now exports those three literals in
-[`contracts/arkdeck-contract.json`](../../contracts/arkdeck-contract.json):
+[`api/arkdeck-contract.json`](../../api/arkdeck-contract.json):
 
 | JSON field | Swift constant | Rust constant |
 |---|---|---|
@@ -98,8 +98,8 @@ ArkTrace now exports those three literals in
 | `schema_adapter_version` | `TraceSchemaAdapter.version` | `SCHEMA_ADAPTER_VERSION` |
 | `index_schema_version` | `TraceDatabaseStagingPreparer.indexVersion` | `INDEX_SCHEMA_VERSION` |
 
-`scripts/verify_arkdeck_contract.py` fails when the file disagrees with either
-implementation or with `contracts/index-definitions.json`. ArkDeck should replace
+`hack/verify_arkdeck_contract.py` fails when the file disagrees with either
+implementation or with `api/index-definitions.json`. ArkDeck should replace
 the hardcoded `index_schema_version: 3` in `arktrace_profile.rs`, and the matching
 parser and schema adapter literals, with a read of this file at the pinned
 ArkTrace revision. That consumption change belongs in ArkDeck; this repository
@@ -137,8 +137,8 @@ RuntimeCapability was used by the analyzer.
 
 After `launchctl kickstart -k`, the daemon returned ready, the operation remained available, and
 the derived Artifact remained readable with the same SHA-256. The path-free machine evidence is
-`Fixtures/release-evidence/phase5-arkdeck-real-artifact.json`; the retained exact derived bytes are
-`Fixtures/release-evidence/phase5-arkdeck-real-artifact-summary.json`. `scripts/test_phase5.sh`
+`test/fixtures/release-evidence/phase5-arkdeck-real-artifact.json`; the retained exact derived bytes are
+`test/fixtures/release-evidence/phase5-arkdeck-real-artifact-summary.json`. `hack/test_phase5.sh`
 rehashes those bytes and closes their source, parser, distribution, Job, restart, and lineage
 relationships.
 

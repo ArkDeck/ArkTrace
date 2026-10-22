@@ -239,7 +239,7 @@ P3-T01、P3-T02、P3-T05 可以并行。
 - [x] 在 exact Developer ID 签名 App 上完成 keyboard-only 与 VoiceOver walkthrough，含 Search → Timeline real event → selection/range → Inspector、loading/result/completion/error announcements 与恢复路径；
 - [x] 最小窗口、14 pt 德语长本地化字符串和 Inspector disclosure focus restoration 的人工检查；
 - [x] 真实 hosted AppKit/SwiftUI control 的 target hard floor 24×24、Tab/focus restoration，以及 focus ring、非纯颜色 selection 与 Reduce Motion 分支由代码/测试锁定；
-- [x] AC-AT-016 的六项 exact candidate-bound artifact 与 SHA 已提交并通过独立 Agent review，事实源为 `Fixtures/release-evidence/accessibility-c00e79ed.json`。
+- [x] AC-AT-016 的六项 exact candidate-bound artifact 与 SHA 已提交并通过独立 Agent review，事实源为 `test/fixtures/release-evidence/accessibility-c00e79ed.json`。
 
 ### P3-T09 — 真实性能、large cancellation 与 viewport 发布门
 
@@ -265,7 +265,7 @@ P3-T01、P3-T02、P3-T05 可以并行。
 - [x] index schema v2 的 CPU/thread-state/named-slice viewport 均命中 persistent covering index，relationship probe 11k～25k steps，未触发 automatic index；
 - [x] medium gate 消费精确 row counts、非空 CPU/state/slice detail+density、context、analysis、RSS，并分别记录真实 detail selection、pan、steady 与 rebuild frame；对 Store 实际执行的六类 production SQL 锁 exact applicable v2 covering plan；最新冻结数值记入 verification 文档；
 - [x] 独立采集、可再分发、恰好一个 type-0 protobuf segment，且非 padding/拼接/重复 packet 的 674,044,067-byte DAYU 200 large trace；多 segment 在缺少可验证 session chain 时继续 fail closed；
-- [x] 在上述 large trace 上以真实 child cancellation、24-index exact closure 与 20-sample benchmark 关闭 gate 6/7；事实源为 `Fixtures/release-evidence/phase3-large-performance.json`。
+- [x] 在上述 large trace 上以真实 child cancellation、24-index exact closure 与 20-sample benchmark 关闭 gate 6/7；事实源为 `test/fixtures/release-evidence/phase3-large-performance.json`。
 
 ### P3-T10 — Build hardening、App tests、许可证、打包和文档
 
@@ -282,7 +282,7 @@ P3-T01、P3-T02、P3-T05 可以并行。
 5. App/CLI license files/UI，关闭发布门 3；
 6. Developer ID/TestFlight/App Store 对应签名/notarization smoke test；
 7. README App 使用说明、screenshots、已知限制；
-8. scripts/test_phase3.sh 运行 Phase 1–3 gate。
+8. hack/test_phase3.sh 运行 Phase 1–3 gate。
 
 **候选证据**
 
@@ -291,7 +291,7 @@ P3-T01、P3-T02、P3-T05 可以并行。
 - [x] 14 个 source component、2 个 build tool 的 exact license bytes、notice、App/CLI licenses 已校验；
 - [x] Debug/Release App bundle、empty entitlement、parser/manifest/license exact-copy gate 已落地；
 - [x] distribution contract regression 锁定 nested helper inner-first signing、exact certificate/Team/Authority、unsigned→signed manifest provenance、人工 artifact/hash 绑定、private-partial 复验后 atomic publish 与 staple-before-final-ZIP；
-- [x] Developer ID identity/team/certificate 与 notary profile 完成真实 smoke：Apple status `Accepted`，ticket staple、Gatekeeper、解包后的 nested/outer signature 与 ticket 均通过；最终 ZIP SHA/bytes/submission ID 见 `Fixtures/release-evidence/phase3-notarization.json`；
+- [x] Developer ID identity/team/certificate 与 notary profile 完成真实 smoke：Apple status `Accepted`，ticket staple、Gatekeeper、解包后的 nested/outer signature 与 ticket 均通过；最终 ZIP SHA/bytes/submission ID 见 `test/fixtures/release-evidence/phase3-notarization.json`；
 - [x] exact signed candidate 的真实 App screenshots、keyboard/VoiceOver/Reduce Motion/target audit 与 focus restoration walkthrough 已提交并通过独立 review；
 - [x] 完整 gate 对 large trace/notarization 缺失 fail closed，不以 skip 关闭发布门。
 

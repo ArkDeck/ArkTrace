@@ -2,8 +2,8 @@
 
 > 日期：2026-08-16
 > 结论：**真实闭环已跑通，判定 improved，发布门 10 关闭。**
-> 机器证据：`Fixtures/release-evidence/phase6-real-debug-loop.json`
-> 冻结件：[PHASE_6_SCENARIO.md](PHASE_6_SCENARIO.md) ｜ Gate：`scripts/test_phase6.sh`
+> 机器证据：`test/fixtures/release-evidence/phase6-real-debug-loop.json`
+> 冻结件：[PHASE_6_SCENARIO.md](PHASE_6_SCENARIO.md) ｜ Gate：`hack/test_phase6.sh`
 
 ## 1. 闭环链路
 
@@ -39,13 +39,13 @@ PHASE_6_SCENARIO.md §0。
 > 变成"声明留存证据被编辑过"。
 >
 > **该缺口已在同日合上：§7.3 用在产分发完整重跑了两轮闭环**，判定同样是 improved。
-> `Fixtures/release-evidence/phase6-real-debug-loop.json` 与 `scripts/test_phase6.sh` 的
+> `test/fixtures/release-evidence/phase6-real-debug-loop.json` 与 `hack/test_phase6.sh` 的
 > 常量现在都指向重跑那一轮，因此门 10 覆盖的是在产分发。本节以下 §3～§6 保留首轮的原始记录。
 
 ## 3. 两轮真实 Artifact
 
 > 历史记录。本节到 §5 描述的是 re-pin 之前那条分发上的首轮闭环。承载发布门 10 的是 §7.3 的在产分发
-> 重跑，留存机器证据与 `scripts/test_phase6.sh` 的常量都指向那一轮；判定同为 improved。见 §9。
+> 重跑，留存机器证据与 `hack/test_phase6.sh` 的常量都指向那一轮；判定同为 improved。见 §9。
 
 | | baseline | follow-up |
 |---|---|---|
@@ -99,7 +99,7 @@ PHASE_6_SCENARIO.md §0。
 | M5 top-5 hot interval score | 2,879,312,023 | 2,285,011,800 | −20.6% |
 
 冻结规则要求 improved 为「M1 相对下降 ≥20% 且 M2、M4 未上升超过 5%」。M1 −87.6%、M2 −88.2%、
-M4 无信号 → **improved**。`scripts/test_phase6.sh` 会从记录的数字重新推导该判定，
+M4 无信号 → **improved**。`hack/test_phase6.sh` 会从记录的数字重新推导该判定，
 不接受仅由文字声明的结论。
 
 ## 6. 曾经开放的 finding（已关闭）
@@ -125,7 +125,7 @@ M4 无信号 → **improved**。`scripts/test_phase6.sh` 会从记录的数字�
 follow-up 轮也补跑了 context（`job-452aa3efa09ebc728eddfe7a77c92ef0`，97,333 B）。
 
 影响：PHASE_6_SCENARIO.md §6 第 4 项**由未满足转为两轮均满足**。M1～M5 从不依赖 context，
-已记录的 improved 判定不变。证据：`Fixtures/release-evidence/phase6-context-closure.json`。
+已记录的 improved 判定不变。证据：`test/fixtures/release-evidence/phase6-context-closure.json`。
 
 ## 7. 采集纪律
 
@@ -151,7 +151,7 @@ ArkTrace 只 trace 正在跑的进程。后续重跑把 `MODE` 设为 `traceWork
 
 用拆出来的 trace demo（其内容即今天的 `ArkDeck/tests/waterflow-demo` fixture）按同一冻结场景
 重跑了一遍，唯一的变更是把 `USE_BLANKET_RELOAD` 从 `true` 翻成 `false`——没有再临时改任何源码。
-证据：`Fixtures/release-evidence/phase6-loop-reproduction.json`。
+证据：`test/fixtures/release-evidence/phase6-loop-reproduction.json`。
 
 | 指标 | 首次闭环 | 复现 | 一致性 |
 |---|---:|---:|---|
@@ -200,7 +200,7 @@ ArkTrace 只 trace 正在跑的进程。后续重跑把 `MODE` 设为 `traceWork
 ## 7.3 在产分发上的完整重跑（2026-08-16）
 
 §7.2 只覆盖了采集与分析半条链。此处用**在产分发**把两轮闭环整条跑完，机器证据已替换为这一轮：
-`Fixtures/release-evidence/phase6-real-debug-loop.json`，`scripts/test_phase6.sh` 的
+`test/fixtures/release-evidence/phase6-real-debug-loop.json`，`hack/test_phase6.sh` 的
 `expected_tool` / `expected_parser` 随之指向 `a7859d69…` / `66887fae…`。
 
 链路与 §8 冻结形状一致：宿主 hvigor 编译（按 §0 声明为非 typed 步骤）→ `artifact import-hap`
@@ -248,25 +248,25 @@ Agent 判断复现了首轮结论：baseline `topProcesses` 首位 `e.waterflowd
 
 ## 8. 审计结果
 
-`scripts/test_phase5.sh` 会串起 Phase 1→2→3→4→5 的整条链，以下为其单次完整执行的结果
+`hack/test_phase5.sh` 会串起 Phase 1→2→3→4→5 的整条链，以下为其单次完整执行的结果
 （parser `e0167fbb…`，树为 `356abef` rebase 到当日 main 之后）：
 
 | 项 | 结果 |
 |---|---|
-| `scripts/test_phase1.sh` | 通过；349 tests，0 skipped |
-| `scripts/test_phase2.sh` | 通过；351 tests，0 skipped；cache-open p95 28.805 ms（目标 ≤1 s）、metadata p95 0.000667 ms；CLI typed error/timeout/cancel status 全部符合契约 |
+| `hack/test_phase1.sh` | 通过；349 tests，0 skipped |
+| `hack/test_phase2.sh` | 通过；351 tests，0 skipped；cache-open p95 28.805 ms（目标 ≤1 s）、metadata p95 0.000667 ms；CLI typed error/timeout/cancel status 全部符合契约 |
 | TraceStreamer build safety | 通过；外部 git 仓库未被改动 |
-| `scripts/verify_licenses.sh` | 通过；product=MIT，components=14，buildTools=2；fail-closed 负例成立 |
+| `hack/verify_licenses.sh` | 通过；product=MIT，components=14，buildTools=2；fail-closed 负例成立 |
 | htrace integrity verifier | 通过；截断/摘要/分帧/拼接/重复/索引溢出全部被拒 |
 | Phase 3 benchmark contract | 通过；自证 large provenance 被拒 |
 | Phase 3 distribution contract | 通过；inner-first 签名、evidence 绑定、staple 先于 ZIP |
-| `scripts/test_phase3_batch1.sh` | 通过；继承 Phase 2 + app candidate + pinned parser |
+| `hack/test_phase3_batch1.sh` | 通过；继承 Phase 2 + app candidate + pinned parser |
 | Phase 3 medium benchmark | 通过；warm-up 不发布证据，正式轮发布 `sha256=00691e21…` |
 | Phase 4 Agent contract | 通过；真实 process/thread/query/context/analyze 路径确定且 path-free |
 | Phase 4 batch gate | 通过；继承 candidate + 真实 Agent CLI + 生产 Context/Analysis 性能 |
 | Phase 5 CLI distribution contract | 通过；两条 “verification failed” 是负例——被篡改的树必须被拒，且拒绝信息有界、不含路径 |
-| `scripts/test_phase5.sh` | **通过**；继承 medium gate + CLI distribution + 真实 ArkDeck capture→persisted summary Artifact |
-| `scripts/test_phase6.sh` | 通过；全部 12 项检查 |
+| `hack/test_phase5.sh` | **通过**；继承 medium gate + CLI distribution + 真实 ArkDeck capture→persisted summary Artifact |
+| `hack/test_phase6.sh` | 通过；全部 12 项检查 |
 | 证据无用户绝对路径 | gate 内 grep 断言通过 |
 | 无 GUI automation / 无人读日志作证据 | 证据包声明 + gate 断言 |
 | 无 raw SQL、无设备权限 | ArkTrace 仅经 typed analyzer operation 被调用；capture/deploy 由 ArkDeck 执行 |
@@ -287,18 +287,18 @@ Agent 判断复现了首轮结论：baseline `topProcesses` 首位 `e.waterflowd
 | 项 | 结果 |
 |---|---|
 | `swift test` | 通过；352 tests，0 failures |
-| `scripts/test_phase1.sh` | 通过 |
-| `scripts/test_phase2.sh` | 通过 |
-| `scripts/test_phase3_batch1.sh` | 通过 |
+| `hack/test_phase1.sh` | 通过 |
+| `hack/test_phase2.sh` | 通过 |
+| `hack/test_phase3_batch1.sh` | 通过 |
 | Phase 3 medium benchmark | 通过；发布 `formatVersion: 4` 证据，`storage.sameFilesystem=true`（source 与 staging 同为 device 16777231），`stagedByteCount` 265,032,803 与 `traceByteCount` 相等 |
 | Phase 3 benchmark contract | 通过 |
 | Phase 3 distribution contract | 通过 |
-| `scripts/test_phase4_batch1.sh` | 通过；其自带的 medium benchmark 同样发布 v4 证据并带 `storage` |
+| `hack/test_phase4_batch1.sh` | 通过；其自带的 medium benchmark 同样发布 v4 证据并带 `storage` |
 | Phase 4 Agent contract | 通过 |
 | Phase 5 CLI distribution contract | 通过 |
-| `scripts/test_phase6.sh` | 通过；含新增的 confirmatory evidence 检查 |
+| `hack/test_phase6.sh` | 通过；含新增的 confirmatory evidence 检查 |
 | license verifier / htrace integrity / build safety | 通过 |
-| `scripts/test_phase3.sh`（完整分发 gate） | **按设计失败**：`ARKTRACE_REVIEWED_SIGNED_APP is required for the final distribution gate`——外部输入缺失时 fail closed，与上文「未能执行的部分」一致 |
+| `hack/test_phase3.sh`（完整分发 gate） | **按设计失败**：`ARKTRACE_REVIEWED_SIGNED_APP is required for the final distribution gate`——外部输入缺失时 fail closed，与上文「未能执行的部分」一致 |
 
 `storage` 断言的失败方向也被逐个探测过：`sameFilesystem` 与两个 device ID 矛盾、跨卷却记成同卷、
 device ID 为 0（路径无法解析）、`stagedByteCount` 与 `traceByteCount` 不等、整个块被删除——五种都被拒。
@@ -318,6 +318,6 @@ fixture 落地并通过 byte count / SHA-256 / git blob 三重校验后，该 ga
 source hash、tool/parser identity 与 request 参数重建。
 
 门 10 现在关闭在 **§7.3 的重跑**上，因为那一轮跑的是在产分发（tool `a7859d69…` /
-parser `66887fae…`）。留存机器证据与 `scripts/test_phase6.sh` 的常量都指向该轮。首轮闭环
+parser `66887fae…`）。留存机器证据与 `hack/test_phase6.sh` 的常量都指向该轮。首轮闭环
 （§3～§5）与 §7.1 的复现保留为历史记录：它们跑在 re-pin 之前的分发上，结论同为 improved，
 但不再是门 10 的承载者。

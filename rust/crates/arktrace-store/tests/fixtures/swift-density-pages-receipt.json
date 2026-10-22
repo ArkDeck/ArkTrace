@@ -208,13 +208,13 @@
     },
     {
       "path": "rust/crates/arktrace-store/oracle/run_density_oracle.py",
-      "sha256": "eac819f4a81bc8c77fd66da90537b9f660bfdbf79164bed72894006cf55fcfbf",
-      "byteCount": 5972
+      "sha256": "f1509870f480c7e7eed5f5270b67f546d41f0761ae77a0b16ca26ae09a9f5b18",
+      "byteCount": 5961
     },
     {
-      "path": "scripts/run-swiftpm.sh",
-      "sha256": "fac7ca17ad065d576c0caa3fde681c95bf4375d7f41b964288a2d472ede285ce",
-      "byteCount": 8418
+      "path": "hack/run-swiftpm.sh",
+      "sha256": "2142e140b142129e391a5ce1398b28045320a15dd300b98a2e8ee7bd90b0bc3d",
+      "byteCount": 8415
     },
     {
       "path": "rust/crates/arktrace-store/tests/fixtures/density-pages-input.json",

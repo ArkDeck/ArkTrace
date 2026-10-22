@@ -38,7 +38,7 @@ DAYU 200 large fixture、真实 parser cancellation 与 20-sample production ben
 ## 候选验证命令
 
     CI=true swift test -c release
-    scripts/test_phase3_batch1.sh
+    hack/test_phase3_batch1.sh
     git diff --check
 
 ## P3-T05～T07 已 review 证据
@@ -57,7 +57,7 @@ DAYU 200 large fixture、真实 parser cancellation 与 20-sample production ben
 - 本轮冻结 Release、继承的 Phase 1/2 gate 均为 **293 tests、0 failure、0 skip**；
   Phase 2 warm cache-open p50/p95 为 34.768334/39.221125 ms，metadata p50/p95 为
   0.000333/0.0005 ms，actual CLI status 保持 2/4/7/7/8/143；
-- `scripts/test_phase3_batch1.sh` 已通过，并同时完成签名 Debug/Release App、pinned
+- `hack/test_phase3_batch1.sh` 已通过，并同时完成签名 Debug/Release App、pinned
   parser/manifest、empty entitlement、Release-only API boundary、built Info.plist 的
   htrace/systrace/trace document registration/Open With contract 与无交互启动 smoke。
 
@@ -71,7 +71,7 @@ DAYU 200 large fixture、真实 parser cancellation 与 20-sample production ben
   上已完成 keyboard-only、VoiceOver、Reduce Motion、minimum target audit、14 pt 德语长本地化/
   最小窗口与 focus restoration walkthrough；六件 artifact 的路径/SHA 和 candidate CDHash
   `c3acd968f032c8256b16197b89155fd544dcde78` 由
-  `Fixtures/release-evidence/accessibility-c00e79ed.json` 绑定并经独立 Agent review，AC-AT-016 已关闭。
+  `test/fixtures/release-evidence/accessibility-c00e79ed.json` 绑定并经独立 Agent review，AC-AT-016 已关闭。
 - Medium performance fixture：OpenHarmony `pbreader.htrace`，Git blob
   `854c3c2b9e37eb8cbdc1e9ab7ac0130adcf21043`，SHA-256
   `695a160f3c99472cc746a09c75ae70c2dcef2d0323028fdb39e02196e1e6a7f9`，
@@ -90,7 +90,7 @@ DAYU 200 large fixture、真实 parser cancellation 与 20-sample production ben
   process/thread joins）命中 exact v2 persistent covering index；relationship probes 为
   11,096～24,596 VM steps（预算 250,000），`usesAutomaticIndex=false`，精确五表 row counts
   与 lock 一致，global primitive bound 为 20,000。最终原子发布 evidence 固定写入
-  `Fixtures/release-evidence/phase3-medium-performance.json`；该文件是逐字段数值、机器信息、
+  `test/fixtures/release-evidence/phase3-medium-performance.json`；该文件是逐字段数值、机器信息、
   query plan、source-tree SHA 与 test-binary SHA 的事实源，并被 source-tree identity 明确排除以
   避免 evidence 自哈希循环。
 - Large policy：只接受独立采集、可再分发、>500 MiB 且 ≤2 GiB、恰好一个 type-0 protobuf
@@ -113,13 +113,13 @@ DAYU 200 large fixture、真实 parser cancellation 与 20-sample production ben
   header digest 偏离完整 payload；协议证据、字节结果与安全处置见
   [DAYU200_LARGE_HTRACE_INTEGRITY.md](DAYU200_LARGE_HTRACE_INTEGRITY.md)。原 480/600 秒文件
   仍在 digest 处 fail closed，不作为 release fixture；只有重新采集的 exact hash 能进入门禁。
-  `scripts/benchmark_phase3.sh large` 和 `scripts/test_phase3.sh` 在缺少或漂移
+  `hack/benchmark_phase3.sh large` 和 `hack/test_phase3.sh` 在缺少或漂移
   `ARKTRACE_LARGE_TRACE`/provenance evidence 时继续 fail closed。
   正式 benchmark 的 cache/viewport/context/analysis/frame/RSS 均满足冻结阈值；24 个
   applicable/persistent indexes 精确闭合且
   `usesAutomaticIndex=false`。真实 child cancellation 后 child 不存在，禁止的 cache/private/owner/
   quarantine residue 为 0；空的安全 `.owners` 目录不被伪报为 active owner。原子事实源为
-  `Fixtures/release-evidence/phase3-large-performance.json`，文档不复制会随每次真实测量波动的精确值。
+  `test/fixtures/release-evidence/phase3-large-performance.json`，文档不复制会随每次真实测量波动的精确值。
 - Storage 前提（2026-08-16，benchmark evidence `formatVersion` 3 → 4）：source snapshot 会被复制到
   session 私有 staging 目录，跨卷时这是一次真实的整卷复制，其 IO 与空间不出现在任何 timing 字段里，
   因此跨卷测得的 large 数值与同卷测得的不可直接比较。evidence 新增 `storage` 块记录
@@ -132,7 +132,7 @@ DAYU 200 large fixture、真实 parser cancellation 与 20-sample production ben
   `e4fec8cc9cbb1be13748e7149424ce664a545c2296b424b6ff520cc3e84d3f06`。
   两个独立 fresh worktree 的实建产物彼此且与仓库 binary byte-identical，binary SHA 保持
   `e0167fbb13bf666dd589c7b27d697683bec2762ec66cefc935139e6da49ecbbf`；完整 two-clean-build
-  gate 已由 `scripts/test_trace_streamer_reproducibility.sh` 实际通过并固化。
+  gate 已由 `hack/test_trace_streamer_reproducibility.sh` 实际通过并固化。
 - Licenses：保守 source closure 含 14 个 components 与 2 个仅构建工具；inventory 对每个
   exact license file 锁定 SHA/byte count，并与 source lock 交叉校验。App bundle、CLI
   `licenses`、`THIRD_PARTY_NOTICES.md` 消费同一资源；签名候选及最终 notarized ZIP 再次
@@ -150,10 +150,10 @@ DAYU 200 large fixture、真实 parser cancellation 与 20-sample production ben
   `ArkTrace-20260814T061210Z.zip` 为 5,041,314 bytes，SHA-256
   `1ae5b0a6b2d68b2b19ad5265ef593aa73b1a67f79418a2ddc11fc686ddd161bd`；ticket staple、
   Gatekeeper、解包后 nested/outer signature 与 ticket 均通过。结构化事实源为
-  `Fixtures/release-evidence/phase3-notarization.json`；live `notarytool log` 经 `jq -S .`
+  `test/fixtures/release-evidence/phase3-notarization.json`；live `notarytool log` 经 `jq -S .`
   key-sort/pretty-print 后的 bounded canonical semantic projection 为
-  `Fixtures/release-evidence/phase3-notarization-receipt.json`，其字段已逐项与 Apple 实时回执核对。
-- 当前完整 `CI=true swift test -c release` 与冻结后的 `scripts/test_phase3_batch1.sh`
+  `test/fixtures/release-evidence/phase3-notarization-receipt.json`，其字段已逐项与 Apple 实时回执核对。
+- 当前完整 `CI=true swift test -c release` 与冻结后的 `hack/test_phase3_batch1.sh`
   均通过：继承的 Phase 1/2 gate 为 **338 tests、0 failure、0 skip**；Phase 2 warm
   cache-open p50/p95 为 46.400791/50.839583 ms，metadata p50/p95 为
   0.000791/0.00125 ms，actual CLI status 保持 2/4/7/7/8/143；
@@ -166,12 +166,12 @@ DAYU 200 large fixture、真实 parser cancellation 与 20-sample production ben
 276 tests、0 failure、0 skip；Phase 2 warm cache-open p50/p95 为
 160.776167/353.283042 ms，metadata p50/p95 为 0.001791/0.003208 ms；actual CLI
 status 为 malformed 2、wrong parser 4、timeout 7、output limit 7、cancel 8、
-mixed second-signal 143。`scripts/test_phase3_batch1.sh` 还同时验证 Debug/Release
+mixed second-signal 143。`hack/test_phase3_batch1.sh` 还同时验证 Debug/Release
 App 均为 arm64、签名有效、entitlement 是空字典、Info identity 一致、bundled
 parser/manifest 字节锁定，且 Release module compile-negative 证明 Debug resolver
 API 不存在。
 
-`scripts/test_phase3_batch1.sh` 先运行完整 Phase 2 gate，再构建/签名 App、校验
+`hack/test_phase3_batch1.sh` 先运行完整 Phase 2 gate，再构建/签名 App、校验
 bundle parser/manifest 字节、扫描禁止 entitlement，并完成无交互启动 smoke。
 这些数据是 P3-T01～T04 提交前的冻结实测；该批独立 reviewer 已确认 P0～P3
 均无 finding。上方 P3-T05～T07 也已通过统一独立 review，不改写前一批证据。该段是历史冻结

@@ -1,7 +1,7 @@
 # ArkTrace ↔ SmartPerf Host 离线能力对齐审计
 
 > 审计日期：2026-08-17
-> 上游 pin：`447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6`（`ThirdParty/TraceStreamer/source-lock.json` 的 `upstream.revision`，fetch 后 `git rev-parse HEAD` 逐字符核对相等）
+> 上游 pin：`447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6`（`third_party/TraceStreamer/source-lock.json` 的 `upstream.revision`，fetch 后 `git rev-parse HEAD` 逐字符核对相等）
 > 上游源码根：`smartperf_host/ide/src/trace/`
 > 审计性质：只读。本文是 [PHASE_7_TASKS.md](PHASE_7_TASKS.md) 的证据基线，任务实现者应以本文的 `path:line` 引用为起点，不要凭记忆重建上游行为
 > 覆盖结论：共核实 36 项面向用户的离线能力 —— ALIGNED 7、INTENTIONAL-DIFFERENCE 3、PARTIAL 4、GAP 15、OUT-OF-SCOPE 6、UNCLEAR 1
@@ -22,7 +22,7 @@
 ### 2.1 取上游 pin 版源码
 
 ```bash
-REV=$(python3 -c "import json;print(json.load(open('ThirdParty/TraceStreamer/source-lock.json'))['upstream']['revision'])")
+REV=$(python3 -c "import json;print(json.load(open('third_party/TraceStreamer/source-lock.json'))['upstream']['revision'])")
 mkdir -p /tmp/sp-upstream && cd /tmp/sp-upstream
 git init && git remote add origin https://gitcode.com/openharmony/developtools_smartperf_host.git
 git fetch --filter=blob:none --depth 1 origin "$REV"
@@ -67,7 +67,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 - **对照**：`database/sql/Cpu.sql.ts:127-134` 显示上游 **CPU** counter 来自 `measure` + `cpu_measure_filter` —— 与 ArkTrace 一致，错的只有 process 一路。
 - **ArkTrace**：`Sources/ArkTraceStore/SQLiteTraceRepository.swift:1977`（`counterRows`）、`:1533`（`density(_:)` 的 process 分支）、`:2374`（`boundedCounterSeriesCount`）与 `Sources/ArkTraceStore/TraceSchemaAdapter.swift:303/317`（capability 探针）全部从 `measure` 读。`grep -rn "process_measure" Sources/ | grep -v _filter` 无命中 → 无 fallback。
 - **用户可见后果**：capability 探针恒返回空 → `capabilities.processCounters = false` → `counters()`（`SQLiteTraceRepository.swift:1237-1238`）返回 `.unavailable` → Sidebar "Process Counters" 组显示 "Not available in this trace"（`Apps/ArkTraceApp/ArkTraceApp.swift:318-321`）。丢失的是 `H:VSync-app`（16 343 样本）、`H:FrameBuffer`（5 312）、`H:settings0`（3 615）、`H:PreferredFrameRate`（2 987）、`H:VSync-rs`（2 762）等 66 条命名 series —— 正是看掉帧与渲染节奏最需要的几条。
-- **旁证**：`Fixtures/databases/trace_streamer_4.3.7.schema-evidence.json` 两个 fixture 的 `capabilities.processCounters` 也都是 `false`，说明该路径可能从未在任何真实 trace 上成立过。README:14 明写支持 counter 泳道。
+- **旁证**：`test/fixtures/databases/trace_streamer_4.3.7.schema-evidence.json` 两个 fixture 的 `capabilities.processCounters` 也都是 `false`，说明该路径可能从未在任何真实 trace 上成立过。README:14 明写支持 counter 泳道。
 - **实证命令**：
 
   ```bash
@@ -231,7 +231,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 | 任意 SQL 查询页（`component/SpQuerySQL.ts`） | DESIGN §4.3 不变量 4、AT-DB-006/007 |
 | `Ctrl+B` 隐藏菜单与搜索框（`SpSystemTrace.event.ts:899-941` 直改 DOM 样式） | Web 特有 DOM 耦合，DESIGN §2.1「不复用」；macOS 原生 sidebar 折叠 + AT-APP-003 已覆盖 |
 | `v` 键 VSync 叠加（`component/chart/VSync.ts:133-134`） | 是 G01 的下游装饰 —— counter 泳道拿不到数据前没有数据源。先修 G01 |
-| 用户自定义配色（`component/trace/base/CustomThemeColor.ts:24/79-86/115-117`，localStorage 覆盖 20 色板，light/dark 各一套） | **仍不做，但理由已换**（改于 2026-08-24）。原理由是「会摧毁同一 slice 两工具同色」——那个目的在 2026-08-19 换掉 20 色表时就已经不存在了。现在的理由是：色值本就是 ArkTrace 的设计产物并由 `scripts/verify_palette.py` 按阈值把关，用户覆盖会绕过校验；而上游做 light/dark 两套所要解决的问题，这里由「每一项对两种画布都 ≥ 3:1」的单表约束解决，不需要第二套。锁定上游向量的测试钉的是 slot 而非色值，不受影响 |
+| 用户自定义配色（`component/trace/base/CustomThemeColor.ts:24/79-86/115-117`，localStorage 覆盖 20 色板，light/dark 各一套） | **仍不做，但理由已换**（改于 2026-08-24）。原理由是「会摧毁同一 slice 两工具同色」——那个目的在 2026-08-19 换掉 20 色表时就已经不存在了。现在的理由是：色值本就是 ArkTrace 的设计产物并由 `hack/verify_palette.py` 按阈值把关，用户覆盖会绕过校验；而上游做 light/dark 两套所要解决的问题，这里由「每一项对两种画布都 ≥ 3:1」的单表约束解决，不需要第二套。锁定上游向量的测试钉的是 slot 而非色值，不受影响 |
 | 插件来源的泳道族（`database/ui-worker/` 60+ 个 `ProcedureWorker*.ts`、`TraceRow.ts:53-175` 约 120 个 `ROW_TYPE_*`、`component/trace/sheet/` 155 个 `TabPane*.ts`）：hiperf / native-memory / xpower / smaps / ark-ts / gpu / network / energy / ability-monitor / vmtracker / hisysevent / ebpf / bpftrace / dma-fence / heap / sdk / userPlugin | 数据源缺失。真库抽样 14 张表全为 0 行：`perf_sample` `native_hook` `hisys_all_event` `gpu_slice` `cpu_usage` `sys_mem_measure` `smaps` `task_pool` `app_startup` `static_initalize` `animation` `dynamic_frame` `hidump` `clock_event_filter`。上游在同一份 trace 上也画不出这些泳道 |
 
 **另一条误判纠正**：种子清单里的「多选 / shift 扩展选择」在 pin 版上游**不存在为 event 多选能力** ——
@@ -262,7 +262,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 4. **`instant` / `raw` 表**（真库各 117 万行）—— 确认存在且非空，但**未查清上游用它们画什么用户可见的东西**；
 5. `component/trace/sheet/` 另约 140 个 TabPane —— 按数据源缺失整体判定（依据是真库行数实证，不是看名字），若 ArkDeck 打开新采集插件需重新过一遍。
 
-**方法学限制（审计当时）**：`swift test` 未跑（`ThirdParty/TraceStreamer/macx/trace_streamer` 未构建，且审计约束禁止跑需要网络的 `scripts/build_trace_streamer.sh`），因此所有 ArkTrace 侧结论来自源码与真库 SQL，**没有一条来自运行中的 App**。
+**方法学限制（审计当时）**：`swift test` 未跑（`third_party/TraceStreamer/macx/trace_streamer` 未构建，且审计约束禁止跑需要网络的 `hack/build_trace_streamer.sh`），因此所有 ArkTrace 侧结论来自源码与真库 SQL，**没有一条来自运行中的 App**。
 
 **该限制已在 Phase 7 执行期解除**：P7-T01～P7-T13 全程有构建过的 pin 版 parser，逐条验收在真机 DAYU 200 库（524 MB）与 pin 版上游 `pbreader.htrace`（265 MB）上实测，G01 的「Sidebar 显示 Not available in this trace」也已在 App 中眼见为实。真机实测因此推翻了本文档两处推断，两处都已就地修正：`frame_slice.dst` 并不指向配对行（真库 42 796 行全为 NULL，配对键是 `vsync` + `ipid`），以及 §3 的 counter capability 探针「反过来写会撞穿预算」只对一半的真实数据成立（见下）。
 

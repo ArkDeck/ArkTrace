@@ -1,11 +1,11 @@
 // The colour *assignment* here is a Swift port of the timeline color logic in
 // openharmony/developtools_smartperf_host, taken at the revision pinned in
-// ThirdParty/TraceStreamer/source-lock.json and licensed under Apache-2.0:
+// third_party/TraceStreamer/source-lock.json and licensed under Apache-2.0:
 // ide/src/trace/component/trace/base/ColorUtils.ts and Utils.getStateColor.
 // Neither fill table is: the twenty-entry identity palette and the thread
 // state table are both ArkTrace's own values sitting in upstream's structure,
 // for the reasons recorded on `funcColorLiterals`, on `stateColors`, and in
-// docs/design/DESIGN.md §13.5. `scripts/verify_palette.py` measures both.
+// docs/design/DESIGN.md §13.5. `hack/verify_palette.py` measures both.
 // See THIRD_PARTY_NOTICES.md.
 
 import ArkTraceCore
@@ -99,7 +99,7 @@ package struct TimelineColor: Hashable, Sendable, Comparable {
 /// twenty values it indexes into.
 ///
 /// Ported from `ide/src/trace/component/trace/base/ColorUtils.ts` at the
-/// revision pinned in `ThirdParty/TraceStreamer/source-lock.json`
+/// revision pinned in `third_party/TraceStreamer/source-lock.json`
 /// (`447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6`, Apache-2.0). The hash is a
 /// byte-exact port including the two details that make the upstream result
 /// differ from textbook FNV-1a; see ``hash(_:modulus:)``.
@@ -122,7 +122,7 @@ package enum TimelinePalette {
     /// truncation. The magnitude is a multiple of four roughly three quarters
     /// of the time, and 20 = 4 x 5, so `magnitude % 20` collapses onto
     /// {0, 4, 8, 12, 16}. Measured over 20,000 synthetic slice names plus
-    /// every pid from 1 to 19,999 (`scripts/verify_palette.py`, deterministic
+    /// every pid from 1 to 19,999 (`hack/verify_palette.py`, deterministic
     /// corpus):
     ///
     /// - slots 0, 4, 8, 12, 16 -- ~14.9% each, **74.3% together**;
@@ -207,10 +207,10 @@ package enum TimelinePalette {
     /// channel, and why the answer for identity precision is the label, the
     /// Inspector and search, not more saturation.
     ///
-    /// `scripts/verify_palette.py` re-derives the *current* figures above from
+    /// `hack/verify_palette.py` re-derives the *current* figures above from
     /// this file and fails CI on drift. It cannot check the 2026-08-19 column
     /// -- that table no longer exists in any source it reads -- so those are
-    /// history rather than invariants. `scripts/test_palette_verifier.py`
+    /// history rather than invariants. `hack/test_palette_verifier.py`
     /// mutation-tests the gate itself.
     ///
     /// What did *not* change is which slot an identity lands in: the hash, the
@@ -415,7 +415,7 @@ package enum TimelinePalette {
     /// from a slice fill. 5.4 makes a state lane distinguishable from a slice
     /// lane on inspection; it does not make them two visual languages, and
     /// nothing packed into one narrow luminance band could.
-    /// `scripts/verify_palette.py` re-checks all of it, including that
+    /// `hack/verify_palette.py` re-checks all of it, including that
     /// upstream's chain still resolves to exactly seven distinct fills --
     /// merging two states would otherwise vanish from every ΔE measurement
     /// instead of failing one.

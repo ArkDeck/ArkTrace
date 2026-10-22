@@ -13,7 +13,7 @@ Completed 记录不替代当前工作树的验证，未勾选验收项仍保留�
 > 任务总数：70
 > 已完成：70（Phase 0 六项 + Phase 1 九项 + Phase 2 七项 + Phase 3 十项 + Phase 4 七项 + Phase 5 九项 + Phase 6 九项 + Phase 7 十三项）
 > 进行中：无
-> 当前状态：全部发布门关闭；Phase 6 真实闭环判定 improved，证据 `Fixtures/release-evidence/phase6-real-debug-loop.json`，gate `scripts/test_phase6.sh`。Phase 7 的证据基线是 [UPSTREAM_ALIGNMENT_AUDIT.md](UPSTREAM_ALIGNMENT_AUDIT.md)
+> 当前状态：全部发布门关闭；Phase 6 真实闭环判定 improved，证据 `test/fixtures/release-evidence/phase6-real-debug-loop.json`，gate `hack/test_phase6.sh`。Phase 7 的证据基线是 [UPSTREAM_ALIGNMENT_AUDIT.md](UPSTREAM_ALIGNMENT_AUDIT.md)
 
 ## 1. 阶段总览
 
@@ -125,7 +125,7 @@ flowchart LR
   首轮 `job-720ac521…` 1,023,605 B 为历史记录）；
 - P6-T06：比较前后 Trace（Completed；improved，承载轮 M1 −87.09%，首轮 −87.6%）；
 - P6-T07：生成可审计闭环证据包（Completed；`phase6-real-debug-loop.json`）；
-- P6-T08：全系统性能、可靠性和发布审计（Completed；`scripts/test_phase6.sh` 全绿）；
+- P6-T08：全系统性能、可靠性和发布审计（Completed；`hack/test_phase6.sh` 全绿）；
 - P6-T09：关闭真实闭环发布门 10 并输出最终报告（Completed；[PHASE_6_VERIFICATION.md](PHASE_6_VERIFICATION.md)）。
 
 ### Phase 7 — Upstream Alignment
@@ -166,7 +166,7 @@ flowchart LR
   逐列对齐；搜索步进不夺 focus（AT-APP-009），位置以文字表达；键位表单一来源 `TraceShortcutCatalog`，
   README 双语三张表由它生成，改 README 会失败已实测）；
 - P7-T13：Phase 7 gate、上游对齐回归与文档收口（P0，阶段出口；Completed 2026-08-18。
-  `scripts/test_phase7.sh` 建立并全绿，30 条上游对齐断言在 gate 里被要求「跑过且通过」，删掉一条会
+  `hack/test_phase7.sh` 建立并全绿，30 条上游对齐断言在 gate 里被要求「跑过且通过」，删掉一条会
   失败；逐条实测「破坏 → 失败」，其中一条实测发现断言不够敏感并已加强。在 pin 版上游 medium
   fixture 上抓到两条 Phase 7 自引入的真回归并修复：counter 探针超预算把有效 trace 判为不兼容、
   `argsetid` 把视口最热查询挤下 covering index；两条的契约改动都先落在 SPECIFICATION / DESIGN。
@@ -188,9 +188,9 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
 | 7 | indexed large viewport query 性能 | Closed；20-sample large performance evidence | Phase 3 / P3-T09 |
 | 8 | ArkDeck multi-analyzer resolver 不弱化 pinned identity | Closed；ArkDeck PR #1309 / merge `528b521c7a6ace44e225ffbc3d1e1797b9c1a54f` | Phase 5 / P5-T03/P5-T07 |
 | 9 | ArkDeck Trace Artifact → ArkTrace → derived analysis Artifact | Closed；real capture/derived Artifact evidence + ArkDeck PR #1311 / merge `4e478b46f202a139dbeb2c91d79e36d6d7774fac` | Phase 5 / P5-T09 |
-| 10 | baseline → analysis → Agent decision → typed request → follow-up capture → comparison | Closed（2026-08-16）；真实两轮 capture + typed 复验链路判定 improved，承载轮为在产分发重跑（M1 −87.09%；首轮 −87.6%），证据 `Fixtures/release-evidence/phase6-real-debug-loop.json`，gate `scripts/test_phase6.sh` | Phase 6 / P6-T09 |
+| 10 | baseline → analysis → Agent decision → typed request → follow-up capture → comparison | Closed（2026-08-16）；真实两轮 capture + typed 复验链路判定 improved，承载轮为在产分发重跑（M1 −87.09%；首轮 −87.6%），证据 `test/fixtures/release-evidence/phase6-real-debug-loop.json`，gate `hack/test_phase6.sh` | Phase 6 / P6-T09 |
 
-发布门 3 已于 2026-08-14 由 exact source/license inventory、App/CLI 同源资源、签名 App 与最终 notarized ZIP 的逐字节复验关闭；事实证据见 DESIGN §24 与 `Fixtures/release-evidence/phase3-notarization.json`。
+发布门 3 已于 2026-08-14 由 exact source/license inventory、App/CLI 同源资源、签名 App 与最终 notarized ZIP 的逐字节复验关闭；事实证据见 DESIGN §24 与 `test/fixtures/release-evidence/phase3-notarization.json`。
 
 ## 5. 跨阶段不变量
 
@@ -212,13 +212,13 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
 以下是已建立的阶段验收入口。日常改动按 [AGENTS.md](../../AGENTS.md) 与 CI planner 选择验证，
 不因存在这些脚本而逐个重跑所有阶段：
 
-    scripts/test_phase1.sh
-    scripts/test_phase2.sh
-    scripts/test_phase3.sh
-    scripts/test_phase4.sh
-    scripts/test_phase5.sh
-    scripts/test_phase6.sh
-    scripts/test_phase7.sh
+    hack/test_phase1.sh
+    hack/test_phase2.sh
+    hack/test_phase3.sh
+    hack/test_phase4.sh
+    hack/test_phase5.sh
+    hack/test_phase6.sh
+    hack/test_phase7.sh
 
 规则：
 
@@ -246,11 +246,11 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
 
 [Phase 1](PHASE_1_TASKS.md) §6 列出的分发前 hardening **已全部归零**，逐条证据见该节：
 
-- ~~third-party exact source lock~~ 与 ~~GN/Ninja URL 和 archive hash~~——`ThirdParty/TraceStreamer/source-lock.json`
+- ~~third-party exact source lock~~ 与 ~~GN/Ninja URL 和 archive hash~~——`third_party/TraceStreamer/source-lock.json`
   锁定 upstream、13 个 source dependency 与两个 tool archive 的 URL/SHA-256/byte count；
-- ~~clean workdir byte-identical build~~——`scripts/test_trace_streamer_reproducibility.sh` 实跑通过，
+- ~~clean workdir byte-identical build~~——`hack/test_trace_streamer_reproducibility.sh` 实跑通过，
   binary 保持 `e0167fbb…`；
-- ~~standalone local patch~~——`ThirdParty/TraceStreamer/patches/faultloggerd-apple-clang.patch`；
+- ~~standalone local patch~~——`third_party/TraceStreamer/patches/faultloggerd-apple-clang.patch`；
 - ~~SSH URL variants → HTTPS~~——`git@gitee.com:` 与 `ssh://git@gitee.com/` 两种形式均被 rewrite；
 - ~~content-derived build recipe version~~——`BUILD_RECIPE_VERSION` 由四个输入的 SHA-256 派生，当前 `e4fec8cc…`；
 - ~~large-trace gate 记录 source/staging filesystem~~ 与 ~~测试不改 process-global `PATH`~~——2026-08-16 完成。

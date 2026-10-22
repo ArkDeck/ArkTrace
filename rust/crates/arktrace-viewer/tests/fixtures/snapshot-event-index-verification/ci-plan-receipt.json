@@ -1,7 +1,7 @@
 {
   "command": [
     "sh",
-    "scripts/ci_plan.sh"
+    "hack/ci_plan.sh"
   ],
   "exitCode": 0,
   "inputPaths": [

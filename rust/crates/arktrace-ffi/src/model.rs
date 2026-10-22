@@ -482,7 +482,7 @@ mod sdk_slice_tests {
     fn backup_configuration_is_closed_fixed_and_disjoint_before_native_creation() {
         let metadata: serde_json::Value = serde_json::from_slice(include_bytes!(concat!(
             env!("CARGO_MANIFEST_DIR"),
-            "/../../../contracts/ready-metadata.json"
+            "/../../../api/ready-metadata.json"
         )))
         .unwrap();
         let value = serde_json::json!({"abiVersion": ABI_VERSION, "contractDigest": CONTRACT_DIGEST_HEX,
@@ -537,7 +537,7 @@ mod sdk_slice_tests {
     fn storage_policy_is_fixed_closed_and_requires_a_matching_root() {
         let metadata: serde_json::Value = serde_json::from_slice(include_bytes!(concat!(
             env!("CARGO_MANIFEST_DIR"),
-            "/../../../contracts/ready-metadata.json"
+            "/../../../api/ready-metadata.json"
         )))
         .unwrap();
         let mut value = serde_json::json!({"abiVersion": ABI_VERSION, "contractDigest": CONTRACT_DIGEST_HEX,

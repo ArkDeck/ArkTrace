@@ -3,7 +3,7 @@
 > 日期：2026-08-12
 > 状态：Passed
 > 实现提交：`973a1d6`、`ffd7595`、`4bf9bdb`
-> 总验收入口：`scripts/test_phase1.sh`
+> 总验收入口：`hack/test_phase1.sh`
 
 ## 1. 验收结论
 
@@ -46,7 +46,7 @@ locked real trace
 | `zlib.htrace` | `eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe` | 67,837 | 3,067 `callstack` |
 | Apache-2.0 license | `c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4` | 11,357 | fixture/license provenance gate |
 
-完整 upstream path、Git blob OID、raw exporter DB SHA/bytes、trace range、row counts 与 capabilities 位于 `Fixtures/databases/trace_streamer_4.3.7.schema-evidence.json`。Integration 从实际文件字节重算这些值，不只检查字符串格式。
+完整 upstream path、Git blob OID、raw exporter DB SHA/bytes、trace range、row counts 与 capabilities 位于 `test/fixtures/databases/trace_streamer_4.3.7.schema-evidence.json`。Integration 从实际文件字节重算这些值，不只检查字符串格式。
 
 最后一次 mandatory gate 使用 `trace_small_10.systrace`，观测到：
 
@@ -85,12 +85,12 @@ Ready DB hash 是该次 gate 的运行证据；locked provenance 以建索引前
 | ArkTraceIntegrationTests | 12 |
 | 合计 | 94 |
 
-普通 `swift test` 允许在未安装本地 binary 时跳过昂贵 real integration，方便 contributor 运行纯单元测试；`scripts/test_phase1.sh` 明确禁止任何 skip，并把 locked scheduling fixture 注入所有真实 integration。
+普通 `swift test` 允许在未安装本地 binary 时跳过昂贵 real integration，方便 contributor 运行纯单元测试；`hack/test_phase1.sh` 明确禁止任何 skip，并把 locked scheduling fixture 注入所有真实 integration。
 
 ### Current additive regression rerun
 
 Phase 1 上表是冻结的阶段完成证据，不随后续阶段新增测试改写。2026-08-13 在
-P2-T01 review findings 修复后重跑同一 `scripts/test_phase1.sh`：133 tests、0 failed、0 skipped；
+P2-T01 review findings 修复后重跑同一 `hack/test_phase1.sh`：133 tests、0 failed、0 skipped；
 这是 Phase 2 additive regression 证据，详细增量记录于
 [PHASE_2_TASKS.md](PHASE_2_TASKS.md)，不改写上述 94-test Phase 1 主表。
 P2-T02 summary/Analysis 垂直切片及 review 修复完成后再次重跑：156 tests、0 failed、

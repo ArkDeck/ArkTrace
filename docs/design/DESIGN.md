@@ -30,7 +30,7 @@
 > 功能回写（2026-08-19）：§14.1 Inspector 可停靠在右侧或底部（AT-APP-003）—— 控件在 pane 自己的 header，偏好存 `UserDefaults`，自动折叠改为按停靠轴判定
 > 缺陷回写三（2026-08-19）：§13.4 加载面板去掉阶段进度点 —— 缓存命中时它会点亮从未发生的三步，末阶段又全亮，且七个等宽点暗示七步等重
 > 配色回写（2026-08-19）：§13.5 换掉上游那张 20 色表 —— 分配规则仍逐位对齐上游，颜色改为 OKLCH 等色相环并按校验器实测（相邻对正常视觉 ΔE 8.5→30，色盲 2.6→15.6）
-> 配色回写二（2026-08-24）：§13.5 上一条测错了对象 —— 「相邻最近一对」测的是 slot 相邻，而 hash 打散身份、任意两 slot 都可能贴在一起；按全部 190 对重测是 3.8 / 色盲 0.42（上一条那两个色盲数还各取了一种色盲：2.6 是红色盲、15.6 是绿色盲）。改为按 slot 实际命中率（{0,4,8,12,16} 占 74.3%）分层设计，identity 与 state 两张表**联合**优化（它们逐行交替），斑马纹改用 `alternatingContentBackgroundColors`（原先两个语义色同值，画出来是零差异 —— 这同时把画布从 2 个变成 4 个，配色必须对四个都过 3:1），校验器落地为 `scripts/verify_palette.py` + `scripts/test_palette_verifier.py` 并进 CI contracts lane
+> 配色回写二（2026-08-24）：§13.5 上一条测错了对象 —— 「相邻最近一对」测的是 slot 相邻，而 hash 打散身份、任意两 slot 都可能贴在一起；按全部 190 对重测是 3.8 / 色盲 0.42（上一条那两个色盲数还各取了一种色盲：2.6 是红色盲、15.6 是绿色盲）。改为按 slot 实际命中率（{0,4,8,12,16} 占 74.3%）分层设计，identity 与 state 两张表**联合**优化（它们逐行交替），斑马纹改用 `alternatingContentBackgroundColors`（原先两个语义色同值，画出来是零差异 —— 这同时把画布从 2 个变成 4 个，配色必须对四个都过 3:1），校验器落地为 `hack/verify_palette.py` + `hack/test_palette_verifier.py` 并进 CI contracts lane
 > 功能回写二（2026-08-19）：§14.2 sidebar 进程名可点击跳转 —— 隐藏的泳道先显示，滚动目标取自布局完成后的 snapshot 而非估算偏移
 > 缺陷回写四（2026-08-19）：§14.1 侧栏泳道名改为换行显示 —— 切尾正好切掉 `processName · threadName` 里唯一能区分两条泳道的部分
 > 功能回写三（2026-08-19）：§14.2 搜索拆成两个界面 —— 侧栏按需展开的过滤框只管进程名/PID，工具栏的搜索不再匹配进程；被排除的域在 query 层就不发出
@@ -298,13 +298,13 @@ ArkTrace/
 │   ├── ArkTraceCaptureTests/
 │   ├── ArkTraceCLITests/
 │   └── ArkTraceIntegrationTests/
-├── Fixtures/
+├── test/fixtures/
 │   ├── traces/
 │   ├── databases/
 │   └── release-evidence/
-├── ThirdParty/
+├── third_party/
 │   └── TraceStreamer/
-├── scripts/
+├── hack/
 │   ├── build_trace_streamer.sh
 │   ├── fetch_phase3_fixtures.sh
 │   ├── benchmark.sh
@@ -413,8 +413,8 @@ App 与 ArkDeck 都不经过第 1 条：AppSupport 用 bundle-only 的
 两者都不向一次 trace 请求暴露该 flag 或 parser 位置。
 
 > **已决（2026-08-16，见 §25 第 12 项）**：早期草稿写的"仅 Debug 构建允许开发者
-> override"从未成立，且不能成立——`scripts/test_phase2.sh` 与
-> `scripts/test_phase4_agent_contract.sh` 都用 **Release** 构建的 CLI 配合
+> override"从未成立，且不能成立——`hack/test_phase2.sh` 与
+> `hack/test_phase4_agent_contract.sh` 都用 **Release** 构建的 CLI 配合
 > `--trace-streamer` 驱动发布门（含 parser-unavailable 与 identity-mismatch 负例）。
 > 把它关进 `#if DEBUG` 会直接打断这两个门。
 >
@@ -534,7 +534,7 @@ Ready DB 与新代码完全兼容。结论：升级后旧 cache 条目直接复�
 are a release coupling）。既然 bump 换不来任何用户可见收益，就不承担这个跨仓库成本。
 
 `schemaFingerprint` 不受影响：它由解析库里的全部表算出，不是由 ArkTrace 的 required 集合算出，增加读表
-不改 fingerprint。已实测 —— `Fixtures/databases/trace_streamer_4.3.7.schema-evidence.json` 的
+不改 fingerprint。已实测 —— `test/fixtures/databases/trace_streamer_4.3.7.schema-evidence.json` 的
 `schemaFingerprint` 与两个 fixture 的 `capabilities` 在 `ParserIntegrationTests` 中逐项断言且全绿，
 证据文件无需 re-pin。
 
@@ -1037,9 +1037,9 @@ Y ≤ 0.270，对 `#292929` ≥ 3:1 要求 Y ≥ 0.167，**黑色** label ≥ 4.
 只有在第二通道真的存在时才成立，见下面 density band 与斑马纹两条。
 
 **校验器入库。** 上一版引用的「调色板校验器」从未提交，所以一个测错对象的指标活过了 review。现在它是
-`scripts/verify_palette.py`：直接从 `TimelineColorPalette.swift` 读表（不复制任何色值）、重算**现表**的每一个
+`hack/verify_palette.py`：直接从 `TimelineColorPalette.swift` 读表（不复制任何色值）、重算**现表**的每一个
 数字、任一项退化即 fail，跑在 CI 的 contracts lane 里。它管不到上表「2026-08-19」那一列——那张表已不在任何它
-读得到的源码里，所以那些数字是历史而不是不变量。配套的 `scripts/test_palette_verifier.py` 对校验器本身做变异
+读得到的源码里，所以那些数字是历史而不是不变量。配套的 `hack/test_palette_verifier.py` 对校验器本身做变异
 测试（14 个用例，各按一种方式破坏配色并断言 gate 拒绝），跑不出 fail 的 gate 不是 gate。校验器同时把自己的
 hash 移植与 `TimelinePaletteTests` 里钉住的上游向量对表——否则「74.3%」只是它在验证自己。这条对表当场抓到一个
 真 bug：Swift 迭代 `value.utf16`，而移植迭代的是 code point，含 emoji 的名字算出来不一样。
@@ -1097,7 +1097,7 @@ catch-all 是唯一允许「吵」的：无法识别的调度状态是数据问�
 `#FFFFFF` 只有 1.77:1、`#C0CE85` 只有 1.69:1。校验器会打印这张表的实测值但不 gate 它，原因写在脚本里。
 `THIRD_PARTY_NOTICES.md` 仍称移植「covers `ColorUtils.FUNC_COLOR_B` … and `Utils.getStateColor`」，这在两张表
 都换成 ArkTrace 自己的值之后是过度归属（不是许可问题，Apache-2.0 下多归属无害），改它需要同时重钉
-`scripts/verify_licenses.sh` 的字节数与 SHA、以及 `scripts/verify_phase5_cli_distribution.py` 的
+`hack/verify_licenses.sh` 的字节数与 SHA、以及 `hack/verify_phase5_cli_distribution.py` 的
 `NOTICE_SHA256` / `NOTICE_BYTES`。
 
 **Density band 借用事件的颜色**（改于 2026-08-18）。density 是 ArkTrace 特有的 LOD，上游没有对应层，但这不意味着它可以有自己的一套颜色：band 曾经取所属 track 的身份色、用 0.18–0.88 的 alpha 表达强度，于是缩小后整屏都是压在窗口背景上的浅色块——既不是 trace 的颜色，也不是调色板里的颜色，而缩小恰恰是打开一条大 trace 时最先看到的视图。
@@ -1694,7 +1694,7 @@ ArkTrace 自身许可证已于 2026-08-12 建仓时确定为 MIT（与 ArkDeck �
 
 发布前必须产出：
 
-- `ThirdParty/TraceStreamer/macx/manifest.json`；
+- `third_party/TraceStreamer/macx/manifest.json`；
 - upstream revision、binary SHA-256、architecture、build recipe；
 - 完整 license inventory；
 - `THIRD_PARTY_NOTICES.md`；
@@ -1727,15 +1727,15 @@ ArkTrace 自身许可证已于 2026-08-12 建仓时确定为 MIT（与 ArkDeck �
 以下不是留给实现者自由猜测的设计问题，而是必须用真实证据关闭的工程门：
 
 1. ~~对 canonical upstream（GitCode）master 重跑 §2.1 证据核对，重新 pin TraceStreamer revision/版本~~——已关闭（2026-08-12，Phase 0）：重锚定至 GitCode master `447a0a49`，核对结论见 §2.1 与 [TRACE_STREAMER.md](TRACE_STREAMER.md)；
-2. ~~TraceStreamer 在当前 Apple silicon/macOS toolchain 的原生、可重现构建~~——已关闭（2026-08-12，Phase 1）：原生 arm64 二进制构建成功（Apple clang 21；gn/ninja 为上游 darwin-x86 预编译件经 Rosetta 运行），配方固化于 `scripts/build_trace_streamer.sh`，provenance 记录于 `ThirdParty/TraceStreamer/macx/manifest.json`；浮动 third_party tip 以构建时 SHA 记入 manifest，完全预 pin 列为后续硬化项（见 TRACE_STREAMER.md §4）；
-3. ~~binary redistribution 的完整第三方许可证清单~~——已关闭（2026-08-14，P3-T10）：14 个 source components 与 2 个 build tools 的 exact license path/SHA/byte count 已由 `license-inventory.json`、`verify_licenses.sh` 和 source lock 交叉闭合；CLI、签名 App 与 notarized/stapled 最终 ZIP 均消费并逐字节复验同一 `LICENSE`、`THIRD_PARTY_NOTICES.md`、inventory 与 18 份 license bytes，分发证据见 `Fixtures/release-evidence/phase3-notarization.json`；
-4. ~~至少一个可再分发真实 `.htrace`/`.ftrace` fixture~~——已关闭（2026-08-12，Phase 1）：Apache-2.0 的 `hiprofiler_data_ability.htrace`、`trace_small_10.systrace` 与 `zlib.htrace` 连同上游许可证/NOTICE 提交至 `Fixtures/traces/`；后两者分别提供非空 scheduling/state 与 named-slice 证据；
-5. ~~required schema fingerprint 与真实 DB fixture~~——已关闭（2026-08-12，P1-T05）：pinned TraceStreamer 从两个真实 fixture 重复导出 byte-identical `-nm` DB；schema adapter v2 的 91-table length-prefixed schema fingerprint 为 `cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3`，source/DB SHA、range、per-fixture capabilities 与六张 required table row counts 锁定在 `Fixtures/databases/trace_streamer_4.3.7.schema-evidence.json`；real integration gate 同时把 actual executable SHA、manifest、evidence parser identity 与每次解析返回的 `metadata.parser` 绑定，并从 fixture/license 实际字节重算 Git blob OID 与 SHA 后重建验证；
+2. ~~TraceStreamer 在当前 Apple silicon/macOS toolchain 的原生、可重现构建~~——已关闭（2026-08-12，Phase 1）：原生 arm64 二进制构建成功（Apple clang 21；gn/ninja 为上游 darwin-x86 预编译件经 Rosetta 运行），配方固化于 `hack/build_trace_streamer.sh`，provenance 记录于 `third_party/TraceStreamer/macx/manifest.json`；浮动 third_party tip 以构建时 SHA 记入 manifest，完全预 pin 列为后续硬化项（见 TRACE_STREAMER.md §4）；
+3. ~~binary redistribution 的完整第三方许可证清单~~——已关闭（2026-08-14，P3-T10）：14 个 source components 与 2 个 build tools 的 exact license path/SHA/byte count 已由 `license-inventory.json`、`verify_licenses.sh` 和 source lock 交叉闭合；CLI、签名 App 与 notarized/stapled 最终 ZIP 均消费并逐字节复验同一 `LICENSE`、`THIRD_PARTY_NOTICES.md`、inventory 与 18 份 license bytes，分发证据见 `test/fixtures/release-evidence/phase3-notarization.json`；
+4. ~~至少一个可再分发真实 `.htrace`/`.ftrace` fixture~~——已关闭（2026-08-12，Phase 1）：Apache-2.0 的 `hiprofiler_data_ability.htrace`、`trace_small_10.systrace` 与 `zlib.htrace` 连同上游许可证/NOTICE 提交至 `test/fixtures/traces/`；后两者分别提供非空 scheduling/state 与 named-slice 证据；
+5. ~~required schema fingerprint 与真实 DB fixture~~——已关闭（2026-08-12，P1-T05）：pinned TraceStreamer 从两个真实 fixture 重复导出 byte-identical `-nm` DB；schema adapter v2 的 91-table length-prefixed schema fingerprint 为 `cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3`，source/DB SHA、range、per-fixture capabilities 与六张 required table row counts 锁定在 `test/fixtures/databases/trace_streamer_4.3.7.schema-evidence.json`；real integration gate 同时把 actual executable SHA、manifest、evidence parser identity 与每次解析返回的 `metadata.parser` 绑定，并从 fixture/license 实际字节重算 Git blob OID 与 SHA 后重建验证；
 6. ~~parser cancellation 在大 Trace 上无 orphan process/cache promotion~~——已关闭（2026-08-15，P3-T09）：674,044,067-byte DAYU 200 单 segment trace 的真实 parser child 在 launch barrier 后取消，child 已退出且禁止的 Ready/private DB、metadata、owner lease 与 quarantine artifact 为 0；空安全目录不冒充 active owner，分类攻击负例仍拒绝 `database.sqlite*`、owner 子项及 session/entry/cancelled/displaced 路径；
-7. ~~indexed viewport query 在 large trace 上满足规格目标~~——已关闭（2026-08-15，P3-T09/P4-T06）：20-sample evidence 满足 cache ≤1s、viewport ≤500ms、context ≤2s、analysis ≤5s、frame ≤16.7ms 与 RSS ≤1.5GiB；24 个 applicable/persistent indexes 精确闭合、`usesAutomaticIndex=false`，精确测量值见 `Fixtures/release-evidence/phase3-large-performance.json`；
+7. ~~indexed viewport query 在 large trace 上满足规格目标~~——已关闭（2026-08-15，P3-T09/P4-T06）：20-sample evidence 满足 cache ≤1s、viewport ≤500ms、context ≤2s、analysis ≤5s、frame ≤16.7ms 与 RSS ≤1.5GiB；24 个 applicable/persistent indexes 精确闭合、`usesAutomaticIndex=false`，精确测量值见 `test/fixtures/release-evidence/phase3-large-performance.json`；
 8. ~~ArkDeck action-specific multi-analyzer resolver 不弱化 pinned identity~~——已关闭（2026-08-15，P5-T03/P5-T07）：ArkDeck PR #1309 / merge `528b521c7a6ace44e225ffbc3d1e1797b9c1a54f` 把 crash 与 ArkTrace analyzerRef 分别绑定到 closed signed profile，caller 无 executable/path/argv 选择面，identity/doctor/cache invalidation 与现有 analyzer regression 全部由同车 contract tests 锁定；
 9. ~~一次真实链路：ArkDeck Trace Artifact → ArkTrace → derived analysis Artifact~~——已关闭（2026-08-15，P5-T09）：真实 `capture.diagnostics@1` source Artifact `ART-fd0a93c85a005703f6edf1cfb47a3daa`（SHA-256 `a5c20c3b85b3daf56618517b114f678635391e4e4da653acbedf38d0c4b85b35`）经 host-only pinned ArkTrace 产出 persisted derived Artifact `ART-13f8ddd3192811c11efc40c048a078eb`（SHA-256 `009f9beb60ea9265fd8b21161689cf705b83a78f6b7cecd178e85a721055a3fe`），daemon restart 后 exact bytes 仍可读；LaunchAgent profile 安装由 ArkDeck PR #1311 / merge `4e478b46f202a139dbeb2c91d79e36d6d7774fac` 闭合，证据见 [ARKDECK_INTEGRATION.md](../guides/ARKDECK_INTEGRATION.md)；
-10. ~~一次真实调试闭环：baseline capture → structured analysis → Agent evidence-backed decision → 下一轮 ArkDeck typed request → follow-up capture → deterministic comparison。~~——**已关闭**（2026-08-16，Phase 6 / P6-T09）：`com.example.waterflowdemo` 在 DAYU 200 / OpenHarmony-7.0.0.37 上，经 `capture.diagnostics@1` 采集 baseline（`ART-d15ec022…`，2,132,120 B，SHA-256 `f0aa075e…`），由 `analyzer.summarize-trace@1` 与 `analyzer.analyze-trace@1`（cpu/scheduling/slices/hot-intervals）产出 structured evidence；Agent 仅据此判定主线程每次 reload 全量重测嵌套 WaterFlow（命中预登记候选 C1，排除 C4），下一轮以 `artifact import-hap → workspace.sign-openharmony-hap@1 → debug.hap@1 → capture.diagnostics@1` 的 typed 链路施加并复验（`ART-6bc7bd62…`，1,023,605 B，SHA-256 `5efdd137…`）。按冻结规则判定 **improved**：App 进程 shareOfOneCPU 0.026339 → 0.003255（−87.6%），主线程 −88.2%，top-5 hot interval score −20.6%。证据 `Fixtures/release-evidence/phase6-real-debug-loop.json`，gate `scripts/test_phase6.sh`，报告 [PHASE_6_VERIFICATION.md](../archive/PHASE_6_VERIFICATION.md)。**承载轮更新（2026-08-16）**：当日的 CLI re-pin 替换了上述首轮所依赖的 tool 与 parser，因此按同一冻结场景在**在产分发**（tool `a7859d69…` / parser `66887fae…`）上整条重跑，门 10 现在关闭在这一轮：baseline `ART-5b17a1a0…`（2,135,494 B，SHA-256 `4b113194…`）、follow-up `ART-5e0feb41…`（1,243,942 B，SHA-256 `5e1781a9…`），判定同为 **improved**（M1 −87.09%、M2 −87.79%、M5 −9.10%；M5 为佐证指标不参与判定）。留存机器证据与 gate 常量均指向该轮，首轮保留为历史记录，见 PHASE_6_VERIFICATION.md §7.3 与 §9。原 `kind=context` finding 已关闭：ArkDeck#1318（commit `28af92cb`）允许每个 series 一个 carry-in counter 样本，端到端复验 job `job-1b81c838…`，证据 `Fixtures/release-evidence/phase6-context-closure.json`。
+10. ~~一次真实调试闭环：baseline capture → structured analysis → Agent evidence-backed decision → 下一轮 ArkDeck typed request → follow-up capture → deterministic comparison。~~——**已关闭**（2026-08-16，Phase 6 / P6-T09）：`com.example.waterflowdemo` 在 DAYU 200 / OpenHarmony-7.0.0.37 上，经 `capture.diagnostics@1` 采集 baseline（`ART-d15ec022…`，2,132,120 B，SHA-256 `f0aa075e…`），由 `analyzer.summarize-trace@1` 与 `analyzer.analyze-trace@1`（cpu/scheduling/slices/hot-intervals）产出 structured evidence；Agent 仅据此判定主线程每次 reload 全量重测嵌套 WaterFlow（命中预登记候选 C1，排除 C4），下一轮以 `artifact import-hap → workspace.sign-openharmony-hap@1 → debug.hap@1 → capture.diagnostics@1` 的 typed 链路施加并复验（`ART-6bc7bd62…`，1,023,605 B，SHA-256 `5efdd137…`）。按冻结规则判定 **improved**：App 进程 shareOfOneCPU 0.026339 → 0.003255（−87.6%），主线程 −88.2%，top-5 hot interval score −20.6%。证据 `test/fixtures/release-evidence/phase6-real-debug-loop.json`，gate `hack/test_phase6.sh`，报告 [PHASE_6_VERIFICATION.md](../archive/PHASE_6_VERIFICATION.md)。**承载轮更新（2026-08-16）**：当日的 CLI re-pin 替换了上述首轮所依赖的 tool 与 parser，因此按同一冻结场景在**在产分发**（tool `a7859d69…` / parser `66887fae…`）上整条重跑，门 10 现在关闭在这一轮：baseline `ART-5b17a1a0…`（2,135,494 B，SHA-256 `4b113194…`）、follow-up `ART-5e0feb41…`（1,243,942 B，SHA-256 `5e1781a9…`），判定同为 **improved**（M1 −87.09%、M2 −87.79%、M5 −9.10%；M5 为佐证指标不参与判定）。留存机器证据与 gate 常量均指向该轮，首轮保留为历史记录，见 PHASE_6_VERIFICATION.md §7.3 与 §9。原 `kind=context` finding 已关闭：ArkDeck#1318（commit `28af92cb`）允许每个 series 一个 carry-in counter 样本，端到端复验 job `job-1b81c838…`，证据 `test/fixtures/release-evidence/phase6-context-closure.json`。
 
 这些是各次发布的历史验收结果，不证明当前工作树或新分发已经通过。后续任务按实际影响选择验证，
 只有重新取得对应证据才更新发布结论；日常开发不要求重复整套发布流程。

@@ -3,7 +3,7 @@
 > 状态：Completed，9/9 —— 真实闭环已跑通并判定 improved，发布门 10 关闭
 > 阶段：Real Debug Loop
 > 验收目标：至少闭合一次真实 OpenHarmony App → ArkDeck → ArkTrace → Agent → typed request → ArkDeck 复验链路
-> 冻结件：[PHASE_6_SCENARIO.md](PHASE_6_SCENARIO.md)；能力与阻塞证据：`Fixtures/release-evidence/phase6-capability-probe.json`
+> 冻结件：[PHASE_6_SCENARIO.md](PHASE_6_SCENARIO.md)；能力与阻塞证据：`test/fixtures/release-evidence/phase6-capability-probe.json`
 
 ## 1. 进入条件
 
@@ -84,7 +84,7 @@ inconclusive 判定阈值。冻结发生在任何 baseline 采集之前；冻结
   `outstandingResidueCount=0`）；
 - [x] Artifact 可由 lease 重新解析（2026-08-16 用 `lease-v1:job-31019f3f…:ART-5b17a1a0…` 重新提交
   `analyzer.summarize-trace@1`，job `job-890a4f84…` succeeded；follow-up 同样成立，见
-  `Fixtures/release-evidence/phase6-lease-reresolution.json`）；
+  `test/fixtures/release-evidence/phase6-lease-reresolution.json`）；
 - [x] raw Trace hash 在后续分析前后不变（全部分析跑完之后重新计算，baseline `4b113194…`/2,135,494 B、
   follow-up `5e1781a9…`/1,243,942 B，与采集时记录逐字节一致）；
 - [x] provenance 足以关联 app/device/job（capture job 绑定 `TGT-958780b2ffb7` / bindingRevision 3 /
@@ -218,7 +218,7 @@ inconclusive 判定阈值。冻结发生在任何 baseline 采集之前；冻结
 **完成条件**
 
 - [x] 至少一次真实 baseline → analysis → Agent decision → typed request → follow-up capture → comparison
-  （`Fixtures/release-evidence/phase6-real-debug-loop.json` 两轮全链路；
+  （`test/fixtures/release-evidence/phase6-real-debug-loop.json` 两轮全链路；
   `phase6-loop-reproduction.json` 为独立复现）；
 - [x] 全程无 fake/synthetic/manual GUI copy（`guiAutomationUsed=false`、
   `humanLogReadForEvidence=false`，每一步 device 动作都是 typed request 且带 job ID）；
@@ -226,7 +226,7 @@ inconclusive 判定阈值。冻结发生在任何 baseline 采集之前；冻结
   重跑 `analyzer.summarize-trace@1`，两轮 derived summary 与冻结记录逐字节相同：baseline
   `c6518e48…`/3,035 B、follow-up `74390239…`/2,611 B，见 `phase6-lease-reresolution.json`）；
 - [x] 结论由结构化 evidence 支撑（M1～M5 全部取自 typed analysis artifact，判定按 §10 冻结规则；
-  `scripts/test_phase6.sh` 从记录数值离线重算同一判定）；
+  `hack/test_phase6.sh` 从记录数值离线重算同一判定）；
 - [x] 发布门 10 关闭（DESIGN §11 发布门 10 已标记关闭并引用本证据包）；
 - [x] 输出 Final Verification Report（[PHASE_6_VERIFICATION.md](PHASE_6_VERIFICATION.md)）；
 - [x] 若阻塞，报告最小真实 blocker、owner、所需 authority/state change，发布门保持开放（§5.1 记录了
@@ -261,10 +261,10 @@ inconclusive 判定阈值。冻结发生在任何 baseline 采集之前；冻结
 - **`analyzer.analyze-trace@1` `kind=context` 被 `validateCounterSample` 拒绝** —— counter 是阶梯
   函数，ArkTrace 会带上窗口前最后一个样本，而校验器要求所有样本时间戳落在窗口内。ArkDeck#1318
   （commit `28af92cb`）改为每个 series 允许一个 duration 覆盖窗口起点的 carry-in 样本后解除，并以
-  job `job-1b81c838…` 端到端复验通过；证据 `Fixtures/release-evidence/phase6-context-closure.json`，
+  job `job-1b81c838…` 端到端复验通过；证据 `test/fixtures/release-evidence/phase6-context-closure.json`，
   证据包内为 `resolvedFindings`。§6 第 4 项两轮均已满足。详见 §11.3。
 - **发布门 10**：已由真实闭环关闭，判定 improved；证据
-  `Fixtures/release-evidence/phase6-real-debug-loop.json`，gate `scripts/test_phase6.sh`。
+  `test/fixtures/release-evidence/phase6-real-debug-loop.json`，gate `hack/test_phase6.sh`。
 
 ## 6. Exit Checklist
 
@@ -279,7 +279,7 @@ inconclusive 判定阈值。冻结发生在任何 baseline 采集之前；冻结
       capture.diagnostics@1，全部 Catalog 可验证）；
 - [x] 前后 metric comparison（承载轮 M1 −87.09%、M2 −87.79%、M5 −9.10%，判定 improved；首轮为
       −87.6% / −88.2% / −20.6%，同样判定 improved。M5 是佐证指标，不参与判定条件）；
-- [x] 完整 provenance/evidence package（`Fixtures/release-evidence/phase6-real-debug-loop.json`）；
-- [x] 系统级 audit（`scripts/test_phase6.sh` 全绿；Phase 1 gate 复跑；license 校验通过；
+- [x] 完整 provenance/evidence package（`test/fixtures/release-evidence/phase6-real-debug-loop.json`）；
+- [x] 系统级 audit（`hack/test_phase6.sh` 全绿；Phase 1 gate 复跑；license 校验通过；
       privacy/无 GUI/无 raw SQL/无设备权限不变量已在 gate 内断言）；
 - [x] 发布门 10 真实关闭。

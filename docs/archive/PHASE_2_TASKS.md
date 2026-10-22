@@ -104,7 +104,7 @@ owner marker；`.ready` 记录必须按 Ready entry 处理，不能当 stale pri
 P3-T05 不得仅凭 PID、时间或裸 UUID 判断 stale。
 
 当前回归（2026-08-13）：`CI=true swift test -c release` 与 debug gate 均为
-133 tests、0 failure；`scripts/test_phase1.sh` 为 133 tests、0 skipped，真实 fixture
+133 tests、0 failure；`hack/test_phase1.sh` 为 133 tests、0 skipped，真实 fixture
 仍为 `quickCheck=ok`、indexVersion 1，parser/source/upstream DB/Ready DB SHA 与 schema
 fingerprint 均未漂移。新增分布相对冻结 Phase 1 基线为 Store +4、Integration +35。
 
@@ -362,12 +362,12 @@ Machine payload validation 全链路独立；output budget 同时约束 stdout +
 4. cached open和 metadata query benchmark，记录机器/trace/parser identity；
 5. docs/guides/CLI.md：安装、global flags、命令、JSON、exit codes、privacy；
 6. README 更新可执行命令；
-7. scripts/test_phase2.sh 一条命令执行 Phase 1 + Phase 2 gate。
+7. hack/test_phase2.sh 一条命令执行 Phase 1 + Phase 2 gate。
 
 **实现证据（2026-08-13，统一独立 review clean）**
 
 已有 20 份 static canonical golden 覆盖五命令 success/empty/truncated/error；新增
-`scripts/test_phase2.sh` 先执行 Phase 1 locked gate，再执行完整 Release zero-skip suite，随后用
+`hack/test_phase2.sh` 先执行 Phase 1 locked gate，再执行完整 Release zero-skip suite，随后用
 实际 `arktrace` 验证 malformed argument、wrong parser、timeout、output overflow、SIGINT cancel 与
 second-signal force。Phase 2 machine evidence 记录 bounded host/trace/parser identity、20 次 warm
 cache hit 的 open/metadata p50/p95、test/skip count 与 CLI status checks。最终 clean gate：

@@ -97,16 +97,16 @@ P5-T01 和 P5-T02 可以并行。
 
 **完成证据（独立 review clean）：**
 
-- `scripts/build_phase5_cli_distribution_candidate.sh` 构建 `LSBackgroundOnly` 的
+- `hack/build_phase5_cli_distribution_candidate.sh` 构建 `LSBackgroundOnly` 的
   `ArkTraceCLI.app`，固定 `Contents/MacOS/arktrace`、bundled TraceStreamer、资源和许可证；
-- `scripts/package_phase5_cli_distribution.sh` 复核 candidate、notarize/staple、Gatekeeper、quarantine self-test 后才原子发布 ZIP；
-- `scripts/verify_phase5_cli_distribution.py` 对 manifest/layout/hash/provenance/attribution/upgrade policy fail closed；
+- `hack/package_phase5_cli_distribution.sh` 复核 candidate、notarize/staple、Gatekeeper、quarantine self-test 后才原子发布 ZIP；
+- `hack/verify_phase5_cli_distribution.py` 对 manifest/layout/hash/provenance/attribution/upgrade policy fail closed；
 - Developer ID 候选已用证书 `38E3B7650DF0CE1DEC0CC8C403614AA0C38B0B4C`
   内到外签名，独立复核 App/tool/parser hardened runtime、timestamp、Team
   `8AQTYW5FKR`、无 entitlement blob、installed doctor self-test、human/Machine
   `licenses` 的 18-file exact closure 及二进制无仓库绝对路径；
 - 详细安装/回滚 contract 见 `CLI_DISTRIBUTION.md`；被 source-tree projection 排除的
-  `Fixtures/release-evidence/phase5-cli-distribution.json` 锁定最终
+  `test/fixtures/release-evidence/phase5-cli-distribution.json` 锁定最终
   `ArkTraceCLI-0.1.0-20260814T105423Z.zip`（5,076,367 bytes，SHA-256
   `ad5cd371bf52ad632ac58aa78594cdfb4501259398a3c54df4b9ec8a36955d7a`）、
   Apple submission `bf933f7e-9f67-443e-9f1c-34669837d7ac`、staple/Gatekeeper、
@@ -307,7 +307,7 @@ context/analyze lowering、严格 envelope validation、exact Artifact persisten
 - [x] source/derived hashes 和 provenance 一致；
 - [x] 无手工打开 ArkTrace、无 GUI automation；
 - [x] 发布门 9 按真实 Trace Artifact → ArkTrace → derived analysis Artifact evidence 关闭；
-- [x] docs/guides/ARKDECK_INTEGRATION.md 和 scripts/test_phase5.sh 完成。
+- [x] docs/guides/ARKDECK_INTEGRATION.md 和 hack/test_phase5.sh 完成。
 
 **完成证据：** ArkDeck production daemon 在 submit 前确认 `capture.diagnostics@1` 与
 `analyzer.summarize-trace@1` available。真实 capture Job

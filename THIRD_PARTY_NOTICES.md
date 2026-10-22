@@ -11,8 +11,8 @@ ArkTrace itself is licensed under the MIT License; the exact ArkTrace license
 is distributed separately as `LICENSE`. The distributed macOS App and CLI
 bundle the pinned OpenHarmony TraceStreamer executable. Its conservative
 source-closure inventory is machine-readable at
-`ThirdParty/TraceStreamer/license-inventory.json`; the exact corresponding
-license texts are under `ThirdParty/TraceStreamer/LICENSES/`.
+`third_party/TraceStreamer/license-inventory.json`; the exact corresponding
+license texts are under `third_party/TraceStreamer/LICENSES/`.
 
 The shipped code includes components under Apache-2.0, MulanPSL-2.0,
 bzip2-1.0.6, MIT, BSD-3-Clause, the zlib license, and SQLite's public-domain
@@ -30,7 +30,7 @@ The profiler repository's shipped subset is Apache-2.0; its separately marked
 kernel-mode eBPF sources are not part of this binary.
 
 Source repositories and exact revisions are recorded in
-`ThirdParty/TraceStreamer/source-lock.json`. Rebuild and source retrieval
+`third_party/TraceStreamer/source-lock.json`. Rebuild and source retrieval
 instructions are in `docs/design/TRACE_STREAMER.md`; those HTTPS repositories are the
 source offer for this distribution.
 
@@ -38,7 +38,7 @@ source offer for this distribution.
 
 `Sources/ArkTraceRendering/TimelineColorPalette.swift` is a Swift port of the
 timeline color logic from the same upstream repository, taken at the revision
-pinned in `ThirdParty/TraceStreamer/source-lock.json`
+pinned in `third_party/TraceStreamer/source-lock.json`
 (`447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6`), which is Apache-2.0. The port
 covers `ColorUtils.FUNC_COLOR_B`, `ColorUtils.JANK_COLOR`, `ColorUtils.hash`,
 `ColorUtils.hashFunc`,
@@ -51,5 +51,5 @@ design — see `docs/design/DESIGN.md` §13.5 and the parity vectors in
 
 This is ArkTrace's only port of upstream *application* code; everything else
 reuses the upstream parser as a pinned executable rather than as source. The
-Apache-2.0 text already ships under `ThirdParty/TraceStreamer/LICENSES/` for
+Apache-2.0 text already ships under `third_party/TraceStreamer/LICENSES/` for
 the bundled parser and covers this file as well.

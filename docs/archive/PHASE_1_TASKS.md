@@ -39,7 +39,7 @@ Phase 1 的交付链路是：
 - **P1-T05：真实 schema evidence。** 从 pinned upstream 引入 Apache-2.0 的 `trace_small_10.systrace` 与 `zlib.htrace`，分别锁定 44,037 `sched_slice` / 68,343 `thread_state` 与 3,067 `callstack`；两次导出 DB byte-identical，schema adapter v2 的 91-table length-prefixed fingerprint、source/DB SHA、range、per-fixture capabilities 与六张 required row counts 已进入 locked evidence；required declared affinity、非空/匹配 capability、bounded range/relationship/data-quality probes 已落地，relationship join 使用 VM-step budget，合法 quoted identifiers 全量进入 fingerprint；actual parser SHA/manifest/evidence/`metadata.parser` 已强绑定，fixture/license 实际字节 Git blob、evidence format 与 canonical provenance fail closed；全量 67 tests 通过、0 失败、0 skip，DESIGN 发布门 5 关闭。
 - **P1-T06：Parser lifecycle。** 子进程以直接 argv 固定 `-nm`，stdout/stderr/`.ohos.ts` diagnostics 有界；取消执行 TERM → 500 ms grace → 同 PID KILL 并显式 wait/reap，无 continuation double-resume；source symlink 只解析一次到 immutable snapshot，Ready output 拒绝 symlink，失败只清理 session-owned 文件。
 - **P1-T07：Atomic Ready。** private partial DB 在 promotion 前完成 raw DB provenance hash、quick_check、schema/range/relationship validation、`arktrace_v1_*` index migration、DB/sidecar/directory fsync；metadata sidecar 先移动，DB rename 作为 Ready marker，取消仅按 device/inode 删除本次产物；Repository read-only + `SQLITE_OPEN_NOFOLLOW` 打开。
-- **P1-T08：Mandatory gate。** `scripts/test_phase1.sh` fail closed 校验 binary/manifest/arm64、fixture/license SHA/byte count/Git blob，clean build 后运行真实 locked scheduling fixture；Phase 1 review hardening 完成时实测 94 tests、0 failed、0 skipped，并输出 4 KiB 内 machine evidence。后续阶段的 additive rerun 单独记录在对应阶段文档，不改写此冻结基线。
+- **P1-T08：Mandatory gate。** `hack/test_phase1.sh` fail closed 校验 binary/manifest/arm64、fixture/license SHA/byte count/Git blob，clean build 后运行真实 locked scheduling fixture；Phase 1 review hardening 完成时实测 94 tests、0 failed、0 skipped，并输出 4 KiB 内 machine evidence。后续阶段的 additive rerun 单独记录在对应阶段文档，不改写此冻结基线。
 - **P1-T09：Phase close。** README、TraceStreamer 实测记录、DESIGN、任务索引与 [PHASE_1_VERIFICATION.md](PHASE_1_VERIFICATION.md) 已按实际实现收口。
 - DESIGN 已按当前定义关闭发布门 2；真实 fixture 发布门也已关闭。
 
@@ -66,14 +66,14 @@ flowchart LR
     T08 --> T09["P1-T09 Phase close"]
 ~~~
 
-依赖链已全部完成；`scripts/test_phase1.sh` 是 Phase 1 的唯一总验收入口。
+依赖链已全部完成；`hack/test_phase1.sh` 是 Phase 1 的唯一总验收入口。
 
 ## 4. 具体任务
 
 ### P1-T01 — 构建可工作的原生 TraceStreamer
 
 **状态：完成。**
-**证据：e710e78、ThirdParty/TraceStreamer/macx/manifest.json。**
+**证据：e710e78、third_party/TraceStreamer/macx/manifest.json。**
 
 已验证：
 
@@ -162,7 +162,7 @@ flowchart LR
 2. 用 pinned binary 实测候选，必须至少得到非零 `sched_slice`；同时要求非零 `callstack`/named slice，若候选不能同时覆盖，则补充同样许可与 provenance 完整的第二个 fixture，禁止降低事件覆盖；
 3. 保留现有小 fixture 用于快速 process/thread smoke test；新增 fixture 专门承担 scheduling/state/slice/index/analysis evidence；
 4. 用这些 real traces 生成 `-nm` SQLite；
-5. 在 `Fixtures/databases` 保存可再分发的真实 DB fixture，或保存可重复生成它的 locked evidence；不得用手写 SQLite 代替；
+5. 在 `test/fixtures/databases` 保存可再分发的真实 DB fixture，或保存可重复生成它的 locked evidence；不得用手写 SQLite 代替；
 6. 记录 source trace SHA、parser SHA、DB SHA、DB byte count、各事件表 row counts、schema fingerprint、trace range 和 capability set；
 7. 固化真实 schema golden，并验证 additive column 不会被误判为不支持；
 8. 按 AT-DB-003/004 收紧 required set：trace_range、process、thread、sched_slice、thread_state、callstack 的 required columns 及 SQLite declared affinity 必须明确测试；
@@ -279,7 +279,7 @@ Phase 1 要完成结构化取消实现；发布门 6 仍需后续 large trace + 
 
 **交付**
 
-1. 新增 scripts/test_phase1.sh 或等价入口；
+1. 新增 hack/test_phase1.sh 或等价入口；
 2. gate 先验证 binary、manifest、fixture、hash 和 architecture，任一缺失或 drift 都失败；
 3. 普通 contributor swift test 可以在无 binary 环境 skip，但 Phase gate 禁止 skip；
 4. 真实执行：trace → child process → partial SQLite → validate/index/ready → read-only Store；
@@ -340,19 +340,19 @@ Phase 1 要完成结构化取消实现；发布门 6 仍需后续 large trace + 
 以下工作重要，但按当前 reviewed DESIGN 不重新阻塞已关闭的发布门 2：
 
 - ~~将 manifest 中记录的所有 floating third-party SHA 转成普通 build 会消费的 source lock~~——已完成：
-  `ThirdParty/TraceStreamer/source-lock.json` 锁定 upstream 与 13 个 source dependency；
+  `third_party/TraceStreamer/source-lock.json` 锁定 upstream 与 13 个 source dependency；
 - ~~固定 GN/Ninja 下载 URL 与 archive SHA~~——已完成：同一 lock 的 `tools` 段固定两者的 URL、SHA-256
   与 byte count，构建脚本按值校验；
 - ~~用两个 clean work directory 验证 byte-identical binary~~——已完成：
-  `scripts/test_trace_streamer_reproducibility.sh` 实跑通过，两个独立 fresh worktree 的产物彼此、且与
+  `hack/test_trace_streamer_reproducibility.sh` 实跑通过，两个独立 fresh worktree 的产物彼此、且与
   仓库 binary 逐字节相同（`e0167fbb…`）；
 - ~~将 faultloggerd inline edit 改为独立 patch~~——已完成：
-  `ThirdParty/TraceStreamer/patches/faultloggerd-apple-clang.patch`；
+  `third_party/TraceStreamer/patches/faultloggerd-apple-clang.patch`；
 - ~~增加 ssh://git@gitee.com/ 形式的 HTTPS rewrite~~——已完成：构建脚本同时 rewrite
   `git@gitee.com:openharmony/` 与 `ssh://git@gitee.com/openharmony/`；
 - ~~为 build recipe 引入基于输入内容的稳定版本~~——已完成：`BUILD_RECIPE_VERSION` 由 build script、
   safety helper、source lock 与 local patch 四者的 SHA-256 派生，当前为 `e4fec8cc…`；
-- ~~large-trace gate 记录 source/staging 是否同一 filesystem；跨卷 snapshot 的真实复制 IO/空间必须计入验收证据~~——已完成（2026-08-16）：benchmark evidence 增加 `storage` 块（`sourceFilesystemID`/`stagingFilesystemID`/`sameFilesystem`/`stagedByteCount`），schema 随之升到 `formatVersion: 4`；`scripts/benchmark_phase3.sh` 断言四个键精确闭合、两个 device ID 非零、`sameFilesystem` 必须与两个 ID 的实际关系一致、`stagedByteCount` 必须等于 `traceByteCount`。跨卷运行不被禁止，但不能再被记成同卷；
+- ~~large-trace gate 记录 source/staging 是否同一 filesystem；跨卷 snapshot 的真实复制 IO/空间必须计入验收证据~~——已完成（2026-08-16）：benchmark evidence 增加 `storage` 块（`sourceFilesystemID`/`stagingFilesystemID`/`sameFilesystem`/`stagedByteCount`），schema 随之升到 `formatVersion: 4`；`hack/benchmark_phase3.sh` 断言四个键精确闭合、两个 device ID 非零、`sameFilesystem` 必须与两个 ID 的实际关系一致、`stagedByteCount` 必须等于 `traceByteCount`。跨卷运行不被禁止，但不能再被记成同卷；
 - ~~避免并行测试通过 `setenv` 修改进程全局 `PATH`，改用隔离的 resolver seam~~——已完成（2026-08-16）：`TraceStreamerResolver` 与 `ArkTraceBundledParserResolver` 暴露 `candidateExecutableURLs()`，测试断言植入的假二进制不在候选集内，不再改动 process-global 环境。
 
 这些条目应在分发前完成，但不能与 Phase 1 Parser/Store critical path 混为一个长期构建重构。
