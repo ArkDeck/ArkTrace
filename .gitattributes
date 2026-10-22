@@ -26,3 +26,12 @@ ThirdParty/TraceStreamer/LICENSES-windows/** -text
 
 # License hashes bind the exact upstream bytes, including line endings.
 rust/licenses/** -text
+
+# Linguist: generated evidence and vendored upstream bytes stay out of language stats.
+# These attributes do not change checkout bytes. -text and eol rules above still apply.
+docs/migration-runs/** linguist-generated
+tools/**/fixtures/** linguist-vendored
+**/*-oracle.json linguist-generated
+contracts/*.json linguist-generated
+rust/licenses/** linguist-vendored
+ThirdParty/** linguist-vendored
