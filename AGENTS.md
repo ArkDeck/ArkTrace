@@ -14,11 +14,12 @@
 ## 事实源与按需阅读
 
 遵循运行环境的指令优先级；在其允许范围内，用户明确请求优先于本地流程建议和 skill。
-本文件说明执行方式，[SPECIFICATION.md](docs/design/SPECIFICATION.md) 定义产品行为，[DESIGN.md](docs/design/DESIGN.md) 解释架构。
+本文件说明执行方式。能力的 Living Spec 在 [openspec/](openspec/README.md)，[SPECIFICATION.md](docs/design/SPECIFICATION.md) 保留 AT-* 细则，[DESIGN.md](docs/design/DESIGN.md) 解释架构。
 以当前代码、配置和实际检查确认实现状态；发现规格与实现冲突时定位差异，不能仅为让测试通过而放宽需求。
 
 | 涉及的工作 | 首选入口 |
 |---|---|
+| 能力规格与变更 | [openspec/project.md](openspec/project.md)、`openspec/specs/`、`openspec/changes/`；细则仍见 [SPECIFICATION.md](docs/design/SPECIFICATION.md) |
 | 平台、模块与依赖 | [Package.swift](Package.swift)、`Sources/`、[SPECIFICATION.md](docs/design/SPECIFICATION.md) §2–4 |
 | Parser、SQLite、cache | `Sources/ArkTraceCore/`、`Sources/ArkTraceParser/`、`Sources/ArkTraceStore/`、`Sources/ArkTraceRuntime/`；[TRACE_STREAMER.md](docs/design/TRACE_STREAMER.md) |
 | 包外消费的离线检查与 cache 维护 | `Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift`、`Sources/ArkTraceRuntime/TraceCache.swift`；`hack/api-baseline/` |
@@ -35,14 +36,14 @@ ArkDeck 是独立仓库，其治理流程不自动适用于 ArkTrace；跨仓库
 
 ## 规格流程
 
-本仓库的现行产品行为以 [SPECIFICATION.md](docs/design/SPECIFICATION.md) 和 [DESIGN.md](docs/design/DESIGN.md) 为准。这里不复制一份 ArkDeck `openspec/` 树，也不要为了形式新建未接入检查的 constitution 或空 spec 目录。
+能力行为的 Living Spec 在 [openspec/specs/](openspec/specs/)。[project.md](openspec/project.md) 只写产品上下文。[changes/](openspec/changes/README.md) 收 change package。格式与 ArkDeck 的 OpenSpec 约定对齐：稳定 Requirement ID、`SHALL` / `SHALL NOT`、Given/When/Then。本仓库不复制 ArkDeck 的 constitution、Core baseline、Catalog 或治理树。
 
-和 ArkDeck 交叉的行为沿用 ArkDeck 的 spec-driven 过程（Living Spec 与 change package，入口是 ArkDeck 仓库的 `openspec/README.md`）：
+[SPECIFICATION.md](docs/design/SPECIFICATION.md) 保留 AT-* 细则和验收正文。Living spec 的每条 Requirement 用 `细则：AT-…` 指向既有编号。两者冲突时先定位差异，不能为了让实现通过而放宽任一方。合入已批准的 delta 时，两处一起改。
 
-1. 先写 proposal 和 spec delta，写清可观察行为、失败语义和验收场景，再改实现。
+1. 改变可观察行为时，先在 `openspec/changes/chg-yyyy-nnn-short-name/` 写 proposal 和 spec delta，再改实现。不要把 current spec 当草稿直接改。
 2. 机器边界放在 `api/`。`arkdeck-contract.json`、FFI、index definitions 由现有 verifier 对照 Swift 与 Rust 源码常量检查。
-3. ArkDeck 的 profile、硬编码版本和消费代码留在 ArkDeck 的 change package 里修改。ArkTrace 不代改下游仓库。
-4. 规格接受、实现完成、验收证据是三件不同的事。历史 Phase 报告不能代替当前 diff 的检查。
+3. ArkDeck 的 profile、硬编码版本和消费代码留在 ArkDeck 仓库自己的 change package 里修改。ArkTrace 不代改下游仓库。
+4. 规格接受、实现完成、验收证据是三件不同的事。`docs/archive/PHASE_6_SCENARIO.md` 是既有离线场景，不是 `openspec/`。历史 Phase 报告不能代替当前 diff 的检查。
 
 ## 保持的产品边界
 
