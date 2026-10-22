@@ -1,0 +1,24 @@
+version: 2
+updates:
+  # Cargo.lock lives in the Rust workspace. Package.swift currently has no
+  # remote dependencies; the Swift entry is here so a future package is covered.
+  - package-ecosystem: cargo
+    directory: /rust
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: swift
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
