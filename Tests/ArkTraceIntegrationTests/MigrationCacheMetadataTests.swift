@@ -8,7 +8,7 @@ final class MigrationCacheMetadataTests: XCTestCase {
     private func golden() throws -> Data {
         let root = URL(filePath: #filePath).deletingLastPathComponent()
             .deletingLastPathComponent().deletingLastPathComponent()
-        return try Data(contentsOf: root.appending(path: "contracts/ready-metadata.json"))
+        return try Data(contentsOf: root.appending(path: "api/ready-metadata.json"))
     }
 
     func testRustReadyMetadataUsesExistingSwiftFormatWithoutAddedFields() throws {

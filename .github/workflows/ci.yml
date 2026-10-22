@@ -9,10 +9,10 @@ name: CI
 # release asset, verifies it against the committed manifest, and runs the real
 # benchmark.
 # The fast workflow is therefore still a necessary check, not a sufficient one
-# -- scripts/test_phase<N>.sh remain the release authority.
+# -- hack/test_phase<N>.sh remain the release authority.
 #
 # Structure:
-#   plan       - cheap Linux job; maps the diff to lanes via scripts/ci_plan.sh
+#   plan       - cheap Linux job; maps the diff to lanes via hack/ci_plan.sh
 #                (fail closed: unknown paths, planner/workflow changes, or an
 #                unresolvable base select every lane) and runs the planner's
 #                own unit tests so the gate cannot rot silently.
@@ -81,7 +81,7 @@ jobs:
           fetch-depth: 0
 
       - name: Planner self-test
-        run: sh scripts/test_ci_plan.sh
+        run: sh hack/test_ci_plan.sh
 
       - name: Compute changed paths and lanes
         id: plan
@@ -116,11 +116,11 @@ jobs:
               ;;
           esac
           if [ "$resolved" = true ]; then
-            plan=$(sh scripts/ci_plan.sh < "$changed_list")
+            plan=$(sh hack/ci_plan.sh < "$changed_list")
           else
             # Fail closed: an empty input makes the planner select every lane.
             echo 'base/merge-base unavailable: selecting every lane' >&2
-            plan=$(sh scripts/ci_plan.sh < /dev/null)
+            plan=$(sh hack/ci_plan.sh < /dev/null)
           fi
           printf '%s\n' "$plan" | tee -a "$GITHUB_OUTPUT"
           {
@@ -179,14 +179,14 @@ jobs:
         with:
           path: |
             ${{ runner.temp }}/arktrace-swiftpm/workspace
-            !${{ runner.temp }}/arktrace-swiftpm/workspace/ThirdParty/TraceStreamer/macx/trace_streamer
+            !${{ runner.temp }}/arktrace-swiftpm/workspace/third_party/TraceStreamer/macx/trace_streamer
             ${{ runner.temp }}/arktrace-swiftpm/build
             ${{ runner.temp }}/arktrace-swiftpm/dependencies
             ${{ runner.temp }}/arktrace-swiftpm/ModuleCache
             ${{ runner.temp }}/arktrace-swiftpm/source-state
-          key: spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**', 'scripts/run-swiftpm.sh') }}-${{ github.sha }}
+          key: spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**', 'hack/run-swiftpm.sh') }}-${{ github.sha }}
           restore-keys: |
-            spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**', 'scripts/run-swiftpm.sh') }}-
+            spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**', 'hack/run-swiftpm.sh') }}-
             spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-
 
       # The package builds warning-free today and that is worth holding. If a
@@ -197,7 +197,7 @@ jobs:
           ARKTRACE_SWIFTPM_CACHE_ROOT: ${{ runner.temp }}/arktrace-swiftpm
         run: |
           set -o pipefail
-          sh scripts/run-swiftpm.sh build 2>&1 | tee build.log
+          sh hack/run-swiftpm.sh build 2>&1 | tee build.log
           if grep -q 'warning:' build.log; then
             echo '::error::swift build emitted warnings'
             grep 'warning:' build.log
@@ -215,7 +215,7 @@ jobs:
           ARKTRACE_SWIFTPM_CACHE_ROOT: ${{ runner.temp }}/arktrace-swiftpm
         run: |
           set -o pipefail
-          sh scripts/run-swiftpm.sh test \
+          sh hack/run-swiftpm.sh test \
             --skip 'ArkTraceAppSupportTests\.AppDistributionTests/testBundled' \
             --skip 'ArkTraceCLITests\.ProductionCommandExecutorTests/testCLITimeoutDrainsCacheRollbackBeforeReturning' \
             --skip 'ArkTraceCLITests\.ProductionCommandExecutorTests/testRealFixtureRunsAllEightCommandsInHumanAndMachineModes' \
@@ -227,7 +227,7 @@ jobs:
       # Compiles the out-of-package consumer that pins the promised public
       # API; a tightened access level that would break the app fails here.
       - name: API baseline (out-of-package consumer)
-        run: sh scripts/test_api_baseline.sh
+        run: sh hack/test_api_baseline.sh
 
       - name: Reject unexpected skips
         run: |
@@ -256,12 +256,12 @@ jobs:
         with:
           path: |
             ${{ runner.temp }}/arktrace-swiftpm/workspace
-            !${{ runner.temp }}/arktrace-swiftpm/workspace/ThirdParty/TraceStreamer/macx/trace_streamer
+            !${{ runner.temp }}/arktrace-swiftpm/workspace/third_party/TraceStreamer/macx/trace_streamer
             ${{ runner.temp }}/arktrace-swiftpm/build
             ${{ runner.temp }}/arktrace-swiftpm/dependencies
             ${{ runner.temp }}/arktrace-swiftpm/ModuleCache
             ${{ runner.temp }}/arktrace-swiftpm/source-state
-          key: spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**', 'scripts/run-swiftpm.sh') }}-${{ github.sha }}
+          key: spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**', 'hack/run-swiftpm.sh') }}-${{ github.sha }}
 
       - name: Upload logs
         if: always()
@@ -310,8 +310,8 @@ jobs:
       - name: Verify any present parser against the pinned manifest
         id: parser
         run: |
-          parser=ThirdParty/TraceStreamer/macx/trace_streamer
-          manifest=ThirdParty/TraceStreamer/macx/manifest.json
+          parser=third_party/TraceStreamer/macx/trace_streamer
+          manifest=third_party/TraceStreamer/macx/manifest.json
           if [ ! -f "$parser" ]; then
             echo "present=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -334,7 +334,7 @@ jobs:
         with:
           path: |
             ${{ runner.temp }}/arktrace-xcode/workspace
-            !${{ runner.temp }}/arktrace-xcode/workspace/ThirdParty/TraceStreamer/macx/trace_streamer
+            !${{ runner.temp }}/arktrace-xcode/workspace/third_party/TraceStreamer/macx/trace_streamer
             ${{ runner.temp }}/arktrace-xcode/Objects
             ${{ runner.temp }}/arktrace-xcode/SourcePackages
             ${{ runner.temp }}/arktrace-xcode/PackageCache
@@ -343,9 +343,9 @@ jobs:
             ${{ runner.temp }}/arktrace-xcode/source-state
             ${{ runner.temp }}/sym/Debug
             !${{ runner.temp }}/sym/Debug/ArkTrace.app
-          key: xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**', 'scripts/run-xcodebuild.sh') }}-${{ github.sha }}
+          key: xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'apple/Apps/**', 'apple/ArkTrace.xcodeproj/**', 'apple/Config/**', 'hack/run-xcodebuild.sh') }}-${{ github.sha }}
           restore-keys: |
-            xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**', 'scripts/run-xcodebuild.sh') }}-
+            xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'apple/Apps/**', 'apple/ArkTrace.xcodeproj/**', 'apple/Config/**', 'hack/run-xcodebuild.sh') }}-
             xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-
 
       # The app target lives in the Xcode project, outside the SwiftPM graph,
@@ -368,16 +368,16 @@ jobs:
           ARKTRACE_XCODE_OUTPUT_ROOT: ${{ runner.temp }}/sym
         run: |
           set -o pipefail
-          sh scripts/run-xcodebuild.sh 2>&1 | tee xcodebuild.log
+          sh hack/run-xcodebuild.sh 2>&1 | tee xcodebuild.log
 
       - name: Verify app document types
         if: steps.app_build.outcome == 'success'
-        run: scripts/verify_app_document_types.sh "$RUNNER_TEMP/sym/Debug/ArkTrace.app"
+        run: hack/verify_app_document_types.sh "$RUNNER_TEMP/sym/Debug/ArkTrace.app"
 
       - name: Native button focus and keyboard regressions
         env:
           ARKTRACE_XCODE_CACHE_ROOT: ${{ runner.temp }}/arktrace-xcode
-        run: python3 scripts/test_native_focus_button.py
+        run: python3 hack/test_native_focus_button.py
 
       - name: Note skipped app checks
         if: steps.parser.outputs.present != 'true'
@@ -385,7 +385,7 @@ jobs:
           {
             echo '### App bundle checks'
             echo 'Skipped: the app target embeds the pinned TraceStreamer'
-            echo 'binary, which is not tracked. `scripts/test_phase3_batch1.sh`'
+            echo 'binary, which is not tracked. `hack/test_phase3_batch1.sh`'
             echo 'enforces the built-bundle document types on a machine that'
             echo 'has it.'
           } >> "$GITHUB_STEP_SUMMARY"
@@ -397,7 +397,7 @@ jobs:
         with:
           path: |
             ${{ runner.temp }}/arktrace-xcode/workspace
-            !${{ runner.temp }}/arktrace-xcode/workspace/ThirdParty/TraceStreamer/macx/trace_streamer
+            !${{ runner.temp }}/arktrace-xcode/workspace/third_party/TraceStreamer/macx/trace_streamer
             ${{ runner.temp }}/arktrace-xcode/Objects
             ${{ runner.temp }}/arktrace-xcode/SourcePackages
             ${{ runner.temp }}/arktrace-xcode/PackageCache
@@ -406,7 +406,7 @@ jobs:
             ${{ runner.temp }}/arktrace-xcode/source-state
             ${{ runner.temp }}/sym/Debug
             !${{ runner.temp }}/sym/Debug/ArkTrace.app
-          key: xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**', 'scripts/run-xcodebuild.sh') }}-${{ github.sha }}
+          key: xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'apple/Apps/**', 'apple/ArkTrace.xcodeproj/**', 'apple/Config/**', 'hack/run-xcodebuild.sh') }}-${{ github.sha }}
 
       - name: Upload logs
         if: always()
@@ -431,23 +431,23 @@ jobs:
       # These need no parser binary and no external inputs.
       - name: Offline release gates
         run: |
-          scripts/verify_licenses.sh
-          scripts/verify_trace_streamer_lock.sh
-          scripts/verify_palette.py --report
-          python3 scripts/test_palette_verifier.py
-          scripts/test_phase6.sh
-          sh scripts/test_ci_plan.sh
-          python3 scripts/test_run_swiftpm.py
-          python3 scripts/test_run_xcodebuild.py
-          python3 scripts/test_native_app_resources.py
-          python3 scripts/test_run_cargo.py
-          python3 scripts/test_cargo_cache.py
-          python3 scripts/test_windows_cli_distribution_contract.py
-          python3 scripts/test_stage_macos_rust_sdk.py
-          python3 scripts/verify_migration_contracts.py
-          python3 scripts/test_migration_contracts.py
-          sh scripts/test_scheduled_ci_alert.sh
-          python3 -m unittest discover -s scripts/rollback_conformance -p 'test_*.py'
+          hack/verify_licenses.sh
+          hack/verify_trace_streamer_lock.sh
+          hack/verify_palette.py --report
+          python3 hack/test_palette_verifier.py
+          hack/test_phase6.sh
+          sh hack/test_ci_plan.sh
+          python3 hack/test_run_swiftpm.py
+          python3 hack/test_run_xcodebuild.py
+          python3 hack/test_native_app_resources.py
+          python3 hack/test_run_cargo.py
+          python3 hack/test_cargo_cache.py
+          python3 hack/test_windows_cli_distribution_contract.py
+          python3 hack/test_stage_macos_rust_sdk.py
+          python3 hack/verify_migration_contracts.py
+          python3 hack/test_migration_contracts.py
+          sh hack/test_scheduled_ci_alert.sh
+          python3 -m unittest discover -s hack/rollback_conformance -p 'test_*.py'
 
   rust-macos:
     name: Rust macOS native
@@ -474,34 +474,34 @@ jobs:
         run: echo "ARKTRACE_CARGO_CACHE_ROOT=$RUNNER_TEMP/arktrace-cargo" >> "$GITHUB_ENV"
       - name: Format, architecture, licenses and contract checks
         run: |
-          python3 scripts/run-cargo.py fmt --all -- --check
-          python3 scripts/verify_migration_contracts.py
-          python3 scripts/test_migration_contracts.py
-          python3 scripts/verify_rust_workspace.py
-          python3 scripts/generate_ffi_bindings.py --check
+          python3 hack/run-cargo.py fmt --all -- --check
+          python3 hack/verify_migration_contracts.py
+          python3 hack/test_migration_contracts.py
+          python3 hack/verify_rust_workspace.py
+          python3 hack/generate_ffi_bindings.py --check
       - name: Build, lint and native tests
         run: |
-          python3 scripts/run-cargo.py build --workspace
-          python3 scripts/run-cargo.py clippy --workspace --all-targets --all-features -- -D warnings
-          python3 scripts/run-cargo.py test --workspace --all-features
-          python3 scripts/run-cargo.py run --bin arktrace-migration-smoke
-          python3 scripts/test_viewer_json_roundtrip.py
-          python3 scripts/test_ffi_contract.py
+          python3 hack/run-cargo.py build --workspace
+          python3 hack/run-cargo.py clippy --workspace --all-targets --all-features -- -D warnings
+          python3 hack/run-cargo.py test --workspace --all-features
+          python3 hack/run-cargo.py run --bin arktrace-migration-smoke
+          python3 hack/test_viewer_json_roundtrip.py
+          python3 hack/test_ffi_contract.py
 
       - name: Compile package-external async Swift SDK consumer
         env:
           ARKTRACE_RUST_SDK_CACHE_ROOT: ${{ runner.temp }}/arktrace-sdk-artifacts
           ARKTRACE_RUST_SDK_CONSUMER_CACHE_ROOT: ${{ runner.temp }}/arktrace-sdk-consumer
         run: |
-          python3 scripts/build_macos_rust_sdk.py --fixtures > sdk-artifact.json
+          python3 hack/build_macos_rust_sdk.py --fixtures > sdk-artifact.json
           export ARKTRACE_RUST_XCFRAMEWORK="$(python3 -c 'import json; print(json.load(open("sdk-artifact.json"))["xcframework"])')"
-          python3 scripts/test_native_sdk_cache.py --cache-root "${{ runner.temp }}/arktrace-sdk-cache-contract" > sdk-cache-contract.json
-          python3 scripts/test_macos_rust_sdk.py --build-only > sdk-consumer.json
-          ARKTRACE_EVENT_ORACLE_CACHE_ROOT="${{ runner.temp }}/arktrace-event-reference" python3 scripts/test_macos_event_sdk.py --reference-build-only > sdk-event-reference.json
-          ARKTRACE_EVENT_ORACLE_CACHE_ROOT="${{ runner.temp }}/arktrace-density-reference" python3 scripts/test_macos_density_sdk.py --reference-build-only > sdk-density-reference.json
-          ARKTRACE_EVENT_ORACLE_CACHE_ROOT="${{ runner.temp }}/arktrace-batch-reference" python3 scripts/test_macos_batch_sdk.py --reference-build-only > sdk-batch-reference.json
-          ARKTRACE_EVENT_ORACLE_CACHE_ROOT="${{ runner.temp }}/arktrace-deadline-reference" python3 scripts/test_macos_deadline_sdk.py --reference-build-only > sdk-deadline-reference.json
-          ARKTRACE_EVENT_ORACLE_CACHE_ROOT="${{ runner.temp }}/arktrace-repository-reference" python3 scripts/test_macos_repository_sdk.py --reference-build-only > sdk-repository-reference.json
+          python3 hack/test_native_sdk_cache.py --cache-root "${{ runner.temp }}/arktrace-sdk-cache-contract" > sdk-cache-contract.json
+          python3 hack/test_macos_rust_sdk.py --build-only > sdk-consumer.json
+          ARKTRACE_EVENT_ORACLE_CACHE_ROOT="${{ runner.temp }}/arktrace-event-reference" python3 hack/test_macos_event_sdk.py --reference-build-only > sdk-event-reference.json
+          ARKTRACE_EVENT_ORACLE_CACHE_ROOT="${{ runner.temp }}/arktrace-density-reference" python3 hack/test_macos_density_sdk.py --reference-build-only > sdk-density-reference.json
+          ARKTRACE_EVENT_ORACLE_CACHE_ROOT="${{ runner.temp }}/arktrace-batch-reference" python3 hack/test_macos_batch_sdk.py --reference-build-only > sdk-batch-reference.json
+          ARKTRACE_EVENT_ORACLE_CACHE_ROOT="${{ runner.temp }}/arktrace-deadline-reference" python3 hack/test_macos_deadline_sdk.py --reference-build-only > sdk-deadline-reference.json
+          ARKTRACE_EVENT_ORACLE_CACHE_ROOT="${{ runner.temp }}/arktrace-repository-reference" python3 hack/test_macos_repository_sdk.py --reference-build-only > sdk-repository-reference.json
           echo 'SDK compile-only; real parser lifecycle/parity acceptance is a separate native gate.'
 
       - name: Upload Swift SDK compile receipts
@@ -545,7 +545,7 @@ jobs:
       - name: Install exact Rust toolchain
         run: rustup toolchain install 1.99.0 --profile minimal --component rustfmt --component clippy
       - name: Install C# consumer SDK
-        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: '8.0.x'
       - name: Set external Cargo cache
@@ -555,24 +555,24 @@ jobs:
         # Bash propagates every native command failure in these multi-command steps.
         shell: bash
         run: |
-          python scripts/run-cargo.py fmt --all -- --check
-          python scripts/verify_migration_contracts.py
-          python scripts/test_migration_contracts.py
-          python scripts/verify_rust_workspace.py
-          python scripts/generate_ffi_bindings.py --check
+          python hack/run-cargo.py fmt --all -- --check
+          python hack/verify_migration_contracts.py
+          python hack/test_migration_contracts.py
+          python hack/verify_rust_workspace.py
+          python hack/generate_ffi_bindings.py --check
       - name: Build, lint and native tests
         shell: bash
         run: |
-          python scripts/run-cargo.py build --workspace
-          python scripts/run-cargo.py clippy --workspace --all-targets --all-features -- -D warnings
-          python scripts/run-cargo.py test --workspace --all-features
-          python scripts/run-cargo.py run --bin arktrace-migration-smoke
-          python scripts/test_viewer_json_roundtrip.py
-          python scripts/test_ffi_contract.py
+          python hack/run-cargo.py build --workspace
+          python hack/run-cargo.py clippy --workspace --all-targets --all-features -- -D warnings
+          python hack/run-cargo.py test --workspace --all-features
+          python hack/run-cargo.py run --bin arktrace-migration-smoke
+          python hack/test_viewer_json_roundtrip.py
+          python hack/test_ffi_contract.py
 
       - name: Windows production acceptance guard regressions
         shell: pwsh
-        run: ./scripts/Test-WindowsProductionAcceptanceContract.ps1
+        run: ./hack/Test-WindowsProductionAcceptanceContract.ps1
 
   # The single required check for branch protection. It runs always, and it
   # fails when a planned lane failed, was cancelled, or was skipped despite
@@ -651,20 +651,20 @@ jobs:
         continue-on-error: true
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ThirdParty/TraceStreamer/macx/trace_streamer
-          key: trace-streamer-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ThirdParty/TraceStreamer/macx/manifest.json', 'ThirdParty/TraceStreamer/source-lock.json', 'ThirdParty/TraceStreamer/patches/**', 'scripts/build_trace_streamer.sh', 'scripts/phase3_shell_safety.sh') }}
+          path: third_party/TraceStreamer/macx/trace_streamer
+          key: trace-streamer-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('third_party/TraceStreamer/macx/manifest.json', 'third_party/TraceStreamer/source-lock.json', 'third_party/TraceStreamer/patches/**', 'hack/build_trace_streamer.sh', 'hack/phase3_shell_safety.sh') }}
 
       - name: Download a missing approved parser
         if: steps.parser-cache.outputs.cache-hit != 'true'
         run: |
-          parser=ThirdParty/TraceStreamer/macx/trace_streamer
+          parser=third_party/TraceStreamer/macx/trace_streamer
           partial=$(mktemp "$RUNNER_TEMP/trace-streamer.XXXXXX")
           trap 'rm -f -- "$partial"' EXIT HUP INT TERM
           asset="https://github.com/ArkDeck/ArkTrace/releases/download/$TRACE_STREAMER_RELEASE_TAG/trace_streamer-macos-arm64"
           curl --proto '=https' --tlsv1.2 --location --fail --silent \
             --show-error --retry 3 --retry-all-errors \
             --output "$partial" "$asset"
-          expected=$(jq -er '.binarySHA256' ThirdParty/TraceStreamer/macx/manifest.json)
+          expected=$(jq -er '.binarySHA256' third_party/TraceStreamer/macx/manifest.json)
           actual=$(shasum -a 256 "$partial" | awk '{print $1}')
           [ "$actual" = "$expected" ] || {
             echo '::error::downloaded TraceStreamer asset differs from the committed manifest'
@@ -676,12 +676,12 @@ jobs:
 
       - name: Require the pinned parser (fail closed, no fake pass)
         run: |
-          parser=ThirdParty/TraceStreamer/macx/trace_streamer
+          parser=third_party/TraceStreamer/macx/trace_streamer
           if [ ! -x "$parser" ]; then
             echo '::error::parser cache restore/download did not produce an executable pinned TraceStreamer; refusing to record a benchmark without the real parser'
             exit 1
           fi
-          expected=$(jq -er '.binarySHA256' ThirdParty/TraceStreamer/macx/manifest.json)
+          expected=$(jq -er '.binarySHA256' third_party/TraceStreamer/macx/manifest.json)
           actual=$(shasum -a 256 "$parser" | awk '{print $1}')
           [ "$actual" = "$expected" ] || { echo '::error::parser bytes drifted from the manifest'; exit 1; }
 
@@ -690,7 +690,7 @@ jobs:
         continue-on-error: true
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ThirdParty/TraceStreamer/macx/trace_streamer
+          path: third_party/TraceStreamer/macx/trace_streamer
           key: ${{ steps.parser-cache.outputs.cache-primary-key }}
 
       # Cache only the verified fixture and its ownership marker, not the
@@ -703,10 +703,10 @@ jobs:
           path: |
             .build/phase3-fixtures/.arktrace-phase3-fixtures-v1
             .build/phase3-fixtures/pbreader.htrace
-          key: phase3-medium-fixture-${{ hashFiles('Fixtures/phase3-performance-fixtures.json') }}
+          key: phase3-medium-fixture-${{ hashFiles('test/fixtures/phase3-performance-fixtures.json') }}
 
       - name: Fetch and verify locked medium fixture
-        run: scripts/fetch_phase3_fixtures.sh
+        run: hack/fetch_phase3_fixtures.sh
 
       - name: Save locked medium fixture cache
         if: steps.fixture-cache.outputs.cache-hit != 'true'
@@ -719,7 +719,7 @@ jobs:
           key: ${{ steps.fixture-cache.outputs.cache-primary-key }}
 
       - name: Run medium benchmark
-        run: scripts/benchmark.sh phase4 medium
+        run: hack/benchmark.sh phase4 medium
 
   # Scheduled runs can fail in benchmark-slow while CI required stays green,
   # because that lane is not a merge gate. This job is the alert for that
@@ -793,4 +793,4 @@ jobs:
             *) add ci-required ;;
           esac
           export ALERT_FAILED_JOBS="$failed"
-          sh scripts/scheduled_ci_alert.sh
+          sh hack/scheduled_ci_alert.sh

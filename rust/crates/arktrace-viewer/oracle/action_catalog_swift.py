@@ -11,8 +11,8 @@ def main():
  if xcode.splitlines()[0]!='Xcode 27.0'or 'Apple Swift version 6.4 'not in swift:raise SystemExit('Xcode 27.0 / Swift 6.4 required')
  targets=['ArkTraceCore','ArkTraceParser','ArkTraceStore','ArkTraceRuntime','ArkTraceAnalysis','ArkTraceRendering','ArkTraceAppSupport']
  for target in targets:shutil.copytree(ROOT/'Sources'/target,source/'Sources'/target,dirs_exist_ok=True)
- shutil.copytree(ROOT/'scripts',source/'scripts',dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__'))
- shutil.copytree(ROOT/'Apps/ArkTraceApp',source/'Apps/ArkTraceApp',dirs_exist_ok=True)
+ shutil.copytree(ROOT/'hack',source/'hack',dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__'))
+ shutil.copytree(ROOT/'apple/Apps/ArkTraceApp',source/'apple/Apps/ArkTraceApp',dirs_exist_ok=True)
  for name in ['README.md','README.zh-CN.md']:shutil.copyfile(ROOT/name,source/name)
  testpaths=['Tests/ArkTraceAppSupportTests/ShortcutCatalogTests.swift','Tests/ArkTraceAppSupportTests/AppSource.swift','Tests/ArkTraceRenderingTests/TimelineNavigationKeyTests.swift','Tests/ArkTraceRenderingTests/TimelineAnnotationKeyTests.swift','Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift']
  for relative in testpaths:p=source/relative;p.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/relative,p)
@@ -33,13 +33,13 @@ def main():
  regressions='--regressions'in sys.argv
  selected='ShortcutCatalogTests|TimelineNavigationKeyTests.test(?!Actual)|TimelineAnnotationKeyTests|TimelineRenderingTests.testTimelineKeyboardAndVoiceOverContractUsesBoundedRealEvents|TimelineRenderingTests.testAccessibilityActionsExposeOnlyCommandsThatCanChangeState'if regressions else'ActionCatalogDisplayOracleTests|TimelineNavigationKeyTests.testActualActionCatalogKeyboardOracle'
  log=CACHE/('action-catalog-swift-regressions.log'if regressions else'action-catalog-swift-oracle.log')
- with log.open('w',encoding='utf-8')as f:code=subprocess.run(['sh','scripts/run-swiftpm.sh','test','--disable-sandbox','--config-path',str(CACHE/'configuration'),'--security-path',str(CACHE/'security'),'--filter',selected],cwd=source,env=env,stdout=f,stderr=subprocess.STDOUT).returncode
+ with log.open('w',encoding='utf-8')as f:code=subprocess.run(['sh','hack/run-swiftpm.sh','test','--disable-sandbox','--config-path',str(CACHE/'configuration'),'--security-path',str(CACHE/'security'),'--filter',selected],cwd=source,env=env,stdout=f,stderr=subprocess.STDOUT).returncode
  print('Swift exit code:',code,'log:',log)
  if code:print(log.read_text(encoding='utf-8')[-9000:]);return code
  if regressions:print(log.read_text(encoding='utf-8')[-1700:]);return 0
  def digest(p):
   data=p.read_bytes();return {'path':str(p.relative_to(ROOT))if p.is_relative_to(ROOT)else str(p),'byteCount':len(data),'sha256':hashlib.sha256(data).hexdigest()}
- paths=[p for target in targets for p in(ROOT/'Sources'/target).rglob('*.swift')]+[ROOT/p for p in testpaths]+list((ROOT/'Apps/ArkTraceApp').rglob('*.swift'))+[ROOT/'README.md',ROOT/'README.zh-CN.md',*list((CRATE/'oracle').glob('action_catalog_*')),inp,keyboard,catalog]
+ paths=[p for target in targets for p in(ROOT/'Sources'/target).rglob('*.swift')]+[ROOT/p for p in testpaths]+list((ROOT/'apple/Apps/ArkTraceApp').rglob('*.swift'))+[ROOT/'README.md',ROOT/'README.zh-CN.md',*list((CRATE/'oracle').glob('action_catalog_*')),inp,keyboard,catalog]
  result=json.loads(keyboard.read_text(encoding='utf-8'));sections=json.loads(catalog.read_text(encoding='utf-8'))['sections']
  receipt={'oracle':'Actual Swift TraceShortcutCatalog, real NSEvent + TimelineNSView.keyDown, actual next-responder forwarding, command entry recording then original handler execution','xcode':xcode.strip(),'swift':swift.strip(),'nativeKeyCases':len(result['cases']),'directCommandCases':len(result['directCommands']),'catalogSections':len(sections),'catalogRows':sum(len(s['entries'])for s in sections),'sourceDigests':[digest(p)for p in sorted(paths)],'cacheOnlyAugmentedSources':[digest(view),digest(test),digest(display),digest(source/'Package.swift')],'copiedExpectedRoutingAlgorithms':False,'scopeFocusTextIMEProof':False,'searchResultsNativeKeyProof':False}
  (CRATE/'tests/fixtures/action-catalog-swift-receipt.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');print(receipt['nativeKeyCases'],'native inputs',receipt['directCommandCases'],'direct commands',receipt['catalogRows'],'catalog rows');return 0

@@ -223,7 +223,7 @@ fn drain_cancels_queued_documents_and_unwind_drops_their_owned_credits() {
 fn backup_root_is_fixed_disjoint_and_requires_persistent_storage() {
     let metadata = crate::CacheMetadata::decode(include_bytes!(concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/../../../contracts/ready-metadata.json"
+        "/../../../api/ready-metadata.json"
     )))
     .unwrap();
     let mut configuration = RuntimeConfiguration::new(

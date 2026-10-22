@@ -1,0 +1,37 @@
+name: Feature request
+description: A product change that is not a vulnerability
+title: "request: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the journey you need. Product behavior is specified in
+        docs/design/SPECIFICATION.md. See CONTRIBUTING.md before opening a pull request.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Who is blocked, and what they cannot do today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: The behavior you want, including what must stay impossible.
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Surface
+      options:
+        - macOS app
+        - CLI
+        - Windows CLI
+        - Capture
+        - Docs
+        - Other
+    validations:
+      required: true

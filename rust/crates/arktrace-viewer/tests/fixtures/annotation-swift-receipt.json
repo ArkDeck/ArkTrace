@@ -7,12 +7,12 @@
   "actions": 674,
   "sourceDigests": [
     {
-      "path": "Apps/ArkTraceApp/Inspector/AnnotationInspectorView.swift",
+      "path": "apple/Apps/ArkTraceApp/Inspector/AnnotationInspectorView.swift",
       "byteCount": 2848,
       "sha256": "a2d2765aecbe794ec7b385a5ec6a5f6042b461a6caf7544a91f33555e2dadf02"
     },
     {
-      "path": "Apps/ArkTraceApp/Viewer/TraceTimelinePane.swift",
+      "path": "apple/Apps/ArkTraceApp/Viewer/TraceTimelinePane.swift",
       "byteCount": 11722,
       "sha256": "9b0cddea6df19d028358284aae93ee52285de35aaaf206e7300cb860f2ae6275"
     },
@@ -123,8 +123,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
-      "byteCount": 375,
-      "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2"
+      "byteCount": 381,
+      "sha256": "10734224b0b15b736c7620623ef7a7591ec59913912097b951df4224eaa162ee"
     },
     {
       "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
@@ -203,13 +203,13 @@
     },
     {
       "path": "Sources/ArkTraceParser/TraceStreamerManifest.swift",
-      "byteCount": 11624,
-      "sha256": "5dd5b227954141de5e92a49c1ab632114f780a364d5476479debf0c1b6e70866"
+      "byteCount": 11621,
+      "sha256": "f5f4f9a5ca29ec2c8cdd1e7223b86b52d6957b0491259f55d6a8f00cf690c898"
     },
     {
       "path": "Sources/ArkTraceParser/TraceStreamerProcessParser.swift",
       "byteCount": 79370,
-      "sha256": "6ea3b715384ec1083727c216c84e3c08eb9d2d77c796e866ad0b9eb87f960a84"
+      "sha256": "69715c8e7c43bc630273ef3d305a5b4023164a4164d7426a8594e46ff5d3d419"
     },
     {
       "path": "Sources/ArkTraceParser/TraceStreamerProgressScanner.swift",
@@ -228,8 +228,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
-      "byteCount": 29092,
-      "sha256": "f192c466dea365b053f35e1fd24413c1ef656abc00cdb07653821bb31cf89197"
+      "byteCount": 29086,
+      "sha256": "10d43f4808a4f02178618cba8cf7c660a668bc463cf2c9b688714b23a59f64cc"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
@@ -333,8 +333,8 @@
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/annotation_swift.py",
-      "byteCount": 6560,
-      "sha256": "1fe9cb8173cf474a30c0d3368ef26f4fa0bf9b63a869ec6903ad5d2127a011b5"
+      "byteCount": 6563,
+      "sha256": "7d8bd7588f95ea3cbd6a17a9624bfe0c1c1df071a7bca075b9cf0ca769d4c6e5"
     },
     {
       "path": "rust/crates/arktrace-viewer/tests/fixtures/annotation-inputs.json",
@@ -365,7 +365,7 @@
     }
   ],
   "deferredRenameCompiledOriginalBlock": {
-    "source": "Apps/ArkTraceApp/Viewer/TraceTimelinePane.swift",
+    "source": "apple/Apps/ArkTraceApp/Viewer/TraceTimelinePane.swift",
     "utf8": "                                        guard selection.sessionID == controller.annotationSessionID else { return }\n                                        controller.updateFlag(id: flag.id, label: label)",
     "sha256": "c0a4c4311054ce410f4e92ea08971a9e8edc83e4a88c39d7a94f581ae5119ad5"
   },

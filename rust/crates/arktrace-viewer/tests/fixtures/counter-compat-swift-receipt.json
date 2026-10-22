@@ -10,8 +10,8 @@
   "sourceDigests": [
     {
       "path": "Package.swift",
-      "byteCount": 10778,
-      "sha256": "1b8bb2f2ac8db595f76bf060ee7cd21f8140eb0ebea04852114940c52d79b20f"
+      "byteCount": 10782,
+      "sha256": "8e4a038790925236d2443a11e4805d2d42fa4e9afcc659ceef18f1b62a4ac65e"
     },
     {
       "path": "Sources/ArkTraceAppSupport/AppDistribution.swift",
@@ -95,8 +95,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
-      "byteCount": 375,
-      "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2"
+      "byteCount": 381,
+      "sha256": "10734224b0b15b736c7620623ef7a7591ec59913912097b951df4224eaa162ee"
     },
     {
       "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
@@ -185,8 +185,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
-      "byteCount": 29092,
-      "sha256": "f192c466dea365b053f35e1fd24413c1ef656abc00cdb07653821bb31cf89197"
+      "byteCount": 29086,
+      "sha256": "10d43f4808a4f02178618cba8cf7c660a668bc463cf2c9b688714b23a59f64cc"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
@@ -333,7 +333,7 @@
   "commandReceipt": {
     "command": [
       "sh",
-      "scripts/run-swiftpm.sh",
+      "hack/run-swiftpm.sh",
       "test",
       "--disable-sandbox",
       "--config-path",

@@ -8,11 +8,11 @@ in `Cargo.lock` and checked against `dependency-licenses.json`.
 Run from the repository root:
 
 ```sh
-python3 scripts/run-cargo.py build --workspace
-python3 scripts/run-cargo.py test --workspace --all-features
-python3 scripts/run-cargo.py clippy --workspace --all-targets --all-features -- -D warnings
-python3 scripts/run-cargo.py fmt --all -- --check
-python3 scripts/verify_rust_workspace.py
+python3 hack/run-cargo.py build --workspace
+python3 hack/run-cargo.py test --workspace --all-features
+python3 hack/run-cargo.py clippy --workspace --all-targets --all-features -- -D warnings
+python3 hack/run-cargo.py fmt --all -- --check
+python3 hack/verify_rust_workspace.py
 ```
 
 The runner owns a stable source mirror, serialized invocation, target and
@@ -57,8 +57,8 @@ query views and five commands,
 production signing/distribution, launch recovery and SDK/App/ArkDeck are unfinished.
 
 ```sh
-python3 scripts/test_macos_rust_cli.py
-python3 scripts/build_macos_rust_cli_candidate.py --development --output /private/tmp/ArkTraceRustCLI.app
+python3 hack/test_macos_rust_cli.py
+python3 hack/build_macos_rust_cli_candidate.py --development --output /private/tmp/ArkTraceRustCLI.app
 ```
 
 See [packaged CLI evidence](../docs/migration-runs/AT-RUST-010-2026-10-03-packaged-cli.md).
@@ -115,7 +115,7 @@ failure/next-request checks. Run the native harness with an explicitly built
 Swift CLI:
 
 ```sh
-python3 scripts/test_macos_event_queries.py --swift-cli /absolute/path/to/arktrace
+python3 hack/test_macos_event_queries.py --swift-cli /absolute/path/to/arktrace
 ```
 
 The harness requires Xcode 27, fixed parser bytes and actual macOS arm64. See
@@ -195,7 +195,7 @@ result lifetime and resource cleanup checks. SDK/App integration and complete
 presentation/acceptance remain open.
 
 ```sh
-python3 scripts/test_macos_viewer_owner.py
+python3 hack/test_macos_viewer_owner.py
 ```
 
 See [scoped owner evidence](../docs/migration-runs/AT-RUST-011-2026-10-04-scoped-owner.md).
@@ -214,7 +214,7 @@ inspector contents, palette/jank facts, tree/navigation/annotations, persistent
 cache and SDK/App/release/performance gates remain incomplete.
 
 ```sh
-python3 scripts/test_macos_viewport_owner.py
+python3 hack/test_macos_viewport_owner.py
 ```
 
 See [viewport owner evidence](../docs/migration-runs/AT-RUST-011-2026-10-04-viewport-owner.md).
@@ -252,10 +252,10 @@ is retained; current checks are in the
 [named/hot record](../docs/migration-runs/AT-RUST-007-009-2026-10-03-named-hot.md).
 
 ```sh
-python3 scripts/test_macos_bounded_analysis.py --swift-cli /absolute/path/to/arktrace
-python3 scripts/test_macos_slice_queries.py --swift-cli /absolute/path/to/arktrace
-python3 scripts/test_macos_rust_cli.py --swift-cli /absolute/path/to/arktrace --named-oracle docs/migration-runs/AT-RUST-010-2026-10-03-named-cli.json
-python3 scripts/verify_analysis_oracles.py
+python3 hack/test_macos_bounded_analysis.py --swift-cli /absolute/path/to/arktrace
+python3 hack/test_macos_slice_queries.py --swift-cli /absolute/path/to/arktrace
+python3 hack/test_macos_rust_cli.py --swift-cli /absolute/path/to/arktrace --named-oracle docs/migration-runs/AT-RUST-010-2026-10-03-named-cli.json
+python3 hack/verify_analysis_oracles.py
 ```
 
 `arktrace-engine::open_no_cache` now composes verified tools, owned source
@@ -338,7 +338,7 @@ Real cross-volume/ENOSPC and ownership-disabled rejection are exercised on a
 disposable APFS image on macOS 27. This gate needs native DiskManagement access:
 
 ```sh
-python3 scripts/test_macos_file_volumes.py
+python3 hack/test_macos_file_volumes.py
 ```
 
 Real parser exports, read-only source copies, permissions, raw-input hashes and
@@ -346,8 +346,8 @@ SQLite `quick_check` are checked separately using the fixed local parser and
 three actual small fixtures (no DiskManagement requirement):
 
 ```sh
-python3 scripts/test_macos_parser_process.py
-python3 scripts/test_macos_directory_commands.py
+python3 hack/test_macos_parser_process.py
+python3 hack/test_macos_directory_commands.py
 ```
 
 This probe also verifies typed DB/sidecar budget failures with the real fixed

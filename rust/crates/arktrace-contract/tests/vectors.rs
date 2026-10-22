@@ -6,10 +6,8 @@ use serde_json::{Value, json};
 
 #[test]
 fn swift_time_contract_vectors() {
-    let corpus: Value = serde_json::from_str(include_str!(
-        "../../../../contracts/time-range-vectors.json"
-    ))
-    .unwrap();
+    let corpus: Value =
+        serde_json::from_str(include_str!("../../../../api/time-range-vectors.json")).unwrap();
     for vector in corpus["vectors"].as_array().unwrap() {
         let event = &vector["event"];
         let query = &vector["query"];
@@ -48,7 +46,7 @@ fn swift_time_contract_vectors() {
 #[test]
 fn swift_quality_contract_vectors() {
     let corpus: Value =
-        serde_json::from_str(include_str!("../../../../contracts/quality-vectors.json")).unwrap();
+        serde_json::from_str(include_str!("../../../../api/quality-vectors.json")).unwrap();
     for vector in corpus["vectors"].as_array().unwrap() {
         let input: QualityIssue = serde_json::from_value(vector["issue"].clone()).unwrap();
         let machine = input.into_machine();
@@ -113,10 +111,8 @@ fn machine_quality_is_closed_bounded_and_sorted() {
 
 #[test]
 fn swift_cache_key_and_lease_protocol_vectors() {
-    let corpus: Value = serde_json::from_str(include_str!(
-        "../../../../contracts/cache-lease-vectors.json"
-    ))
-    .unwrap();
+    let corpus: Value =
+        serde_json::from_str(include_str!("../../../../api/cache-lease-vectors.json")).unwrap();
     assert_eq!(
         corpus["protocol"]["windows"]["offsetDecimal"],
         WINDOWS_LEASE_OFFSET.to_string()

@@ -1,0 +1,7 @@
+# ArkTrace CODEOWNERS.
+#
+# A merge to protected main needs an approving review from the human
+# maintainer. Automation and agents are never listed here.
+#
+# Every path:
+* @lvye
