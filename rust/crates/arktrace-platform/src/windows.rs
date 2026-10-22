@@ -7,7 +7,7 @@
 //! user and the DACL grants nobody else anything, except the principals that
 //! hold root's place (SYSTEM, Administrators, TrustedInstaller). Leases are
 //! `LockFileEx` on one byte at offset 2^64-2 of the lease file, the lock byte
-//! shared with the ArkDeck purger (docs/RUST_CORE_MIGRATION_DESIGN.md).
+//! shared with the ArkDeck purger (docs/archive/RUST_CORE_MIGRATION_DESIGN.md).
 //! Primitives adapted from ArkDeck `arkdeck-platform/src/windows/host_fs.rs`
 //! and `identity.rs` (MIT, same organization).
 use crate::{HostError, HostOperation, IoBudget};

@@ -4,7 +4,7 @@
 This is a development candidate, not a signed distribution (AT-RUST-016 packages
 the release). It is built with the `development-resources` feature, so every image
 is pinned by its whole SHA-256 only. The layout is the closed Windows installation
-layout documented in docs/CLI.md:
+layout documented in docs/guides/CLI.md:
 
     <output>/arktrace.exe
     <output>/resources/ArkTraceRust/runtime.json

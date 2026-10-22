@@ -225,7 +225,7 @@ P4-T01 和 P4-T02 可以并行。
 
 1. query/context/analyze 全命令 golden：success/empty/truncated/error；
 2. real trace integration、determinism、privacy、no-raw-SQL negative tests；
-3. docs/CLI.md 补 query/context/analyze examples、JSON schemas，以及 Agent 可问的问题、limits、capabilities、provenance、错误恢复；不新增独立 AGENT_CONTRACT.md；
+3. docs/guides/CLI.md 补 query/context/analyze examples、JSON schemas，以及 Agent 可问的问题、limits、capabilities、provenance、错误恢复；不新增独立 AGENT_CONTRACT.md；
 4. scripts/test_phase4.sh 运行 Phase 1–4 gate；
 5. benchmark output 纳入 scripts/benchmark.sh。
 

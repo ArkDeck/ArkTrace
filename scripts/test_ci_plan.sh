@@ -41,8 +41,8 @@ expect "dependabot config skips every compile lane" "$docs_only" \
     '.github/dependabot.yml'
 
 expect "docs-only change skips every compile lane" "$docs_only" \
-    'docs/DESIGN.md
-docs/SPECIFICATION.md'
+    'docs/design/DESIGN.md
+docs/design/SPECIFICATION.md'
 
 expect "README change selects the SwiftPM lane (shortcut tables are asserted)" \
     'lane_swiftpm=true
@@ -140,7 +140,7 @@ expect "phase6 scenario doc feeds the phase6 gate" \
     'lane_swiftpm=false
 lane_app=false
 lane_contracts=true' \
-    'docs/PHASE_6_SCENARIO.md'
+    'docs/archive/PHASE_6_SCENARIO.md'
 
 expect "workflow change fails closed to every lane" "$all_lanes" \
     '.github/workflows/ci.yml'

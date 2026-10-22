@@ -9,7 +9,7 @@
 - [x] Phase 2 CLI/Runtime/Cache/JSON contract 稳定；
 - [x] real trace 可经共享 Runtime 打开；
 - [x] P1-T05 已引入并验证至少包含非零 CPU scheduling 和 named slice 行的可再分发 fixture；
-- [x] App 分发形态、Sandbox、Developer ID/App Store、Intel 支持形成待独立 review 的决策候选，见 [APP_DISTRIBUTION.md](./APP_DISTRIBUTION.md)；
+- [x] App 分发形态、Sandbox、Developer ID/App Store、Intel 支持形成待独立 review 的决策候选，见 [APP_DISTRIBUTION.md](../guides/APP_DISTRIBUTION.md)；
 - [x] DESIGN §25.11 的无障碍决策候选保留当前 0.1 硬门，未降低 SPEC/DoD；
 
 ## 2. 阶段输出

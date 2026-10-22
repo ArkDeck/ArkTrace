@@ -7,9 +7,9 @@
 ## 安装与构建
 
 需要 Apple silicon Mac、Swift 6、`jq`，以及按
-[TRACE_STREAMER.md](./TRACE_STREAMER.md) 构建的 pinned arm64 TraceStreamer：
+[TRACE_STREAMER.md](../design/TRACE_STREAMER.md) 构建的 pinned arm64 TraceStreamer：
 
-完整安装单位是 [CLI_DISTRIBUTION.md](./CLI_DISTRIBUTION.md) 定义的签名、notarized
+完整安装单位是 [CLI_DISTRIBUTION.md](CLI_DISTRIBUTION.md) 定义的签名、notarized
 `ArkTraceCLI.app`；生产和 ArkDeck 均直接执行其 `Contents/MacOS/arktrace`。构建候选使用：
 
 ```bash

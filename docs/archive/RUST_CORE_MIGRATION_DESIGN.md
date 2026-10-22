@@ -66,24 +66,24 @@ capture/inspect/export 对等、Viewer 后置，因此 Windows Viewer 不是 Ark
 表外还有两类迁移面：`Apps/ArkTraceApp/`（43 个 Swift 文件 / 3,182 行，另含 xcstrings、
 Assets）保留为 macOS 原生 UI；`Tests/` 的 44 个文件 / 29,633 行是 001 提取行为向量的主要来源。
 
-依赖事实源为 [Package.swift](../Package.swift)。对外 API 已有独立包的
-[编译基线](../scripts/api-baseline/Sources/ArkTraceAPIBaseline/APIBaseline.swift)，
+依赖事实源为 [Package.swift](../../Package.swift)。对外 API 已有独立包的
+[编译基线](../../scripts/api-baseline/Sources/ArkTraceAPIBaseline/APIBaseline.swift)，
 不能因为符号在本仓“看似无人使用”就删除。
 
 ### 2.2 本次迁移必须解决的实际缺口
 
 | 缺口 | 已核对事实 | 迁移处理 |
 |---|---|---|
-| Windows parser | 仅有 [macx manifest](../ThirdParty/TraceStreamer/macx/manifest.json)，arm64、上游 `447a0a49…`、4.3.7；无仓内 Windows 可审查发行包 | 早期完成 Windows x64 构建与语义比对，不能等 UI 做完 |
+| Windows parser | 仅有 [macx manifest](../../ThirdParty/TraceStreamer/macx/manifest.json)，arm64、上游 `447a0a49…`、4.3.7；无仓内 Windows 可审查发行包 | 早期完成 Windows x64 构建与语义比对，不能等 UI 做完 |
 | Apple 平台绑定 | Darwin、MachO、CryptoKit、OSLog、CoreGraphics；CLI doctor/identity 与签名布局也受平台约束 | 明确 port，不靠扩大 `cfg` 或禁用校验完成移植 |
 | ArkDeck loader | Rust loader/trust/doctor 只在 macOS 编译：校验 product `0.1.0`/build `1`、arm64、bundle id、JSON contract 1.0、`ArkTraceCLI.app` 布局、Developer ID + 公证 + staple、CDHash，tree digest 含 POSIX mode；Windows daemon 一旦设置 `ARKDECK_ARKTRACE_DESCRIPTOR` 即拒绝启动，且 Windows 没有 `runtime service install/update` | Windows 发行契约、loader 与 descriptor 选择方式都是 ArkDeck 侧独立交付；macOS 新版本号同样要 loader 放行 |
 | ArkDeck inspect | Rust `HostServices::trace_inspection` 只有默认实现，对所有请求答 `operationUnavailable`；2026-09-25 裁定：G5 内保持拒绝 (c)，之后走 (b) 由已加载的 reviewed CLI 回答，(a) 在 ArkDeck 内重写解析被否决 | 017/018 经 CLI `inspect --json` 接入，含 handler、`resourceNotFound` 帧、schema 扩展、成功与拒绝路径 |
-| 质量事实转换 | [TraceOfflineInspectionService](../Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift) 因 `issue.message != nil` 拒绝整个结果；ArkDeck 裁定这是 ArkTrace 缺陷，CLI Machine 契约已在边界丢弃 message | 不等 Rust：现行 Swift 先在边界丢弃自由文本、继续校验 category/scope/count（001）；Rust 继承修正后行为，修正前后各留向量 |
+| 质量事实转换 | [TraceOfflineInspectionService](../../Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift) 因 `issue.message != nil` 拒绝整个结果；ArkDeck 裁定这是 ArkTrace 缺陷，CLI Machine 契约已在边界丢弃 message | 不等 Rust：现行 Swift 先在边界丢弃自由文本、继续校验 category/scope/count（001）；Rust 继承修正后行为，修正前后各留向量 |
 | 版本错配 | ArkDeck 链接 ArkTrace `9172c952…`，其 manifest 只接受 recipe `a2e47752…`；ArkDeck 不 pin CLI revision、只 pin 合同，现有 reviewed CLI 构建于落后 74 个提交的 `61d0f2ae…`，携带 recipe `e4fec8cc…`；ArkDeck App 另自带 recipe `a2e47752…` 的 parser | 维护者从 ArkDeck 链接的 revision 重新发布 reviewed distribution（(b) 的另一前置）；兼容记录同时覆盖 engine、SDK、CLI 与各产品自带 parser，不沿用旧 PASS |
 | 两类下游消费者 | ArkDeck daemon 经 descriptor 消费 CLI（`summary`/`context`/`analyze`，固定 `--json --no-cache` 与预算）；ArkDeck macOS App 直接 import Core/Analysis/AppSupport/Rendering（Runtime 经 `ArkDeckTraceAdapter`），以 `signedBundleInPlace` 原位执行自带 parser | CLI 接入和 Swift SDK 接入分别验收 |
 | ArkDeck 现有 Rust 移植 | ArkDeck daemon 已移植 distribution loader/trust/doctor、summary 与 analysis envelope validator、三个 provenance 常量，以及 purge-only 的 cache 维护（macOS 根在 App 容器，Windows 根为 `%LOCALAPPDATA%\ArkDeck\Trace`，`LockFileEx` 锁 `u64::MAX-1` 一个字节） | 这些是 ArkTrace CLI、manifest、Machine JSON 与 cache 格式的第二个消费实现；任何格式变化与 ArkDeck 对应移植同批验证 |
 | Windows 采集 | ArkDeck Windows HDC tuple 为空（CHG-2026-078 仍为 proposed），managed HDC 与 USB mapping 未闭合；其 XPA-021 还要求 Windows 主机 + DAYU200 并依赖 XPA-020 | 属 ArkDeck 设备通路；本仓离线迁移不依赖它也不绕过它；capture/inspect/export 对等仍是 ArkDeck 自己的验收门 |
-| 标注与缓存耦合 | [view-state.json](../Sources/ArkTraceAppSupport/TraceViewStateStore.swift) 放在 parser-key 对应 cache entry 中，按 AT-APP-004 随该 entry 回收 | 换实现、parser hash 或 cache root 会使旧标注不可见；切换前必须备份并导入（§9），不能以清缓存代替迁移 |
+| 标注与缓存耦合 | [view-state.json](../../Sources/ArkTraceAppSupport/TraceViewStateStore.swift) 放在 parser-key 对应 cache entry 中，按 AT-APP-004 随该 entry 回收 | 换实现、parser hash 或 cache root 会使旧标注不可见；切换前必须备份并导入（§9），不能以清缓存代替迁移 |
 
 ### 2.3 如何参考 ArkDeck
 
@@ -103,7 +103,7 @@ Assets）保留为 macOS 原生 UI；`Tests/` 的 44 个文件 / 29,633 行是 0
 
 ArkDeck Runtime 的唯一设备 authority、Capability、HDC 注册、durable Job journal 等
 是设备执行产品的边界。ArkTrace 的离线 Session 不接管这些概念；本仓 GUI Capture
-继续遵守 [CAPTURE.md](CAPTURE.md) 的显式用户操作边界。
+继续遵守 [CAPTURE.md](../design/CAPTURE.md) 的显式用户操作边界。
 设备相关集成验证由 ArkDeck 已发布 typed operation 完成，迁移测试不会调用 raw HDC 代替它。
 
 ## 3. 架构选择
@@ -222,7 +222,7 @@ CLI Machine JSON `1.0`、CLI argv、SDK API、FFI ABI、cache schema、distribut
 引入自己的明确版本。接口不兼容时先显式拒绝，不能静默协商到另一份语义。
 
 parser adapter `1`、schema adapter `2`、index schema `3` 既参与 cache key，也被 ArkDeck 以
-源码常量逐字比对 Machine JSON 的 `provenance`（[ARKDECK_INTEGRATION](ARKDECK_INTEGRATION.md)
+源码常量逐字比对 Machine JSON 的 `provenance`（[ARKDECK_INTEGRATION](../guides/ARKDECK_INTEGRATION.md)
 “Schema versions are a release coupling”）。Rust Store 只在 schema/索引语义确实变化时 bump，
 并与 ArkDeck 的对应改动同批发布；否则旧 pin 会在 Job 准入后才以 `analyzer.schemaMismatch` 失败。
 
@@ -294,7 +294,7 @@ schema、禁用 mmap、有限 schema/row/VM 工作与同一请求 cancellation/d
 已移植 schema fingerprint v2、affinity、严格 INTEGER/range/required relationship、optional counter
 source、clock-epoch correction 和 structured quality probes。三份实际 small 的上述机器事实与 Swift
 oracle T0 一致。初始校验的证据和范围见
-[006 Store 记录](migration-runs/AT-RUST-006-2026-10-03-store-validation.md)。
+[006 Store 记录](../migration-runs/AT-RUST-006-2026-10-03-store-validation.md)。
 
 索引准备现以独立 0600 candidate 执行，NativePlatform 在任何 SQL 之前直接读取 pinned SQLite
 FILESTAT metadata，fstat 比较实际 SQLite FD 的 device/inode，拒绝恢复正确路径仍持有外来 inode
@@ -303,14 +303,14 @@ FILESTAT metadata，fstat 比较实际 SQLite FD 的 device/inode，拒绝恢复
 用 page-count/file-byte bounds、私有事务、取消/截止时间完成 bootstrap/schema/余下 indexes，
 验证列序、collation、unique、partial 和 ascending key，恢复 DELETE 后关闭 SQLite，再以 0400
 封存并独立 hash。真实三份 small 各 24 条正确索引，复开语义仍 T0。此处尚无 metadata/entry
-lease 的产品 Ready；证据见 [006 索引记录](migration-runs/AT-RUST-006-2026-10-03-index-preparation.md)。
+lease 的产品 Ready；证据见 [006 索引记录](../migration-runs/AT-RUST-006-2026-10-03-index-preparation.md)。
 
 后续 Engine no-cache 子项将真实 export、索引和现有 format-1 metadata 接到原子 ephemeral
 Ready；复开全部索引/metadata、文件模式和身份通过后才返回 session。每次 no-cache 打开使用
 独立 publication name 和 fresh exclusive lease；显式 close 只移除自己的 Ready/owner/lease，
 Drop 保留证据。它不构成 persistent cache 的 shared-reader/eviction 协议。三份实际 small、
 两个同时存活的同源 session 和 10 个负例见
-[Engine no-cache 记录](migration-runs/AT-RUST-006-2026-10-03-engine-no-cache.md)。
+[Engine no-cache 记录](../migration-runs/AT-RUST-006-2026-10-03-engine-no-cache.md)。
 metadata 字段/UTC ISO 8601 通过 Swift/Rust codec 回归，owner format 2 仍隔离。固定 zlib 的
 `ts_tmp/unzlib_file.txt` 按 exact membership/private mode/byte budget 在进程清理后验证；
 该已知辅助文件现也在执行/进程组清理期间接受监督，nested parents 保持 held/no-follow/private
@@ -320,10 +320,10 @@ aggregate/quota 或任意 undeclared file 的执行期治理。
 按 key→entry→owner 顺序无等待取得现有锁，复核 metadata snapshot/完整 owner record/dev-inode。
 active、invalid metadata 和 unresolved proof 保留；移动的自有目录按身份回收，外来替换保留。
 真实 Engine SIGKILL 的 OpeningDatabase/Ready notification/returned-session 三个窗口通过，见
-[辅助输出与 Ready 回收记录](migration-runs/AT-RUST-005-006-2026-10-03-scratch-ready-recovery.md)。
+[辅助输出与 Ready 回收记录](../migration-runs/AT-RUST-005-006-2026-10-03-scratch-ready-recovery.md)。
 rename 到 owner registration 之间、disposal 中断/orphan lease、其它 fault windows 和产品接入
 仍未通过；这不构成 persistent cache eviction 或 legacy Swift recovery。
-随后 [绑定 owner 与发布/清理故障记录](migration-runs/AT-RUST-006-2026-10-03-bound-owner.md)
+随后 [绑定 owner 与发布/清理故障记录](../migration-runs/AT-RUST-006-2026-10-03-bound-owner.md)
 补充 format-3 key/session/lease identity、rename 前 durable Publishing intent 和 Removed tombstone
 到 lease unlink/owner proof 删除的顺序。真实 12 个 Engine SIGKILL 窗口中 11 个回收，rmdir 到
 Removed 落盘之间保留 identity-unresolved proof 与已绑定 lease。fresh lease allocation 到 bind
@@ -337,7 +337,7 @@ NoCacheSession 在 owner disposal 前 checked-close SQLite。共享 CLI composit
 processes/threads 生成 bounded Machine JSON 1.0，close 成功后才返回完整 bytes；三份真实
 small 九份输出仅实际 executable SHA 与已知 C++ DB digest 变化允许 T1，其余事实 T0。
 它尚未接到生产 argv/resource/signal/error route，也不构成所有 typed queries/完整 CLI/SDK
-或 App 替换。证据见 [007/010 记录](migration-runs/AT-RUST-007-010-2026-10-03-directory-commands.md)。
+或 App 替换。证据见 [007/010 记录](../migration-runs/AT-RUST-007-010-2026-10-03-directory-commands.md)。
 
 当前 Ready reader 在首次 open 完整执行 quick_check、schema 与索引校验。后续 Session
 preflight 和 request-scoped worker 只复用该 reader 所持同一个不可变文件的 inspection；worker
@@ -349,8 +349,8 @@ Density 在一条 SQL 内流式折叠全部匹配行，只保留固定 bucket �
 statement 使用独立固定 50,000,000-step 上限；普通查询、schema 和 density identity lookups
 继续使用原额度。statement 不分段重置 credit，查询 deadline、取消和 decoded byte credit
 同时生效，达到任何上限即失败，不发布部分聚合。索引 schema 4 与真实 medium 验证见
-[medium 记录](migration-runs/AT-RUST-007-013-2026-10-06-medium-queries.md)，large 的诊断与
-实际 GUI 结果见[本轮记录](migration-runs/AT-RUST-006-007-013-2026-10-06-real-large-gui.md)。
+[medium 记录](../migration-runs/AT-RUST-007-013-2026-10-06-medium-queries.md)，large 的诊断与
+实际 GUI 结果见[本轮记录](../migration-runs/AT-RUST-006-007-013-2026-10-06-real-large-gui.md)。
 Engine/FFI 的共享默认 database ceiling 为 4 GiB，容纳真实 large 的 2.214 GB indexed
 Ready；source ceiling 仍为 2 GiB。仅 standalone bundled App 的打开默认期限为 300 s，
 generic SDK 仍为 60 s；交互 query 默认 30 s。结构 quick_check 的独立 work credit 按
@@ -440,14 +440,14 @@ macOS 端口原型使用专用 `arktrace-host-process` 监督 parser：Engine �
 初始挂起核验窗口由 Darwin 孤儿挂起组的 SIGHUP/SIGCONT 处置覆盖：spawn 显式重置默认 SIGHUP、
 清空 mask，原生测试证明继承 session 与新建无终端 session 中宿主 SIGKILL 后 helper 未执行入口。
 005 仍需其它 spawn/取消/fault 窗口、sealed bundle 原位执行、沙箱与签名 gate。证据见
-[005 macOS 记录](migration-runs/AT-RUST-005-2026-10-03-macos.md)。
+[005 macOS 记录](../migration-runs/AT-RUST-005-2026-10-03-macos.md)。
 新增目录发布与初始挂起窗口证据见
-[004/005 后续记录](migration-runs/AT-RUST-004-005-2026-10-03-publication-bootstrap.md)。
+[004/005 后续记录](../migration-runs/AT-RUST-004-005-2026-10-03-publication-bootstrap.md)。
 输出文件预算后续已加入：最多 16 个相对 CWD 的 fresh component，按文件设 byte limit，
 保留首次出现的 FD/identity 并检查权限/链接/替换；解析期间、TERM/grace drain 与进程组清理完成后
 均检查预算。stdout/stderr 的清理阶段超量也不能返回成功。该轮询端口拒绝超量结果，不是磁盘硬配额，
 未声明文件和 crash owner 回收仍需 parser/Engine 策略。实际 pinned parser 的正常与 budget 负例见
-[005 输出预算记录](migration-runs/AT-RUST-005-2026-10-03-output-budgets.md)。
+[005 输出预算记录](../migration-runs/AT-RUST-005-2026-10-03-output-budgets.md)。
 
 Windows reparse point 不等于链接：symlink/junction 沿用“显式输入解析一次、内部路径拒绝”；
 OneDrive 云文件占位符、重复数据删除等非链接 tag 既不能笼统按链接拒绝，也不能静默跟随。显式输入
@@ -462,7 +462,7 @@ validation → indexes → metadata → 同卷 Ready 发布。失败与取消清
 复制为私有只读快照再执行）与 `signedBundleInPlace`（沙箱签名 App 只能原位执行 sealed bundle 内的
 helper，身份由签名与封印保证）。Windows 的 MSIX 安装目录只读，对应原位执行；ZIP 形态沿用快照或持有
 handle 的原位执行，二者都必须执行已核验的同一 bytes。parser 子进程只获得固定最小 environment
-（[APP_DISTRIBUTION](APP_DISTRIBUTION.md)）；Windows 另须限定 DLL 搜索目录，CWD、PATH 与用户可写目录
+（[APP_DISTRIBUTION](../guides/APP_DISTRIBUTION.md)）；Windows 另须限定 DLL 搜索目录，CWD、PATH 与用户可写目录
 不得参与加载。
 
 cache miss 时现有实现把 source 分块完整复制为 session 私有只读快照（未用 clonefile），再按该快照
@@ -502,7 +502,7 @@ quarantine/removing/removed 分别记录回收事务，按 held parents/no-follo
 目录已删、removed tombstone 尚未落盘的 crash 窗口保留 identity proof；它不伪装成已完成回收。
 v2 不兼容旧 format-1 owner reader；017 的真实 purger 对等与 entry lease 协调完成前，不交给旧维护端。
 此登记证明目录所有权，不替代 006 的 schema/index/metadata/Ready handoff，见
-[004 owner 原生记录](migration-runs/AT-RUST-004-2026-10-03-owner-recovery.md)。
+[004 owner 原生记录](../migration-runs/AT-RUST-004-2026-10-03-owner-recovery.md)。
 
 后续 format 3 仅升级已绑定的 ephemeral entry owner：原五字段加 `ephemeral`，其 closed 四字段
 为 keyIdentifier、sessionIdentifier、leaseDevice、leaseInode。4 KiB 和遍历边界不变，Native
@@ -529,14 +529,14 @@ hash/byte count、metadata、readonly database、quick-check/schema/index。last
 原子更新属于 bookkeeping；session 每次查询重读当前 metadata 并校验全部不可变字段，
 更新访问时间不撤销已有 session 的 DB FD/shared lease。预算、IO 和 cleanup 失败不充当
 损坏证据。实际原始 zlib trace、SDK cold/warm/并发/重启及原 Core 协议回归见
-[缓存 session 记录](migration-runs/AT-RUST-008-012-2026-10-05-persistent-session.md)。
+[缓存 session 记录](../migration-runs/AT-RUST-008-012-2026-10-05-persistent-session.md)。
 2026-10-05 后续增量提供固定 held root 的有界 inventory、LRU maintain 与 purge-unused。
 删除要求 key EX→stable entry EX→exact owner EX，重读 metadata 和目录 identity；先持久化
 Removing，再 rename/删除。意图后的取消用独立五秒 cleanup budget drain 当前事务，最后仍
 返回取消；取消不等于没有 mutation。Removing/Removed 且原目录已不存在时，只在相同 lease
 authority 下回收精确 ledger/marker；missing Ready proof 与 quarantine 保留。13 项原生维护
 回归及实际 trace 的五个 SIGKILL 删除窗口见
-[维护记录](migration-runs/AT-RUST-008-2026-10-05-cache-maintenance.md)。Runtime/SDK/App 独立维护
+[维护记录](../migration-runs/AT-RUST-008-2026-10-05-cache-maintenance.md)。Runtime/SDK/App 独立维护
 入口、产品 low-disk、多进程竞争、旧标注导入和默认 App 切换仍未验收。
 
 同日后续已接通 Engine-scoped 异步维护请求与 Swift SDK：固定配置 root，闭集 scalar opcode，
@@ -545,7 +545,7 @@ authority 下回收精确 ledger/marker；missing Ready proof 与 quarantine 保
 export 与维护 capability，摘要和 C/C# 生成绑定同步；旧 artifact 由摘要检查拒绝。
 SDK 严格解析有界整数库存/报告，保持 inventory.active 与 skippedActive 的不同语义，
 不把前后不同观察强行列成计数等式。实际 SDK cold/warm/双读者/purge/reparse 通过，见
-[异步维护接线记录](migration-runs/AT-RUST-008-012-2026-10-05-async-cache-maintenance.md)。
+[异步维护接线记录](../migration-runs/AT-RUST-008-012-2026-10-05-async-cache-maintenance.md)。
 App 后台维护/Settings purge、ArkDeck Rust 消费与其余整体验收继续待办；App 维护仍应在
 成功 open 后调度，保持 AT-PERF-002 的首字节路径。
 
@@ -569,7 +569,7 @@ App 后台维护/Settings purge、ArkDeck Rust 消费与其余整体验收继续
 ### 9.3 维护与 ArkDeck
 
 cache hit 检查、构建 lease、active lease、high/low watermark、LRU、隔离重建和 cleanup
-沿用 [SPECIFICATION §16](SPECIFICATION.md) 的语义；默认 20/16 GiB。
+沿用 [SPECIFICATION §16](../design/SPECIFICATION.md) 的语义；默认 20/16 GiB。
 Ready 查询的 DB 为只读；写 access timestamp 与标注要有单独串行/文件锁，不把 UI 写入
 放进 SQLite read transaction。跨进程 App/CLI 同开、purge 与活跃解析竞争必须测试。
 
@@ -590,7 +590,7 @@ Windows 清理 daemon 自建的 `%LOCALAPPDATA%\ArkDeck\Trace`，即 macOS 今�
 
 必须覆盖 `doctor/licenses/inspect/summary/processes/threads/query/context/analyze` 九个命令，
 以及 global flags、help/version、错误优先级、human escaping、Machine JSON 和信号退出。
-保持 [CLI.md](CLI.md) 的默认预算：30 s invocation deadline、10k rows/events、8 MiB output；
+保持 [CLI.md](../guides/CLI.md) 的默认预算：30 s invocation deadline、10k rows/events、8 MiB output；
 范围仍为 100–120,000 ms、1–100k rows/events、1 KiB–64 MiB output。
 GUI/parser 内部预算不能错误替代 CLI 的整次调用 deadline。
 保留开发 CLI 的 `--trace-streamer <absolute-path>`，并对该文件执行完整身份校验；
@@ -685,17 +685,17 @@ CPU 身份目录独立于前 20,000 条活动样本，最多 4,096 个 signed CP
 分别报告 truncation；活动样本保留原先进程计数排序。身份查找与样本共用原有 VM、
 memory 和 absolute deadline。真实 signed bundle 的 public consumer 冷解析及缓存重开
 已到 Ready，GUI、性能和发行验收仍待完成；见
-[CPU 目录增量记录](migration-runs/AT-RUST-007-013-2026-10-06-cpu-catalog.md)。
+[CPU 目录增量记录](../migration-runs/AT-RUST-007-013-2026-10-06-cpu-catalog.md)。
 
 2026-10-05 已有显式 SDK 图下的 `TraceRustProductRuntime`，固定 Engine 同时供 document
 controllers 与 cache maintenance 使用；原 catalog/Rendering 通过 Core adapter 复用。
 标注兼容 IO 在 MainActor 外，close 前排空，sidecar 保持 owner-private。默认 App、native
 held-FD persistence 和 Rust hot snapshot 仍未切换；实际边界见
-[运行时接线记录](migration-runs/AT-RUST-008-012-2026-10-05-native-product-runtime.md)。
+[运行时接线记录](../migration-runs/AT-RUST-008-012-2026-10-05-native-product-runtime.md)。
 
 同日扩展名提示已与 Swift 原始大小写/nil 对等，新增 Session-held 只读 sidecar
 端口并验证原字节保留与有界读取；C ABI/SDK/controller 持久化写入尚未接通，
-不形成默认切换。见[读取增量记录](migration-runs/AT-RUST-008-012-2026-10-05-source-format-sidecar-read.md)。
+不形成默认切换。见[读取增量记录](../migration-runs/AT-RUST-008-012-2026-10-05-source-format-sidecar-read.md)。
 
 Rust 输出 immutable snapshot：viewport generation、logical dimensions、track/depth layout、
 event key、primitive bounds、LOD/density、color slot、label facts、truncation/quality。
@@ -709,7 +709,7 @@ closure 内访问，转换前预留有界 copy credit，scene 同时保留 Rust 
 deadline 传到 Store 的所有并行查询；独立操作预算继续由产品配置注入，`load.total` 保留。
 相同 viewport/backing scale 使用 Rust frame，交互中的视口变换继续复用平台 geometry。
 真实 medium 的生产 Controller 与只读原始行核对通过，GUI/性能/large 等整体验收继续
-待办。此前运行时记录描述的是当时的 Swift adapter 边界；见[当前原生渲染记录](migration-runs/AT-RUST-011-013-2026-10-06-native-rendering.md)。
+待办。此前运行时记录描述的是当时的 Swift adapter 边界；见[当前原生渲染记录](../migration-runs/AT-RUST-011-013-2026-10-06-native-rendering.md)。
 
 可见 lanes、overscan、32 depth-row 上限、density cache 等现有行为先由向量冻结，
 后续性能调优显式验证。批次按颜色 slot 组织；hover 是 overlay，不触发 SQL 或基础批次重建。
@@ -802,14 +802,14 @@ hardlink、外部替换、readonly/disk-full、cache hit 后变化、同 key 多
 旧 viewport 结果迟到、Int64 最大边界、缺表/加表/坏关联、预算最小 error、日志路径泄漏。
 
 现有真实 small 为 `Fixtures/traces/{zlib.htrace,hiprofiler_data_ability.htrace,trace_small_10.systrace}`。
-medium 为 [固定 fixture 清单](../Fixtures/phase3-performance-fixtures.json) 的
+medium 为 [固定 fixture 清单](../../Fixtures/phase3-performance-fixtures.json) 的
 `pbreader.htrace`（265,032,803 bytes）；large 沿用同一清单的策略：独立采集、可再分发、
 >500 MiB 且 ≤2 GiB 的单个 type-0 protobuf segment，经 `ARKTRACE_LARGE_TRACE` 提供并有 reviewed
 provenance 与许可。没有对应文件就报告未测，不能靠 padding、拼接或复制事件拼大文件。
 
 ### 13.2 性能预算
 
-延续 [SPECIFICATION §20](SPECIFICATION.md) 的现有目标，不从 ArkDeck 的 daemon 数字
+延续 [SPECIFICATION §20](../design/SPECIFICATION.md) 的现有目标，不从 ArkDeck 的 daemon 数字
 推导 ArkTrace 预算；迁移不凭语言选择承诺提速。
 
 | 工作负载 | 现有目标 |
@@ -843,7 +843,7 @@ FFI acquire/release、native 转换/复制、draw、Rust 引擎、parser child �
 
 ### 13.3 CI 与本地反馈
 
-002 扩展现有 [ci_plan.sh](../scripts/ci_plan.sh)：Rust pure、macOS native、Windows native、
+002 扩展现有 [ci_plan.sh](../../scripts/ci_plan.sh)：Rust pure、macOS native、Windows native、
 Swift binding/App、C# binding/App、contract/distribution、定时性能。未知 diff 选择全部相关
 车道，纯文档不强制编译。编译成功的 Windows `cfg` 测试必须真的在 Windows 跑；
 Unix 上 0 tests 不是通过 Windows 验证。现有 planner 只有 swiftpm/app/contracts 三车道，
@@ -900,10 +900,10 @@ Windows x64、独立 GUI Capture、隔离 cache、CLI 优先。普通实现不�
 ## 16. 参考与实施入口
 
 - [迁移任务与依赖](RUST_CORE_MIGRATION_TASKS.md)：唯一的新迁移进度清单。
-- [现行规格](SPECIFICATION.md)、[现行设计](DESIGN.md)、[CLI](CLI.md)、
-  [TraceStreamer](TRACE_STREAMER.md)、[GUI Capture](CAPTURE.md)。
-- [CLI 发行](CLI_DISTRIBUTION.md)、[App 发行](APP_DISTRIBUTION.md)、
-  [ArkDeck integration](ARKDECK_INTEGRATION.md)：现行消费边界，按任务同步更新。
+- [现行规格](../design/SPECIFICATION.md)、[现行设计](../design/DESIGN.md)、[CLI](../guides/CLI.md)、
+  [TraceStreamer](../design/TRACE_STREAMER.md)、[GUI Capture](../design/CAPTURE.md)。
+- [CLI 发行](../guides/CLI_DISTRIBUTION.md)、[App 发行](../guides/APP_DISTRIBUTION.md)、
+  [ArkDeck integration](../guides/ARKDECK_INTEGRATION.md)：现行消费边界，按任务同步更新。
 - [ArkDeck 冻结架构参考](https://github.com/ArkDeck/ArkDeck/blob/9c0d1a92e111562ed95ac61d0e5505b453024316/docs/design/cross-platform/rust-core-cross-platform-architecture.md)：
   借鉴 module/port、T0/T1/T2、纵向任务与证据组织；不继承其全部历史流程。
 - [ArkDeck Windows Trace 任务背景](https://github.com/ArkDeck/ArkDeck/blob/9c0d1a92e111562ed95ac61d0e5505b453024316/openspec/changes/chg-2026-074-shared-rust-runtime-core/tasks.md)：
@@ -915,8 +915,8 @@ Windows x64、独立 GUI Capture、隔离 cache、CLI 优先。普通实现不�
 本次文档不改变现行产品已支持的平台，不改历史 evidence，不构建 Rust 内核，
 不创建发行包、不操作设备、不修改 ArkDeck。相应行为由配套任务实际交付。
 
-2026-10-05 Session-held sidecar 写入已作为 native 后端增量实现：Ready 外固定 journal 与 owner-bound scratch，先记录 intent、以 held parents 原子替换，再记录 completion 后清理；固定 retirement 名称和已知 cleanup 中断可恢复。Warm lookup/purge 复核 journal，未知 evidence 保留。format-1 codec 有界编码并遵循 persistent marks/empty-delete。524 Rust 与 30 个受控原生 SIGKILL、实际 Trace save/reopen/delete 通过；C ABI/async/Swift SDK/controller 尚未连接，默认 App 和整体验收仍待完成。见[写入增量记录](migration-runs/AT-RUST-008-012-2026-10-05-native-sidecar-write.md)。
+2026-10-05 Session-held sidecar 写入已作为 native 后端增量实现：Ready 外固定 journal 与 owner-bound scratch，先记录 intent、以 held parents 原子替换，再记录 completion 后清理；固定 retirement 名称和已知 cleanup 中断可恢复。Warm lookup/purge 复核 journal，未知 evidence 保留。format-1 codec 有界编码并遵循 persistent marks/empty-delete。524 Rust 与 30 个受控原生 SIGKILL、实际 Trace save/reopen/delete 通过；C ABI/async/Swift SDK/controller 尚未连接，默认 App 和整体验收仍待完成。见[写入增量记录](../migration-runs/AT-RUST-008-012-2026-10-05-native-sidecar-write.md)。
 
-2026-10-05 native sidecar transport 增量：异步与 C ABI read/write/remove 使用独立 4 MiB 原始文档通道，普通请求保留 1 MiB；排队/运行输入共享 16 MiB actual-capacity credit，worker 校验与 IO 复用 Session-held authority。529 Rust、实际锁竞争额度/取消/drain/panic、save/reopen/delete/future 保留、79 现有 SDK tests 和本轮包外 SDK 实际消费通过，24 个最终 gates exit 0。ABI digest 更新、26 exports/record 布局不变。Swift sidecar SDK/controller、兼容 URL IO 替换、默认 App 与 macOS 总验收仍待完成；全部失败及实际 source/bin 记录见[本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-native-sidecar-wire.md)，goal 保持 active。
+2026-10-05 native sidecar transport 增量：异步与 C ABI read/write/remove 使用独立 4 MiB 原始文档通道，普通请求保留 1 MiB；排队/运行输入共享 16 MiB actual-capacity credit，worker 校验与 IO 复用 Session-held authority。529 Rust、实际锁竞争额度/取消/drain/panic、save/reopen/delete/future 保留、79 现有 SDK tests 和本轮包外 SDK 实际消费通过，24 个最终 gates exit 0。ABI digest 更新、26 exports/record 布局不变。Swift sidecar SDK/controller、兼容 URL IO 替换、默认 App 与 macOS 总验收仍待完成；全部失败及实际 source/bin 记录见[本轮记录](../migration-runs/AT-RUST-008-012-2026-10-05-native-sidecar-wire.md)，goal 保持 active。
 
-2026-10-05 native sidecar Swift SDK 增量：typed read/write/remove、原始格式与 provenance 检查、分配前完整 JSON 大小计数及 retained packed/text owner 已接通。87 SDK tests（新增 8 项、0 skip）、包外实际 Trace/save/reopen/exact 4 MiB/key-lock cancel/timeout/future 保留/ephemeral/Engine 后 facets/最终额度归零与 API baseline 通过，11 个最终本地 gates exit 0。复用已核对 472 当前 native source inputs 的不可变 artifact，本轮未重编 Rust。控制器 adapter、兼容 URL IO 替换、默认 App 与 macOS 总验收仍未完成；失败、输入、二进制及额度范围见[本轮记录](migration-runs/AT-RUST-012-2026-10-05-native-sidecar-sdk.md)，goal 保持 active。
+2026-10-05 native sidecar Swift SDK 增量：typed read/write/remove、原始格式与 provenance 检查、分配前完整 JSON 大小计数及 retained packed/text owner 已接通。87 SDK tests（新增 8 项、0 skip）、包外实际 Trace/save/reopen/exact 4 MiB/key-lock cancel/timeout/future 保留/ephemeral/Engine 后 facets/最终额度归零与 API baseline 通过，11 个最终本地 gates exit 0。复用已核对 472 当前 native source inputs 的不可变 artifact，本轮未重编 Rust。控制器 adapter、兼容 URL IO 替换、默认 App 与 macOS 总验收仍未完成；失败、输入、二进制及额度范围见[本轮记录](../migration-runs/AT-RUST-012-2026-10-05-native-sidecar-sdk.md)，goal 保持 active。

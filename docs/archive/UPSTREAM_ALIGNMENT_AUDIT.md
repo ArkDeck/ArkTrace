@@ -3,7 +3,7 @@
 > 审计日期：2026-08-17
 > 上游 pin：`447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6`（`ThirdParty/TraceStreamer/source-lock.json` 的 `upstream.revision`，fetch 后 `git rev-parse HEAD` 逐字符核对相等）
 > 上游源码根：`smartperf_host/ide/src/trace/`
-> 审计性质：只读。本文是 [PHASE_7_TASKS.md](./PHASE_7_TASKS.md) 的证据基线，任务实现者应以本文的 `path:line` 引用为起点，不要凭记忆重建上游行为
+> 审计性质：只读。本文是 [PHASE_7_TASKS.md](PHASE_7_TASKS.md) 的证据基线，任务实现者应以本文的 `path:line` 引用为起点，不要凭记忆重建上游行为
 > 覆盖结论：共核实 36 项面向用户的离线能力 —— ALIGNED 7、INTENTIONAL-DIFFERENCE 3、PARTIAL 4、GAP 15、OUT-OF-SCOPE 6、UNCLEAR 1
 
 ## 1. 审计边界
@@ -11,7 +11,7 @@
 只回答一个问题：**上游能做而 ArkTrace 不能做（或做得不一样）的、与离线看 trace 相关的事。** 以下按
 本审计只覆盖离线 viewer；以下不纳入这份离线差距计数：
 
-1. 采集、设备、网络能力（后续已由独立 `ArkTraceCapture` 实现，见 [CAPTURE.md](./CAPTURE.md)，仍不属于本审计）；
+1. 采集、设备、网络能力（后续已由独立 `ArkTraceCapture` 实现，见 [CAPTURE.md](../design/CAPTURE.md)，仍不属于本审计）；
 2. 重写 parser（AT-SYS-005）；
 3. 移植 Web 架构（worker 池、Web Component、DOM 耦合，DESIGN §2.1「不复用」清单）；
 4. CLI 与上游对标（上游没有 CLI）；
@@ -37,7 +37,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 本次审计的「数据在不在库里」结论全部来自四个真机 DAYU 200 解析库。它们当时位于 `/private/tmp/`
 （`arktrace-dayu200-20260815-480s.sqlite` 529M、`-600s` 597M、`-fixed-600s` 555M、`-perf-debug` 2.1G），
 **`/private/tmp` 是易失目录**，因此关键行数已抄录进下表。若这些文件已被清理，重跑相关判定需要先按
-`docs/DAYU200_LARGE_HTRACE_INTEGRITY.md` 重新取一份真机 trace 并解析。
+`docs/archive/DAYU200_LARGE_HTRACE_INTEGRITY.md` 重新取一份真机 trace 并解析。
 
 四库一致的行数（用于判定「上游画得出、我们缺不缺数据」）：
 

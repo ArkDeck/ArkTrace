@@ -94,7 +94,7 @@ mod layout {
         include_bytes!("../../../../ThirdParty/TraceStreamer/macx/manifest.json");
 }
 /// Closed Windows installation layout, relative to the directory holding
-/// `arktrace.exe` (docs/CLI.md "Windows installation layout"). Images keep
+/// `arktrace.exe` (docs/guides/CLI.md "Windows installation layout"). Images keep
 /// `.exe` names: `CreateProcessW` would otherwise append one.
 #[cfg(windows)]
 mod layout {

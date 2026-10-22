@@ -6,45 +6,45 @@
 > 1.1 修订：补齐各任务需求编号（含此前未引用的 AT-LOD/CTX/JSON/MODEL/AD 与 AT-SYS-004），
 > 加入不依赖 Rust 的下游解阻项、ArkDeck 已裁定的 `trace.inspect` 路线及 Windows 取消/运行时/分发要求。
 > 实施已开始：001/002/004/005/006/007/010 为 in-progress，0 项完整 done；本轮优先推进 macOS 验收。
-> 实际记录：[首轮基线与 workspace](migration-runs/AT-RUST-001-002-2026-10-02.md)。
+> 实际记录：[首轮基线与 workspace](../migration-runs/AT-RUST-001-002-2026-10-02.md)。
 > 2026-10-06 增量：011/012/013 的生产 Rust hot snapshot → macOS Rendering 接线已实现，
 > ABI/snapshot format 2、完整 Inspector facts、原始 deadline 与有界 retained copies 已验证。
 > GUI、large/performance、完整进程树、下游和适用发行验收仍 open；不改写完整任务状态。
-> 见[原生渲染记录](migration-runs/AT-RUST-011-013-2026-10-06-native-rendering.md)。
+> 见[原生渲染记录](../migration-runs/AT-RUST-011-013-2026-10-06-native-rendering.md)。
 > 后续加入当前 ABI 2 的 488 字段呈现对照与 99 变体实际 Swift converter 回归；
-> 仅测试/向量变化，生产 bytes 未变。见[wire 回归记录](migration-runs/AT-RUST-011-013-2026-10-06-wire-regressions.md)。
+> 仅测试/向量变化，生产 bytes 未变。见[wire 回归记录](../migration-runs/AT-RUST-011-013-2026-10-06-wire-regressions.md)。
 > 当前 ABI 2 字符串准入新增 103 个变体与 85 次拒绝后恢复，实际 native converter 通过；
-> native load/copy owner 生命周期与整体验收仍 open。见[字符串边界记录](migration-runs/AT-RUST-012-013-2026-10-06-string-admission.md)。
+> native load/copy owner 生命周期与整体验收仍 open。见[字符串边界记录](../migration-runs/AT-RUST-012-013-2026-10-06-string-admission.md)。
 > 修正契约声明仍为格式 1、实际 producer/consumer 已为格式 2 的不一致，统一生成常量；
 > 当前新 SDK/App、真实 medium cold/cache/Inspector 及适用 macOS checks 通过。
-> 见[快照格式契约记录](migration-runs/AT-RUST-012-013-2026-10-06-snapshot-format-contract.md)；总验收仍 open。
+> 见[快照格式契约记录](../migration-runs/AT-RUST-012-013-2026-10-06-snapshot-format-contract.md)；总验收仍 open。
 > 后续实际 Rust pack → Swift convert 的 5 个 scenes / 598 字段回归通过，默认 CI 同时核对
-> producer 与冻结 records。见[packed conversion 记录](migration-runs/AT-RUST-011-013-2026-10-06-packed-conversion.md)。
+> producer 与冻结 records。见[packed conversion 记录](../migration-runs/AT-RUST-011-013-2026-10-06-packed-conversion.md)。
 > 当前 ABI 的真实 native load 新增 3 组 / 7 次 load 持有期、共享 copies、Codable 与
 > byte/owner 拒绝后恢复验证；同时修复 SwiftPM 源码同步删除缓存 SDK 的问题。
-> 见[snapshot load 记录](migration-runs/AT-RUST-012-013-2026-10-06-snapshot-load-ownership.md)；
+> 见[snapshot load 记录](../migration-runs/AT-RUST-012-013-2026-10-06-snapshot-load-ownership.md)；
 > 小 trace 有界验证已通过，取消/deadline、GUI、性能及其余完整任务验收仍 open。
 > 已修复 Return 激活当前 snapshot 已移除事件的焦点问题；默认三组回归及 packed snapshot
 > 的 5 次 convert / 5 次当前 Swift loader / 90 次实际 keyDown 对照通过。
-> 见[键盘焦点记录](migration-runs/AT-RUST-011-013-2026-10-06-keyboard-focus.md)；
+> 见[键盘焦点记录](../migration-runs/AT-RUST-011-013-2026-10-06-keyboard-focus.md)；
 > loading 显示上一帧时仍能激活该帧 detail，macOS 总验收继续 open。
 > 同一 native 键盘候选已逐字节纳入长期回归；当前主线 native 全套 761 项通过，
-> 见[主线键盘回归记录](migration-runs/AT-RUST-011-013-2026-10-06-native-keyboard-regression.md)。
+> 见[主线键盘回归记录](../migration-runs/AT-RUST-011-013-2026-10-06-native-keyboard-regression.md)。
 > 实际 native load 的调用前取消、原始绝对 deadline 过期及两次健康恢复已纳入主线；
 > native 全套 763 项通过，错误后与最后 owner 释放后额度回到 opening 基线，close 后归零。
-> 见[取消与 deadline 回归记录](migration-runs/AT-RUST-012-013-2026-10-06-native-load-cancellation.md)；
+> 见[取消与 deadline 回归记录](../migration-runs/AT-RUST-012-013-2026-10-06-native-load-cancellation.md)；
 > in-flight 取消、Rust retained hit 接线及完整 macOS 验收仍 open。
 > 已补 retained HotSnapshot 的纯 Rust hit，接受显式显示 viewport/scale 和 detail/density 模式，
 > 复用现有几何与 density intent；54 个当前 Swift/Rust 命中对照（含 loading 重投影）和
-> 12 个负例通过。见[retained hit 记录](migration-runs/AT-RUST-011-012-2026-10-06-retained-hit.md)；
+> 12 个负例通过。见[retained hit 记录](../migration-runs/AT-RUST-011-012-2026-10-06-retained-hit.md)；
 > C ABI/SDK/NSView 的生产接线与整体验收仍 open。
 > 后续已接通 additive ABI-2 retained hit export、typed Swift SDK 与生产 NSView，loading
 > 改 viewport 时保留 owner，detail/density 分模式命中。真实 Engine 的 96 点对照三轮通过，
 > 包括 Engine release 后读取；SDK 字段矩阵明确区分 nil/zero 与 Int64 精度。见
-> [retained hit 接线记录](migration-runs/AT-RUST-011-012-013-2026-10-06-retained-hit-wire.md)；总验收仍 open。
+> [retained hit 接线记录](../migration-runs/AT-RUST-011-012-013-2026-10-06-retained-hit-wire.md)；总验收仍 open。
 > SDK 切换缓存增量：Package 将四个 pinned artifact member 的 digest 纳入 C/Swift compiler
 > context，修复旧 Clang module 复用；当前 native 全套 773 项与实际最后 byte-credit 并发
-> 拒绝/退款/恢复/close-zero 通过。见[缓存身份记录](migration-runs/AT-RUST-012-013-2026-10-06-sdk-cache-identity.md)；完整 macOS 验收仍 open。
+> 拒绝/退款/恢复/close-zero 通过。见[缓存身份记录](../migration-runs/AT-RUST-012-013-2026-10-06-sdk-cache-identity.md)；完整 macOS 验收仍 open。
 
 ## 1. 执行规则与完成语义
 
@@ -181,7 +181,7 @@ flowchart LR
 - 已有严格双平台原生 CI：main `45bf447` 使用 Rust 1.99.0、Xcode 27.0，macOS 258 项、
   Windows 146 项测试及 build/lint/contract 通过；Windows gate 已修正失败传播和 checkout 字节身份。
   hosted App 实际构建仍因缺 parser 跳过，binding 链接与干净 Windows 运行库验收未完成，
-  见 [双平台 CI 记录](migration-runs/AT-RUST-002-2026-10-03-native-ci.md)。
+  见 [双平台 CI 记录](../migration-runs/AT-RUST-002-2026-10-03-native-ci.md)。
 - 平台/输入：macOS arm64、Windows 11 x64 native runner；无设备。
 - 需求：设计 §4/13；AT-SYS-001/003/006。
 - 路径：拟新增 `rust/`、`contracts/` 生成入口、`windows/` 最小 binding 项目；
@@ -215,12 +215,12 @@ flowchart LR
 - 进展（2026-10-14）：`scripts/build_trace_streamer_windows.sh` 在 Windows 11 x64 原生主机两次
   clean build 产出逐字节相同的 PE x64 parser（`d0e5a197…`，仅导入系统 DLL）；两份 evidence
   fixture 在四类路径下的导出 DB 与 macOS 锁定值逐字节相同。Windows 静态 runtime 许可清单
-  已入独立的 `windows-license-inventory.json`。干净主机、large 与签名/分发未完成；剩余项见 [TRACE_STREAMER.md §4a](TRACE_STREAMER.md#4a-windows-x64-锁定构建at-rust-003)。
+  已入独立的 `windows-license-inventory.json`。干净主机、large 与签名/分发未完成；剩余项见 [TRACE_STREAMER.md §4a](../design/TRACE_STREAMER.md#4a-windows-x64-锁定构建at-rust-003)。
 - 平台/输入：Windows 11 x64 构建主机、上游源码、真实 Trace；无设备操作。
 - 需求：AT-SYS-005、AT-PARSE-002/003/004/010、AT-DB-*、AT-SEC-002/005、AT-CLI-011（许可清单）；
   AT-PARSE-001/007 的调用与成功判定由 006 接入。
 - 路径：`ThirdParty/TraceStreamer/`、拟新增 Windows build/verify 脚本；
-  `docs/TRACE_STREAMER.md`、`THIRD_PARTY_NOTICES.md`、许可/fixture 检查。
+  `docs/design/TRACE_STREAMER.md`、`THIRD_PARTY_NOTICES.md`、许可/fixture 检查。
 
 交付：
 
@@ -248,19 +248,19 @@ flowchart LR
 - 状态：in-progress；开工依赖：002；完成依赖：001、002。
 - 已实现 macOS held descriptor、owner mode/ACL/ownership 校验、bounded 快照复制、文件同卷无覆盖发布、
   identity-owned 清理与 shared/exclusive lease；真实 APFS 跨卷和 ENOSPC 结果见
-  [2026-10-03 文件端口记录](migration-runs/AT-RUST-004-2026-10-03-macos.md)。
+  [2026-10-03 文件端口记录](../migration-runs/AT-RUST-004-2026-10-03-macos.md)。
   lease conversion、完整 owner/entry-lease 协调、ArkDeck purger 对等与 Windows 文件端口尚未完成，
   不将 004 标 done。
 - 后续增加 readonly flat-directory seal（64 个 regular files/aggregate byte limit）及完整目录
   同卷无覆盖发布、取消回退、payload/ancestor/replacement/collision 故障验证。三份实际 parser
   DB 已复制为 sealed payload 并验证发布前后同 digest；原生 APFS 跨卷目录拒绝且候选保留。
   此原语未替代 owner/crash/Ready 协议，见
-  [004/005 后续记录](migration-runs/AT-RUST-004-005-2026-10-03-publication-bootstrap.md)。
+  [004/005 后续记录](../migration-runs/AT-RUST-004-005-2026-10-03-publication-bootstrap.md)。
 - 后续已实现隔离 Rust 根的 owner v2 ledger：exclusive owner lease、creating→bound、发布位置登记、
   quarantine/removing/removed、有界 held-directory 回收与 stale identity 查找。创建/回收的 8 个实际
   SIGKILL 窗口区分可回收与不确定证明；已发布状态保留，等待 entry lease authority。76 个 Rust tests
   及三份真实 parser 的 owner 创建/登记、5 个 session 的后续 Rust 回收通过，见
-  [004 owner 记录](migration-runs/AT-RUST-004-2026-10-03-owner-recovery.md)。
+  [004 owner 记录](../migration-runs/AT-RUST-004-2026-10-03-owner-recovery.md)。
   v2 不交给旧 format-1 writer/purger；Ready、未绑定 creating、已失去目录身份的记录不会猜测删除。
 - 2026-10-14 Windows 文件端口：`arktrace-platform` 新增 `windows` 模块（`windows-sys 0.61.2`），
   以相同公开类型实现 held file/directory、volume/file ID 身份（ReFS 128 位 id 拒绝）、owner-only
@@ -268,7 +268,7 @@ flowchart LR
   `LockFileEx` 字节 `u64::MAX-1` 的 shared/exclusive lease（与 `contracts/` 向量及 ArkDeck purger
   一致）、known-folder 工作区与 owner v2/3/4 ledger；sidecar 与双名原子交换在 Windows 拒绝
   （无 `RENAME_SWAP`）。28 个 Windows 原生测试通过，见
-  [Windows 文件端口记录](migration-runs/AT-RUST-004-2026-10-14-windows-host-files.md)。
+  [Windows 文件端口记录](../migration-runs/AT-RUST-004-2026-10-14-windows-host-files.md)。
   进程/信任/CLI 信号端口（005）与 engine/CLI 接入未完成。
 - 平台/输入：macOS APFS、Windows NTFS native tests；无设备。
 - 需求：AT-SEC-001/002/007、AT-PARSE-008、AT-CACHE-003/004/005/006。
@@ -307,13 +307,13 @@ flowchart LR
 
 2026-10-03 macOS 原型已实现私有 executable snapshot、SHA/signature 验证、挂起启动后 kernel
 code identity 核对、有界 stdout/stderr、TERM→KILL、进程树/宿主死亡控制管道与 reap。
-记录见 [005 原生进程证据](migration-runs/AT-RUST-005-2026-10-03-macos.md)。实际 pinned C++ parser
+记录见 [005 原生进程证据](../migration-runs/AT-RUST-005-2026-10-03-macos.md)。实际 pinned C++ parser
 已由该端口导出三份真实小 trace，并通过独立 `quick_check`；这不是 Ready DB 或生产签名验收。
 初始挂起 bootstrap 窗口已补默认 SIGHUP，并在继承 session/无终端 session 的宿主 SIGKILL 下
 证明 helper 入口未执行；见上方 004/005 后续记录。后续实现声明输出文件的 live/final budget、
 held CWD identity 与 FD/identity 检查，并修复清理阶段忽略 stdout/stderr 超量的问题。62 个 Rust tests
 及实际 parser 的 DB/sidecar 超量负例通过，见
-[005 输出预算记录](migration-runs/AT-RUST-005-2026-10-03-output-budgets.md)。
+[005 输出预算记录](../migration-runs/AT-RUST-005-2026-10-03-output-budgets.md)。
 仍需其它取消/launch race/fault 窗口、signedBundleInPlace、
 生产 Developer ID/hardened/notarization、Windows Job Object，以及与 004 owner/crash 协议集成。
 2026-10-14 Windows 进程端口：同名 `run_supervised`/`VerifiedExecutable`/`ProcessBudget` 等以挂起
@@ -324,7 +324,7 @@ live/final 预算、`.exe` 名与 AMD64 PE 头、`AuthenticodePublisher`（WinVe
 `O=`/`CN=` 钉 publisher，leaf 哈希只记录）与仅 SHA 的 `DevelopmentPinned`；CLI 的映射映像
 （`GetMappedFileNameW`）、控制台 Ctrl 事件（首次取消、二次 130/143 立即退出）与可取消的整块
 stdout 提交。37 个单元与 8 个原生集成测试通过，见
-[Windows 进程端口记录](migration-runs/AT-RUST-005-2026-10-14-windows-process.md)。
+[Windows 进程端口记录](../migration-runs/AT-RUST-005-2026-10-14-windows-process.md)。
 publisher 链根/EKU 钉、engine/CLI 接入（006/010）与真实 parser 运行未完成。
 
 交付：
@@ -353,24 +353,24 @@ publisher 链根/EKU 钉、engine/CLI 接入（006/010）与真实 parser 运行
   （recipe parser `d0e5a197…`，NTFS 上 promote 前关闭候选目录成员句柄、重开后按 snapshot 比对）；
   三份 small fixture 的 inspect/processes/threads 与 macOS 记录 T0（除平台身份字段、index 3→4 与
   已知 hiprofiler upstream DB T1），见
-  [Windows no-cache 记录](migration-runs/AT-RUST-006-010-2026-10-14-windows-no-cache-cli.md)。
+  [Windows no-cache 记录](../migration-runs/AT-RUST-006-010-2026-10-14-windows-no-cache-cli.md)。
 - 平台/输入：先 macOS pinned parser，Windows 随 003 接上；真实 fixture，无设备。
 - 需求：AT-PARSE-*、AT-DB-001～006/009/010、AT-SEC-001/003、AT-SYS-004。
 - 路径：`arktrace-parser`、`arktrace-store` schema/staging；移植参考
   `TraceStreamerProcessParser`、`TraceDatabaseStagingPreparer`、`TraceSchemaAdapter`。
 
-macOS 开工证据：[Rust Store 校验记录](migration-runs/AT-RUST-006-2026-10-03-store-validation.md)。
+macOS 开工证据：[Rust Store 校验记录](../migration-runs/AT-RUST-006-2026-10-03-store-validation.md)。
 固定 parser 的三份实际 small 输出，经 held FD/readonly SQLite 校验后，与 Swift oracle 的
 schema fingerprint、capabilities、duration 和全部 quality facts 精确相等。rusqlite 0.40.2/
 bundled SQLite 3.53.2 的源码、license、source ID 和实际 compile options 已冻结/记录。
 Rust 96 tests、Swift 596 tests（6 个既有 opt-in skips）、API baseline 通过。
-后续 [索引准备记录](migration-runs/AT-RUST-006-2026-10-03-index-preparation.md) 完成 bootstrap/
+后续 [索引准备记录](../migration-runs/AT-RUST-006-2026-10-03-index-preparation.md) 完成 bootstrap/
 其余索引的私有事务、完整 index introspection、DELETE 恢复、SQLite close 与 readonly 封存。
 三份实际输出各有 24 条正确索引，复开后上述语义仍 T0 相等；Rust 106 tests、clippy 与
 contract/license verifier 通过。这是 indexed snapshot 子项；metadata、entry lease 与正式
 Engine/CLI/SDK/App 接入尚未完成，`readyAcceptance=false`，006 不标 done。
 
-[Engine no-cache 记录](migration-runs/AT-RUST-006-2026-10-03-engine-no-cache.md) 随后接通真实 parser
+[Engine no-cache 记录](../migration-runs/AT-RUST-006-2026-10-03-engine-no-cache.md) 随后接通真实 parser
 到 metadata/ephemeral Ready/显式 close：三份 small 的 inspection 与原校验、Swift oracle 相等；
 10 个真实负例拒绝 Ready 并清理 owned outputs，替换目录场景保留外来 bytes。Rust 113 tests、
 2 项新增 Swift metadata 兼容性回归通过。当前仅有独立 no-cache lease，persistent cache/shared
@@ -378,7 +378,7 @@ entry handoff 和 CLI/SDK/App 仍未完成。后续已将已知 scratch 文件
 纳入 private protocol 3 的嵌套路径执行/cleanup/final 检查；aggregate/quota 与 undeclared output
 治理仍待完成。
 
-[辅助输出与 Ready 回收记录](migration-runs/AT-RUST-005-006-2026-10-03-scratch-ready-recovery.md)
+[辅助输出与 Ready 回收记录](../migration-runs/AT-RUST-005-006-2026-10-03-scratch-ready-recovery.md)
 补充 nested scratch 的执行/cleanup/final 监督（private protocol 3），实际 zlib 超量返回
 Parsing/OutputFileLimitExceeded(index 2)，11 个 Engine 负例、3 个正例继续通过。
 explicit no-cache recovery 在 key→entry→owner 锁和 metadata/owner/identity 复核后清理已登记
@@ -388,7 +388,7 @@ Ready/owner/ephemeral lease 均回收；Rust 122 tests、clippy/contract/license
 rename-before-owner-registration、disposal 中断/orphan lease 及其余 fault 窗口尚未通过；006 保持
 in-progress，产品和最终验收不因上述子项标 done。
 
-[绑定 owner 与发布/清理故障记录](migration-runs/AT-RUST-006-2026-10-03-bound-owner.md) 随后增加
+[绑定 owner 与发布/清理故障记录](../migration-runs/AT-RUST-006-2026-10-03-bound-owner.md) 随后增加
 format-3 ephemeral key/session/lease identity，保留 v2 readers 和现有 metadata/key/schema 版本。
 Engine 在 source copy/parser 前绑定 candidate，在 rename 前持久化 Publishing intent，payload
 删除后保留 Removed tombstone 至 lease unlink 和 owner artifacts 清理。12 个实际 SIGKILL
@@ -425,7 +425,7 @@ Engine 在 source copy/parser 前绑定 candidate，在 rename 前持久化 Publ
 limit+1、生命周期归一化、坏名称/倒置 end 降级、exact/prefix/contains 转义、request-owned
 取消/deadline 和 checked close 已实现。三份 small 的 processes/threads 完整机器事实与 Swift
 oracle 一致，实际 SDK key filters 与取消后的下一请求通过；证据见
-[007/010 目录与命令记录](migration-runs/AT-RUST-007-010-2026-10-03-directory-commands.md)。
+[007/010 目录与命令记录](../migration-runs/AT-RUST-007-010-2026-10-03-directory-commands.md)。
 六个目录回归覆盖边界；其它 query family/search/density/detail/navigation、read pool、Windows
 原生与大样本性能仍未交付，007 不标完成。
 
@@ -434,31 +434,31 @@ Store 保留半开/instant/open-ended、Int64 时间、源行 limit+1、零关�
 可选字段降级和 typed quality；组合层按归一化时间排序并合并 Trace 整体质量，能力缺失时
 也保留整体质量。三份真实 small 的 **51 组查询事实 T0**，18 个预算/取消/非法请求之后
 同一连接的下一请求通过。15 个 Store、2 个 contract、2 个组合层新增回归通过；证据见
-[CPU/线程状态查询记录](migration-runs/AT-RUST-007-2026-10-03-scheduling-queries.md)。
+[CPU/线程状态查询记录](../migration-runs/AT-RUST-007-2026-10-03-scheduling-queries.md)。
 Engine/Store API 已接入实际打包 CLI 的 CPU/thread-state query；其它查询族、SDK/App 与正式
-验收仍待完成。后续入口证据见 [query CLI 记录](migration-runs/AT-RUST-010-2026-10-03-query-cli.md)。
+验收仍待完成。后续入口证据见 [query CLI 记录](../migration-runs/AT-RUST-010-2026-10-03-query-cli.md)。
 
 named slices 已加入同一 reader 与 NoCacheSession raw/Agent 层，保留完整 14-field coded DTO、
 按需且不编码的 argument-set handle、完整 Trace 时长过滤、depth 能力错误、parent 哨兵、
 转义名称匹配与源行预算。三份真实 small 的 **45 个完整 typed page T0**、30 个负例及后续
 请求通过；9 个 Store、2 个 contract 和 1 个 public error 回归通过。Rust 产品 CLI 的 named
 view 尚未开放；counter/frame/argument/detail/navigation/search/density、pool 与性能仍待迁移。
-详见[named 查询与热点接入记录](migration-runs/AT-RUST-007-009-2026-10-03-named-hot.md)。
+详见[named 查询与热点接入记录](../migration-runs/AT-RUST-007-009-2026-10-03-named-hot.md)。
 随后已接入产品 CLI named view，核对 Core 发现 Agent/CLI 的名称过滤上界为 **256 UTF-8 bytes**，
 区别于 raw Store 的 4096；已收紧组合入口并补缺名称时的 match guard。新的 **48 个 typed page /
-39 个负例**及完整 CLI 文档与 human 差分通过，见[named CLI 记录](migration-runs/AT-RUST-010-2026-10-03-named-cli.md)。
+39 个负例**及完整 CLI 文档与 human 差分通过，见[named CLI 记录](../migration-runs/AT-RUST-010-2026-10-03-named-cli.md)。
 随后 counter 样本、独立 series 目录与 Agent 页已接入共享 reader/session 及实际 CLI。
 三份真实 small 的 **48 组 / 144 个完整 typed page T0**与 36 个负例通过；保留 Int64 值、
 物理表 rowid、scope、区间及分页差异。受控实际 Swift 输出确认两条 clamp 观察投影相同
 时仍须保留，已加回归。CPU counters 没有新的真实 fixture，当前只有受控 SQLite 覆盖。
-详见[counter 查询记录](migration-runs/AT-RUST-007-010-2026-10-03-counters.md)。
+详见[counter 查询记录](../migration-runs/AT-RUST-007-010-2026-10-03-counters.md)。
 随后 raw frame 查询已接入共享 reader/session。Swift 与 Rust 均接受规格所列的七列
 `frame_slice`，可选 `itid` 缺失时返回 nil；保留完整半开区间、instant/open-ended、
 type 0/1、原始 flag、limit+1 与合格列空表的 capability。**62 个实际 Swift 受控用例**
 包含 50 个 frame 请求及 12 个已有 raw/Agent 页；已有三种 Agent view 的独立 clamp
 观察不再被相同机器投影误合并。三份实际 parser/Ready 的 **42 个完整页 T0**及
 15 个失败后下一请求检查通过；三份真实 frame 表均为空，非空 frame 仍缺真实 corpus。
-详见[frame 查询记录](migration-runs/AT-RUST-007-2026-10-03-frame-queries.md)。
+详见[frame 查询记录](../migration-runs/AT-RUST-007-2026-10-03-frame-queries.md)。
 argument/detail/navigation/search/density、pool、SDK/App 接线与完整验收继续保持未完成。
 随后 argument 查询及 Inspector 的按需 slice handle 已接入共享 reader/session。
 只在整数 datatype=1 时解析字典字符串，其它类型保留原始 Int64；保持最多 64 项、
@@ -467,7 +467,7 @@ argument/detail/navigation/search/density、pool、SDK/App 接线与完整验收
 unavailable。**84 个实际 Swift 受控用例**、4 个 opt-in handle 两跳、**18 个真实
 parser/Ready 页 T0**与 15 个失败后下一请求检查通过。三份真实 `args` 表经有界采样
 均为空，真实非空参数与 Inspector 场景仍缺新 corpus；该切片不能代表完整 Store。
-详见[argument 查询记录](migration-runs/AT-RUST-007-2026-10-03-argument-queries.md)。
+详见[argument 查询记录](../migration-runs/AT-RUST-007-2026-10-03-argument-queries.md)。
 detail/navigation/search/density、pool、SDK/App 接线与完整验收继续保持未完成。
 
 共享 Viewer search 已迁入纯 Rust Analysis，通过 typed `SearchRepository` 接到同一
@@ -477,7 +477,7 @@ NoCacheSession；按域完全省去排除的查询，保留 name/PID/TID 与 sig
 逐一匹配；三份真实 parser/Ready 的 **67 个完整 SearchResults T0**及 21 个失败后
 下一请求检查通过。过程、线程目录均有真实正向，named slice 的正向来自 zlib。
 Toolbar 的 process 排除不依靠事后结果过滤；Sidebar 的可见行文字过滤仍属于 Viewer。
-详见[共享搜索记录](migration-runs/AT-RUST-007-2026-10-03-search.md)。
+详见[共享搜索记录](../migration-runs/AT-RUST-007-2026-10-03-search.md)。
 detail/navigation、pool、Viewer/SDK/App 接线、Windows 与完整验收仍未完成。
 
 六类 density 查询已接到同一 StoreReader/NoCacheSession，以聚合 SQL 统计事件并读取最长
@@ -486,7 +486,7 @@ PID/TID 回退、原始 state/name/frame flag、unassociated slice 语义、coun
 以及完整质量页；占用时长/利用率仍明确 unavailable。**190 个实际 Swift 受控用例**与
 **60 个真实 parser/Ready 结果 T0**、21 个失败后下一请求检查通过。三份 small 中真实
 非空 CPU counter/frame 尚无证据；density cache/read pool、Viewer/SDK/App 接线仍待完成。
-详见[density 查询记录](migration-runs/AT-RUST-007-2026-10-03-density-queries.md)。
+详见[density 查询记录](../migration-runs/AT-RUST-007-2026-10-03-density-queries.md)。
 
 七类 typed eventBatch 已接到同一 Session；1–32 个查询保留各族输入顺序，三个附加 worker
 各自持有/关闭 connection，全部排空才返回，不发布部分结果。共享 allocation credit 与
@@ -495,15 +495,15 @@ request-owned abort 已接入 SQL progress handler；保守 credit 不等同 RSS
 **21 个失败后下一请求不变**检查通过，FD 与明确关闭后的 owner/lease/Ready 均核验。
 macOS `/dev/fd` 瞬时 EBADF 已用同身份、同预算、最多八次重试处理；1,536 次连接 churn
 回归通过。265 项 Rust tests 通过；完整 SDK async executor、density cache、detail/navigation、
-Windows、性能与 App 验收仍未完成。详见[batch 与读池记录](migration-runs/AT-RUST-007-2026-10-03-batch-queries.md)。
+Windows、性能与 App 验收仍未完成。详见[batch 与读池记录](../migration-runs/AT-RUST-007-2026-10-03-batch-queries.md)。
 
 同日新增真实 native `summaryFacts`，接通 StoreReader/Session/async Engine/FFI 与 SDK
 typed request，保持各领域不同的前缀/匹配/DISTINCT 语义及缺失能力；独立跨语句 SQL
 VM work policy 与 decoded credit 约束工作。4 份冻结 DB 的 9 个成功事实和 5 个预期
 失败、两条真实 Trace 的 4 次包外 SDK 查询通过。机器质量明确移除人类 prose 并保留
 有序结构化事实；Core warning/repository/App 适配与完整 009/012 验收继续待办，
-见[native summaryFacts 记录](migration-runs/AT-RUST-007-012-2026-10-04-native-summary-facts.md)。
-随后接通共享保留预算的 typed summary views，见[typed summary SDK 记录](migration-runs/AT-RUST-012-2026-10-04-typed-summary-sdk.md)。
+见[native summaryFacts 记录](../migration-runs/AT-RUST-007-012-2026-10-04-native-summary-facts.md)。
+随后接通共享保留预算的 typed summary views，见[typed summary SDK 记录](../migration-runs/AT-RUST-012-2026-10-04-typed-summary-sdk.md)。
 
 交付：
 
@@ -555,7 +555,7 @@ generation handles、有界 queue/results、nonblocking poll/cancel、预留 clo
 Failed 可 close、owner worker drain/Drop 与原子 Request/资源终态。三份实际 small 的九份
 完整 batch/search/analysis UTF-8 response 一致，12 项原生生命周期检查与 272 项 Rust tests
 通过。持久 cache、外层 namespace 自动重启恢复、旧标注导入和 Windows runtime 仍待完成；
-这也是 012 的后端前置，尚非 SDK/App 验收。详见[异步生命周期记录](migration-runs/AT-RUST-008-012-2026-10-04-async-runtime.md)。
+这也是 012 的后端前置，尚非 SDK/App 验收。详见[异步生命周期记录](../migration-runs/AT-RUST-008-012-2026-10-04-async-runtime.md)。
 
 2026-10-05 持久 session 增量：隔离 native root 的 cold/warm Ready、format-4 cache owner binding、
 shared active lease、两秒 exclusive grace、corrupt quarantine、未知格式保留、timestamp touch
@@ -564,14 +564,14 @@ shared active lease、两秒 exclusive grace、corrupt quarantine、未知格式
 通过。483 Rust tests、72 SDK tests、4 Span 拒绝、27 个同 Ready 原 Core 回归、本机默认
 Swift/API/unsigned App 检查通过。状态仍为 in-progress：LRU/purge、cache 多进程/真实 crash/
 低磁盘、外层 namespace 重启恢复、旧标注迁移、默认 App/发行及 macOS 总验收尚待完成。
-来源、实际 artifact 与失败边界见[本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-persistent-session.md)。
+来源、实际 artifact 与失败边界见[本轮记录](../migration-runs/AT-RUST-008-012-2026-10-05-persistent-session.md)。
 
 2026-10-05 维护增量：Rust Engine fixed-root inventory/LRU/purge、稳定 key/entry 与 exact-owner
 删除、durable Removing intent 及 generic/orphan/removal recovery 已接通。计数保留原 Swift
 inventory.active 与 skippedActive 的区别；实际 parser Ready 的 dual-session 保护、purge/reparse、
 阈值维护和五个 SIGKILL 删除窗口通过。intent 后取消先 drain 本次删除，不声称没有 mutation。
 Runtime/SDK/App 维护入口及其余 008/macOS 验收继续推进，见
-[维护记录](migration-runs/AT-RUST-008-2026-10-05-cache-maintenance.md)。
+[维护记录](../migration-runs/AT-RUST-008-2026-10-05-cache-maintenance.md)。
 
 同日后续接通非阻塞 Engine-scoped cache request、C ABI scalar 入口与 Swift SDK 的 inventory、
 standard maintain、purge-unused。维护复用普通 request 的队列/取消/结果/drain，session 为零；
@@ -581,7 +581,7 @@ intent 后取消、ephemeral 拒绝与结果预算；四项 SDK 解码回归覆�
 提前取消，三份 Trace 的 75 个 FFI/Swift response 与五个原生 SIGKILL 删除窗口通过。
 C ABI 暂定 v1 新增一个 export，摘要/绑定/fixture 与 production SDK 同步。App/ArkDeck 的
 Rust 维护消费和其余 008/012/macOS 验收继续待办，见
-[异步维护接线记录](migration-runs/AT-RUST-008-012-2026-10-05-async-cache-maintenance.md)。
+[异步维护接线记录](../migration-runs/AT-RUST-008-012-2026-10-05-async-cache-maintenance.md)。
 
 ## 11. AT-RUST-009 — 共享 summary/context/analyze 与质量边界
 
@@ -591,7 +591,7 @@ Rust 维护消费和其余 008/012/macOS 验收继续待办，见
   按实测字节的保留二分）；scheduling 按 Swift 以 trace 能力 + 已观测 Runnable 终点证明（取代
   `Unproven` 占位）。Store 的事件页去掉 Swift 没有的 200 万 VM-step 上限（行数、解码字节、deadline
   与取消仍约束），全 Trace 20,000 事件页由此可答。实测见
-  [context/analyze 记录](migration-runs/AT-RUST-009-010-2026-10-14-context-analyze.md)。
+  [context/analyze 记录](../migration-runs/AT-RUST-009-010-2026-10-14-context-analyze.md)。
 - 平台/输入：跨平台纯计算、真实 Store；无设备。
 - 需求：AT-AN-*、AT-CTX-001～005、AT-JSON-002、AT-QUERY-008、AT-ERR-*、AT-PERF-005/006。
 - 路径：`arktrace-analysis`、contract machine validation；对应 Swift analysis oracle。
@@ -614,7 +614,7 @@ Rust 维护消费和其余 008/012/macOS 验收继续待办，见
 - 无 scheduling 证据、空 range、overflow、并发取消及预算边界正确。
 - 更换语言不改变分析结论；有意修 bug 的差异有独立向量，不扩大 normalization 范围。
 
-2026-10-03 主线进展：[原始并行交接](migration-runs/AT-RUST-009-parallel-analysis-2026-10-03.md)
+2026-10-03 主线进展：[原始并行交接](../migration-runs/AT-RUST-009-parallel-analysis-2026-10-03.md)
 逐一核对 22 个新增文件后追加导入，未覆盖共享 manifest/lock。主线使用固定 Unicode NFC
 依赖合并 canonical-equivalent raw state，同时保留第一份标签与 UTF-8 输出顺序；修正共享
 Swift 对 open-ended Runnable 终点的证明规则。原始 23 parity / 2 differences 证据保留；
@@ -622,13 +622,13 @@ Swift 对 open-ended Runnable 终点的证明规则。原始 23 parity / 2 diffe
 `NoCacheSession::analyze_bounded` 接真实独立 CPU/process/thread/state/scheduling/hot raw
 pages，保留四个 identity/property filters、取消/时限与最终快照身份检查。三份真实 small 的
 15 个请求在四个完整 section 上与 Swift CLI T0 一致，另有 3 个独立预算和 21 个负例。
-详见[主线分析记录](migration-runs/AT-RUST-009-2026-10-03-mainline-analysis.md)。
+详见[主线分析记录](../migration-runs/AT-RUST-009-2026-10-03-mainline-analysis.md)。
 
 这仍是六个纯 section 的迁移入口。固定上游 Runnable 语义未完成证明，Engine 保持 unproven；
 后续已把真实 named query 接入 hot：独立预算、最小时长过滤、真实 callstack key/full range、
 quality/truncation 均从 Store page 传递，argument handle 不读取。新增两个时长阈值场景后，
 三份 small 的 **21 组请求**在五个完整数组、section facts 和 analysis dataQuality 上 T0；
-3 个独立页预算和 27 个负例也通过，详见[named/hot 记录](migration-runs/AT-RUST-007-009-2026-10-03-named-hot.md)。
+3 个独立页预算和 27 个负例也通过，详见[named/hot 记录](../migration-runs/AT-RUST-007-009-2026-10-03-named-hot.md)。
 完整 long slices、summary/context、full envelope、
 编码 byte budget、SDK/App/CLI 接通与 performance 仍待完成，不能将 009 或最终 macOS 验收标记完成。
 
@@ -637,19 +637,19 @@ quality/truncation 均从 Store page 传递，argument handle 不读取。新增
 - 状态：in-progress；开工依赖：001、002；完成依赖：005–009；Windows 加 003。
 - Windows 进展（2026-10-14）：`arktrace.exe` 的 inspect/processes/threads/query 在 Windows 原生运行；
   闭合安装布局、`.exe` helper/parser、Authenticode publisher 或开发 SHA pin、`ARKTRACE_STORAGE_ROOT`
-  宿主私有根、Ctrl+C/Break 结构化取消与 kill 后无存活 parser 均已实测（[CLI.md](CLI.md) Windows 节）。
+  宿主私有根、Ctrl+C/Break 结构化取消与 kill 后无存活 parser 均已实测（[CLI.md](../guides/CLI.md) Windows 节）。
   随后接通 `summary`（Swift `TraceSummaryEngine` 归约：解析范围、固定 truncation 节序、按 UTF-8
   字节稳定排序的 event source、capability 可空性）与 `doctor [--self-test]`（九项规范检查，首个失败
   返回 typed error，自测内置 Trace 固定 SHA）；三份 small fixture 的 summary 与 doctor 对 Swift
   oracle T0（除平台身份与 index 版本），见
-  [summary/doctor 记录](migration-runs/AT-RUST-010-2026-10-14-summary-doctor.md)。随后 `context`
+  [summary/doctor 记录](../migration-runs/AT-RUST-010-2026-10-14-summary-doctor.md)。随后 `context`
   与 `analyze` 两平台接通（Swift 语法、请求参数、envelope truncation 节、Context 的
   envelope-fitted 字节重试与人类输出）；ArkDeck 12 份 reviewed Swift envelope 在 Windows 上 T0，见
-  [context/analyze 记录](migration-runs/AT-RUST-009-010-2026-10-14-context-analyze.md)。Windows
+  [context/analyze 记录](../migration-runs/AT-RUST-009-010-2026-10-14-context-analyze.md)。Windows
   `licenses` 已接通完整安装归属集合、Windows 静态 runtime 清单和 bounded human/JSON 输出；
   取消、超时或编码预算不足均不返回部分文档。macOS Rust `licenses` 仍待接通。
 - 平台/输入：两端 CLI、真实 parser/resources；无设备。
-- 需求：AT-CLI-*、AT-JSON-001～008、AT-CTX-005、AT-ERR-*、AT-SEC-*、AT-AD-006/007、[CLI.md](CLI.md)。
+- 需求：AT-CLI-*、AT-JSON-001～008、AT-CTX-005、AT-ERR-*、AT-SEC-*、AT-AD-006/007、[CLI.md](../guides/CLI.md)。
 - 路径：`arktrace-cli`、machine/argv corpora、resource locator、signal tests、CLI 文档。
 
 已开始 shared command composition：inspect/processes/threads 消费实际 NoCacheSession，完整
@@ -657,26 +657,26 @@ Machine JSON 1.0 envelope 验证后 bounded encode，checked session close 成�
 失败也 close。真实三份 small 的九份输出中，仅实际 Rust executable SHA 与 hiprofiler 已知
 upstream DB SHA 变化记 T1，其余字段 T0。输出超限、取消、deadline、非法 limits 四个真实
 负例均不返回成功 bytes，Ready/owner/ephemeral lease 清空。证据同
-[007/010 记录](migration-runs/AT-RUST-007-010-2026-10-03-directory-commands.md)。
+[007/010 记录](../migration-runs/AT-RUST-007-010-2026-10-03-directory-commands.md)。
 随后已接通实际 `arktrace` executable adapter：三命令 argv、help/version、pretty/human、闭合
 错误 envelope/exit status、kernel mapped Mach-O identity、sealed bundle resources、首次信号取消和
 有界 stdout/stderr 提交。普通构建要求 Developer ID/hardened runtime；原生验收候选包显式开启
 development-resources，只证明开发签名路径。新证据见
-[打包 CLI 记录](migration-runs/AT-RUST-010-2026-10-03-packaged-cli.md)。
+[打包 CLI 记录](../migration-runs/AT-RUST-010-2026-10-03-packaged-cli.md)。
 实际 query 入口随后接入 CPU slices / thread states，要求 view 与成对 range；maxRows/maxEvents
 同时约束，身份/属性互斥，raw/normalized state 只属于 state view。请求、filters、单一事件数组、
 quality、truncation、provenance 的完整机器文档对照冻结新 Swift oracle 的 51 组结果，除实际
 Mach-O SHA 和 hiprofiler 既有 upstream DB SHA 变动外全部 T0。原有九份目录/inspect 文档与
-资源/首次信号/背压矩阵也重跑通过，见 [query CLI 记录](migration-runs/AT-RUST-010-2026-10-03-query-cli.md)。
+资源/首次信号/背压矩阵也重跑通过，见 [query CLI 记录](../migration-runs/AT-RUST-010-2026-10-03-query-cli.md)。
 query 的 slices 已接通：name/exact/prefix/contains、minimum duration、depth 与身份 filters、
 Agent 256-byte 名称边界；private argument handle 不进入 CLI。实际候选包对 **48 份完整 named
 Machine 文档**通过，仍仅允许实际 tool SHA 和既有 hiprofiler upstream DB SHA 的差异。
 三个 query view 的 fresh Swift human bytes 一致；旧 9 份目录/inspect、51 份 CPU/state 文档、
-**46 个负例**（含新增边界、输出与既有原生信号/背压）通过。见[named CLI 记录](migration-runs/AT-RUST-010-2026-10-03-named-cli.md)。
+**46 个负例**（含新增边界、输出与既有原生信号/背压）通过。见[named CLI 记录](../migration-runs/AT-RUST-010-2026-10-03-named-cli.md)。
 随后 counters view 及 filter/name/scope 参数已接通。实际开发候选的 **48 份 counter
 Machine 文档**和原 108 份文档重跑通过，总计 **156 份**；四个 view 的 fresh Swift human
 bytes 一致，60 个 CLI 负例通过。单独保留候选通过真实 1-row counter 查询及 1 KiB 输出
-上限检查，见[counter 查询记录](migration-runs/AT-RUST-007-010-2026-10-03-counters.md)。
+上限检查，见[counter 查询记录](../migration-runs/AT-RUST-007-010-2026-10-03-counters.md)。
 其它五命令仍未接通，010 不标完成。
 其余 query views、其它五命令、二次强停与启动恢复、完整输出压力/TTY 与发行身份、下游消费仍未完成，不能据此
 声称生产 CLI 已替换。原 smoke binary 保留为开发检查。
@@ -731,28 +731,28 @@ bytes 一致，60 个 CLI 负例通过。单独保留候选通过真实 1-row co
 strict clippy/fmt、七 crate/35 份 license 与契约通过。独立生产依赖消费端发现默认 JSON
 解码器拒绝 891/10,000 个合法完整 Viewport roundtrip；产品启用 float_roundtrip 后全部
 通过，并把该消费端检查接入两平台 CI。显式 detail 的离屏查询例外、quality scope 与真实
-Store/SDK 接线仍待完成，不能据纯模块完成 011。详见[主线 Viewer 记录](migration-runs/AT-RUST-011-2026-10-04-mainline-viewer.md)。
+Store/SDK 接线仍待完成，不能据纯模块完成 011。详见[主线 Viewer 记录](../migration-runs/AT-RUST-011-2026-10-04-mainline-viewer.md)。
 
 随后已按 offscreen 要求同步修正 Swift/Rust 显式 detail：相同 13 组实际 Swift loader
 输入仅 1 组查询行为变化（60 lanes → 1），布局/质量及其它 12 组保持精确一致，原始向量
 保留。当前 302 项 Rust tests、28 项 Swift 回归和 Xcode 27 实际 App 构建通过；尚未
-Rust SDK 切换，详见[离屏 detail 记录](migration-runs/AT-RUST-011-2026-10-04-offscreen-detail.md)。
+Rust SDK 切换，详见[离屏 detail 记录](../migration-runs/AT-RUST-011-2026-10-04-offscreen-detail.md)。
 
 同日已把 Viewer derived facts 合入完整 snapshot quality，注册五个缺失 scope，来源与
 派生事实共用 4,096 项上限及原始身份去重。当前 304 项 Rust tests、111 项完整 Rendering
 tests、一项 CLI quality 测试及当前 App 构建通过；重新实测六份 Swift oracle，520 组完整
-输出字节不变，见[质量状态记录](migration-runs/AT-RUST-011-2026-10-04-quality-envelope.md)。
+输出字节不变，见[质量状态记录](../migration-runs/AT-RUST-011-2026-10-04-quality-envelope.md)。
 
 typed DTO 适配器已覆盖六类 source，并精确重放 8 组独立 actual Swift detail/style
 向量；当前 308 项 Rust tests 通过。尚未接入真实 Store owner，nil namedSlice 的 detail/
-density 范围差异须在接线时解决，见[事件页投影记录](migration-runs/AT-RUST-011-2026-10-04-detail-adapter.md)。
+density 范围差异须在接线时解决，见[事件页投影记录](../migration-runs/AT-RUST-011-2026-10-04-detail-adapter.md)。
 
 同日增加实际 NoCache/async owner 的 bounded detail 操作；同步修正 Swift/Rust nil
 namedSlice 和 counter physical-family 的 pre-limit 范围。保留六组实际 Swift scope 修复前后
 输出、七组 counter raw/loader 向量，三份真实 trace 的 21 个 async/blocking Rust 响应逐字节
 一致；FD 23 → 23，原始 trace 不变。315 Rust tests、113 Swift 回归、API baseline 和
 Xcode 27 App build 通过；七份既有 Swift oracle 的 528 组输出字节不变。完整 viewport、
-generation/cache、SDK/App 与验收仍待完成，见[owner 接线记录](migration-runs/AT-RUST-011-2026-10-04-scoped-owner.md)。
+generation/cache、SDK/App 与验收仍待完成，见[owner 接线记录](../migration-runs/AT-RUST-011-2026-10-04-scoped-owner.md)。
 
 随后接入 session-owned viewport loader、bounded density LRU、cached depth、focused
 inclusion 与 64/512 density resolution；async worker 按 generation 取消旧 viewport 并
@@ -762,40 +762,40 @@ Rust blocking/async 完整 UTF-8 相同，worker gate、FD/owner/raw-byte 检查
 332 Rust tests、strict clippy/fmt、十项 offline gate 与 46 planner cases 通过。完整原始
 Swift snapshot/inspector 保留；labels/inspector/palette/jank、tree/navigation/annotations、
 SDK/App/persistent-cache/发行/性能及最终验收仍未完成，见
-[viewport owner 记录](migration-runs/AT-RUST-011-2026-10-04-viewport-owner.md)。
+[viewport owner 记录](../migration-runs/AT-RUST-011-2026-10-04-viewport-owner.md)。
 
 011 的后续共享配色/呈现模块已按审查清单进入主线：仅导入 18 个新增文件并追加
 精确模块导出。实际主线 356 Rust tests（含 72 viewer）和 26 Swift 回归通过；重新
 运行的 1,168 个 actual Swift oracle 输出与原审查结果逐字节一致，迁移 verifier
 覆盖输入/输出与完整 Swift source pins。仅纯模块可用，production snapshot/ABI、
 SDK 绘制和 App 尚未接通；density fallback 与 actual frame depth 的既有规格差异
-保持明确未裁决。见[主线呈现记录](migration-runs/AT-RUST-011-2026-10-04-mainline-presentation.md)。
+保持明确未裁决。见[主线呈现记录](../migration-runs/AT-RUST-011-2026-10-04-mainline-presentation.md)。
 
 导航纯模块已按最终审查清单导入 49 个新增路径，三个生产源使用容量修复版本，
 保留原始历史记录及既有 palette 导出。当前主线 382 Rust tests（98 Viewer）、4 项
 actual Swift canonical 与 88 项相关回归通过；四份新 oracle 输出逐字节相同。
 迁移 verifier 覆盖当前 Swift 完整源集合和输入/输出身份。host Unicode matcher、
 相邻事件查询执行、session aggregate 预算和 Engine/SDK/App 接线仍未完成，不能据此
-关闭 011 或 macOS 验收。见[主线导航记录](migration-runs/AT-RUST-011-2026-10-04-mainline-navigation.md)。
+关闭 011 或 macOS 验收。见[主线导航记录](../migration-runs/AT-RUST-011-2026-10-04-mainline-navigation.md)。
 
 标注模块随后导入最终审查的 21 个新增路径，修正持久化投影的外部可变容量问题。
 当前 401 Rust runtime tests + 3 compile-fail、748 个新运行 actual Swift 状态观察点
 和 15 项相关回归通过；原 canonical 输出字节不变，verifier 核对完整当前源码与
 deferred editor 身份。host 总预算、持久化接线和 Engine/FFI/SDK/App 未完成；原始
-历史报告未重写。见[主线标注记录](migration-runs/AT-RUST-011-2026-10-04-mainline-annotations.md)。
+历史报告未重写。见[主线标注记录](../migration-runs/AT-RUST-011-2026-10-04-mainline-annotations.md)。
 
 当前 counter 兼容修复允许合法 process counter 保留 `measure` 或
 `process_measure` 的真实 EventKey；CPU counter 仍只接受 `measure`。
 主 workspace 增加 5 项永久回归，当前实际 Swift loader/style 与原生选择/reveal
 输出逐字节一致。生产 wire、SDK/App 接线和完整验收仍未完成，见
-[主线 counter 兼容记录](migration-runs/AT-RUST-011-2026-10-04-mainline-counter-compat.md)。
+[主线 counter 兼容记录](../migration-runs/AT-RUST-011-2026-10-04-mainline-counter-compat.md)。
 
 随后按审查清单接入 Inspector 完整事实投影、snapshot EventKey 索引和 action catalog，
 仅新增 149 个专属路径并追加六行模块导出。当前 442 Rust runtime + 6 compile-fail、
 4 项 actual Swift canonical 和 40 项相关回归通过；四份新 oracle 输出字节不变。
 索引保留首个 nil Inspector 对重复键的阻断，catalog 保留原生键盘路由语义。
 实际 snapshot owner、SDK/App 和用户焦点/IME 接线仍未完成，见
-[主线 Viewer facts 记录](migration-runs/AT-RUST-011-2026-10-04-mainline-viewer-facts.md)。
+[主线 Viewer facts 记录](../migration-runs/AT-RUST-011-2026-10-04-mainline-viewer-facts.md)。
 
 ## 14. AT-RUST-012 — C ABI 与 Swift/C# SDK
 
@@ -831,7 +831,7 @@ deferred editor 身份。host 总预算、持久化接线和 Engine/FFI/SDK/App 
 声明与真实 macOS owner/Swift parity 验证。22 exports、10 records/95 offsets、336 Rust
 测试及 1,000 valid-allocation byte cases 通过。async Swift SDK、C# SafeHandle、完整
 生命周期压力、event/metric batches、SDK 分发与 App 切换仍未通过，见
-[C ABI owner 记录](migration-runs/AT-RUST-012-2026-10-04-c-abi-owner.md)。
+[C ABI owner 记录](../migration-runs/AT-RUST-012-2026-10-04-c-abi-owner.md)。
 
 后续同日推进已落地显式本地不可变 XCFramework、包外 async Swift SDK consumer、ARC
 result/snapshot owners、同步 Span 借用与取消/关闭/排空，并新增第 23 个 export 保留完整
@@ -840,7 +840,7 @@ session cleanup 错误。真实三条 trace 的 33 个 viewport 与 42 个 densi
 607 Swift 测试（601 通过、6 项既有跳过）、包外 API baseline 和旧 App 构建通过。
 生产 SDK 严格内存安全编译通过；完整 SDK/发布签名/1000 生命周期压力和 App 切换仍未
 验收。临时 JSON 字节复制已有独立预算，decoded DTO 所有权预算仍待完成。见
-[Swift SDK 开发记录](migration-runs/AT-RUST-012-2026-10-04-swift-sdk.md)。
+[Swift SDK 开发记录](../migration-runs/AT-RUST-012-2026-10-04-swift-sdk.md)。
 
 随后实际 package-external SDK 的 **1,000 轮完整生命周期压力 gate 通过**：每轮成功
 固定 parser open、slice query、非空 native snapshot、另一次已获 native admission 的
@@ -849,7 +849,7 @@ SDK sessions/requests 均归零。21 个检查点 FD 保持 22、direct children
 基线 20,430,848 bytes、检查点最大 20,856,832、最终 shutdown 前 20,480,000；原始
 hash 不变、无 Ready 残留。10 warmups 不计入这 1,000 轮，取消 admission 不冒充解析
 中途取消；Rust Release + Swift Debug 开发 artifact 不冒充 Release App SLO。完整机器
-记录和未覆盖范围见[SDK 生命周期记录](migration-runs/AT-RUST-012-2026-10-04-sdk-lifecycle.md)。
+记录和未覆盖范围见[SDK 生命周期记录](../migration-runs/AT-RUST-012-2026-10-04-sdk-lifecycle.md)。
 typed response/decoded-owner budget、C# owners、event/metric、生产签名和 SDK 分发仍待
 完成，012 与 macOS 整体验收继续保持 in-progress。
 
@@ -858,14 +858,14 @@ pool、Engine+Session 身份和实际 request 验证，记录/质量/text views 
 SDK 测试和四个实际借用编译反例通过。三条真实 trace 的 18 个目录页与独立发起的
 native 查询一致，256-owner 拒绝/恢复、关闭后存活与最终归零已实测；zlib 的名称为
 nil，未冒充文本检查。其它响应、aggregate/RSS、App 切换与发布/性能验收仍待完成。
-见[typed 目录 SDK 记录](migration-runs/AT-RUST-012-2026-10-04-typed-directory-sdk.md)。
+见[typed 目录 SDK 记录](../migration-runs/AT-RUST-012-2026-10-04-typed-directory-sdk.md)。
 
 随后新增闭合保留的 `RustSession.openingView()`，metadata/parser/cache/preparation/inspection
 及文本共享 SDK credit；与目录共用预算和闭合解码。原始 JSON 检查拒绝重复字段及
 浮点表示冒充整数，保留质量顺序与重复项。27 SDK tests、四项真实借用拒绝、三条
 真实 trace 的完整 native opening 对照及18页目录回归通过。独立同DB原Swift metadata
 对照、Core machine quality 适配、其他 typed responses、summaryFacts 与 App/发行/
-最终验收仍未完成，见[typed opening SDK 记录](migration-runs/AT-RUST-012-2026-10-04-typed-opening-sdk.md)。
+最终验收仍未完成，见[typed opening SDK 记录](../migration-runs/AT-RUST-012-2026-10-04-typed-opening-sdk.md)。
 
 同日新增 `RustSession.summaryFacts()` 的闭合 typed 保留视图：七类 bounded count、
 来源集合/记录/UTF-8 和有序质量事实共用 opening/directory 的 ARC credit。35 项 SDK
@@ -873,7 +873,7 @@ nil，未冒充文本检查。其它响应、aggregate/RSS、App 切换与发布
 256-owner 跨三类拒绝、释放后恢复、close/shutdown 后视图与提取文本不变、最终
 配额归零已实测。million-item native 查询边界保留，SDK 存储 admission 可更早拒绝。
 Core warning materialization、其他响应、repository/App 接线与完整 012/013/macOS
-验收仍未完成，见[typed summary SDK 记录](migration-runs/AT-RUST-012-2026-10-04-typed-summary-sdk.md)。
+验收仍未完成，见[typed summary SDK 记录](../migration-runs/AT-RUST-012-2026-10-04-typed-summary-sdk.md)。
 
 随后接通 opening、目录和 summary 的显式 Core 兼容复制；机器质量入口保留顺序、
 重复、null 和 count，移除人类 prose，旧 warning 构造接口保持兼容。新增 10 项测试，
@@ -884,7 +884,7 @@ Core warning materialization、其他响应、repository/App 接线与完整 012
 6 个既有 skips）、API baseline、生产 SDK、App 构建及文档类型检查通过；App 构建保留
 一条可选 AppIntents 提取告警。App 仍用 Swift 内核；人类质量呈现、其他 typed responses、
 repository/App 接线与完整 macOS 验收仍待办，见
-[Core 兼容复制记录](migration-runs/AT-RUST-012-2026-10-04-core-materialization.md)。
+[Core 兼容复制记录](../migration-runs/AT-RUST-012-2026-10-04-core-materialization.md)。
 
 ## 15. AT-RUST-013 — macOS 原生 App 使用 Rust
 
@@ -944,7 +944,7 @@ repository/App 接线与完整 macOS 验收仍待办，见
 
 - 状态：planned；开工依赖：002、004、005；完成依赖：004、005、013、014。
 - 平台/输入：两端 native host；软件阶段 stand-in；真实验收需要 SDK HDC 与板卡和明确授权。
-- 需求：AT-SYS-003/006、AT-APP-014～019、AT-SEC-004/005、AT-AD-011、[CAPTURE.md](CAPTURE.md)。
+- 需求：AT-SYS-003/006、AT-APP-014～019、AT-SEC-004/005、AT-AD-011、[CAPTURE.md](../design/CAPTURE.md)。
 - 路径：独立 `arktrace-capture`、`arktrace-capture-ffi`、两端 Capture UI adapter；
   不向离线 CLI/engine 添加 Capture feature。
 
@@ -974,7 +974,7 @@ repository/App 接线与完整 macOS 验收仍待办，见
 - 需求：AT-SEC-*、AT-CLI-001/011、AT-PARSE-002、SPECIFICATION §23.5、现行 CLI/App distribution 边界、
   设计 §10。
 - 路径：`scripts/` 发行/验证入口、`contracts/distribution/`、SDK artifact metadata、
-  `docs/CLI_DISTRIBUTION.md`、`docs/APP_DISTRIBUTION.md`、license inventory。
+  `docs/guides/CLI_DISTRIBUTION.md`、`docs/guides/APP_DISTRIBUTION.md`、license inventory。
 
 交付：
 
@@ -1161,40 +1161,40 @@ CI
 记录随实现提交，不为了回填状态单独制造任务或改写已签名历史 evidence。
 缺某个发布输入时继续可独立推进的软件，最终 020 保留其验收缺口。
 
-2026-10-05 原生产品运行时增量：显式 SDK 图下同一固定 Engine 接入 document controller、后台维护和 Settings inventory/purge。真实 Trace 的模型机器事实、双窗口保护、标注/收藏重开及 purge/reparse 通过；修复 sidecar 0644 导致 native Ready 拒绝，并把兼容 IO 移出 MainActor、在关闭前排空。500 Rust、78 SDK、92 原生 AppSupport、609 默认 Swift（6 opt-in skips）和适用 API/App/contract gates 通过。默认 App、native held-FD sidecar、旧 cache import、hot snapshot、性能/发行/ArkDeck 和 macOS 总验收未完成；见[本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-native-product-runtime.md)，goal 保持 active。
+2026-10-05 原生产品运行时增量：显式 SDK 图下同一固定 Engine 接入 document controller、后台维护和 Settings inventory/purge。真实 Trace 的模型机器事实、双窗口保护、标注/收藏重开及 purge/reparse 通过；修复 sidecar 0644 导致 native Ready 拒绝，并把兼容 IO 移出 MainActor、在关闭前排空。500 Rust、78 SDK、92 原生 AppSupport、609 默认 Swift（6 opt-in skips）和适用 API/App/contract gates 通过。默认 App、native held-FD sidecar、旧 cache import、hot snapshot、性能/发行/ArkDeck 和 macOS 总验收未完成；见[本轮记录](../migration-runs/AT-RUST-008-012-2026-10-05-native-product-runtime.md)，goal 保持 active。
 
-2026-10-05 扩展名与 sidecar 读取增量：真实产品四种扩展名/无扩展名的 metadata、目录与 snapshot 对等；Session-held 只读 `view-state.json` 端口保留 key-lock parent，固定名称、有界解码与取消/identity 复核，损坏/未知/超量原 bytes 保留。509 Rust、79 SDK、609 默认 Swift（6 opt-in skips）、API/App 与 31 个最终本地 gates 通过，第一次 App 磁盘不足失败留存并修复。读取端口未接入 C ABI/SDK/controller，写入事务、旧状态备份导入、默认 App/hot snapshot 和 macOS 总验收继续推进；见[本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-source-format-sidecar-read.md)，goal 保持 active。
+2026-10-05 扩展名与 sidecar 读取增量：真实产品四种扩展名/无扩展名的 metadata、目录与 snapshot 对等；Session-held 只读 `view-state.json` 端口保留 key-lock parent，固定名称、有界解码与取消/identity 复核，损坏/未知/超量原 bytes 保留。509 Rust、79 SDK、609 默认 Swift（6 opt-in skips）、API/App 与 31 个最终本地 gates 通过，第一次 App 磁盘不足失败留存并修复。读取端口未接入 C ABI/SDK/controller，写入事务、旧状态备份导入、默认 App/hot snapshot 和 macOS 总验收继续推进；见[本轮记录](../migration-runs/AT-RUST-008-012-2026-10-05-source-format-sidecar-read.md)，goal 保持 active。
 
-2026-10-04 typed event SDK 增量：七类 cold page 与 Core 兼容复制已接入 retained owner；SDK `sliceDetails` 保留 nullable Inspector handle，旧机器输出保持原形状。50 SDK tests、三份真实 Trace 42 次同 Ready DB 原 Swift 对照、457 Rust all-features tests、production SDK/API/default Swift/App 构建通过。实际语料的非空 frames/arguments 与非 null Inspector handle、App cutover 和整体 macOS 验收仍未通过。实际告警、失败与 CI 状态见 [本轮记录](migration-runs/AT-RUST-012-2026-10-04-event-sdk.md)；goal 保持 active。
+2026-10-04 typed event SDK 增量：七类 cold page 与 Core 兼容复制已接入 retained owner；SDK `sliceDetails` 保留 nullable Inspector handle，旧机器输出保持原形状。50 SDK tests、三份真实 Trace 42 次同 Ready DB 原 Swift 对照、457 Rust all-features tests、production SDK/API/default Swift/App 构建通过。实际语料的非空 frames/arguments 与非 null Inspector handle、App cutover 和整体 macOS 验收仍未通过。实际告警、失败与 CI 状态见 [本轮记录](../migration-runs/AT-RUST-012-2026-10-04-event-sdk.md)；goal 保持 active。
 
-2026-10-04 density SDK 增量：retained sparse bucket/color identity/quality 与 Core 复制已接通；56 SDK tests、110 独立原 Swift 成功向量、最小真实 Trace 14 次同 Ready DB 对照及关闭后读取通过。逐 query deadline/batch、共享 repository、App cutover 和 macOS 总验收仍未完成。新增私有 immutable Ready supplement；工具告警、输入边界与实际 CI 状态见 [本轮记录](migration-runs/AT-RUST-012-2026-10-04-density-sdk.md)，goal 保持 active。
+2026-10-04 density SDK 增量：retained sparse bucket/color identity/quality 与 Core 复制已接通；56 SDK tests、110 独立原 Swift 成功向量、最小真实 Trace 14 次同 Ready DB 对照及关闭后读取通过。逐 query deadline/batch、共享 repository、App cutover 和 macOS 总验收仍未完成。新增私有 immutable Ready supplement；工具告警、输入边界与实际 CI 状态见 [本轮记录](../migration-runs/AT-RUST-012-2026-10-04-density-sdk.md)，goal 保持 active。
 
-2026-10-04 batch SDK 增量：七类 typed batch 共享 retained owner，返回数组与各输入槽位配对，nullable Inspector handle 与 Core 复制已接通。63 SDK tests、固定 Ready 受控 opening 下三个真实 native batch / 48 槽位与当前原 Swift prepared concurrent repository 对照及关闭后读取通过；458 Rust tests、production SDK/API/default Swift/App 检查通过。逐 query deadline transport、共享 repository/App 切换与 macOS 总验收仍未完成。来源、失败留存和实际 CI 边界见 [本轮记录](migration-runs/AT-RUST-012-2026-10-04-batch-sdk.md)，goal 保持 active。
+2026-10-04 batch SDK 增量：七类 typed batch 共享 retained owner，返回数组与各输入槽位配对，nullable Inspector handle 与 Core 复制已接通。63 SDK tests、固定 Ready 受控 opening 下三个真实 native batch / 48 槽位与当前原 Swift prepared concurrent repository 对照及关闭后读取通过；458 Rust tests、production SDK/API/default Swift/App 检查通过。逐 query deadline transport、共享 repository/App 切换与 macOS 总验收仍未完成。来源、失败留存和实际 CI 边界见 [本轮记录](../migration-runs/AT-RUST-012-2026-10-04-batch-sdk.md)，goal 保持 active。
 
-2026-10-04 独立 query deadline 增量：原 Core deadline 的 epoch 秒/阿秒与 thread nil 已逐槽位接通，SDK 显式整操作 timeout 保持独立。68 SDK tests、471 Rust tests、11 个同 Ready 原 Swift batch / 22 次 native batch 的成功与 QUERY_TIMEOUT 对照、关闭后 retained 读取及 production SDK/API/default Swift/App 检查通过；共享 repository/default App 切换和整体 macOS 验收仍未完成。精度、实际 SQL 中断、来源及失败输入缺口见 [本轮记录](migration-runs/AT-RUST-012-2026-10-04-deadline-sdk.md)，goal 保持 active。
+2026-10-04 独立 query deadline 增量：原 Core deadline 的 epoch 秒/阿秒与 thread nil 已逐槽位接通，SDK 显式整操作 timeout 保持独立。68 SDK tests、471 Rust tests、11 个同 Ready 原 Swift batch / 22 次 native batch 的成功与 QUERY_TIMEOUT 对照、关闭后 retained 读取及 production SDK/API/default Swift/App 检查通过；共享 repository/default App 切换和整体 macOS 验收仍未完成。精度、实际 SQL 中断、来源及失败输入缺口见 [本轮记录](../migration-runs/AT-RUST-012-2026-10-04-deadline-sdk.md)，goal 保持 active。
 
-2026-10-05 Core repository adapter 增量：package actor 显式实现全部 13 个协议入口，processes/summaryFacts/frames/arguments 的原始 deadline 接通，既有七类 batch 复用。71 SDK tests、476 Rust tests、27 个同 Ready 原 Swift 协议对照与关闭后 typed DTO 重读、production SDK/API/default Swift/App 检查通过。Host 整操作预算/end-to-end admission、Ready identity memoization、Runtime persistent cache/default App 接入和 macOS 总验收继续推进；available frames/arguments 本次页为空，不能认证非空实际语料。来源与三轮失败边界见 [本轮记录](migration-runs/AT-RUST-012-2026-10-05-core-repository-sdk.md)，goal 保持 active。
+2026-10-05 Core repository adapter 增量：package actor 显式实现全部 13 个协议入口，processes/summaryFacts/frames/arguments 的原始 deadline 接通，既有七类 batch 复用。71 SDK tests、476 Rust tests、27 个同 Ready 原 Swift 协议对照与关闭后 typed DTO 重读、production SDK/API/default Swift/App 检查通过。Host 整操作预算/end-to-end admission、Ready identity memoization、Runtime persistent cache/default App 接入和 macOS 总验收继续推进；available frames/arguments 本次页为空，不能认证非空实际语料。来源与三轮失败边界见 [本轮记录](../migration-runs/AT-RUST-012-2026-10-05-core-repository-sdk.md)，goal 保持 active。
 
-2026-10-05 native sidecar 保存增量：Session-held 端口完成 atomic create/replace/delete、固定 intent/completion/retirement 与取消后恢复，warm lookup 和 purge 核对同一 entry/lease/owner 权限。524 Rust、30 个受控真实 SIGKILL 场景、实际 Trace 双 Session/save/reopen/delete 与 18 个最终本地 gates 通过；磁盘、fixture/helper、编译与缓存冻结失败完整保留。C ABI/async/SDK/controller sidecar transport、兼容 URL IO 替换和 macOS 总验收仍未完成；见[本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-native-sidecar-write.md)，goal 保持 active。
+2026-10-05 native sidecar 保存增量：Session-held 端口完成 atomic create/replace/delete、固定 intent/completion/retirement 与取消后恢复，warm lookup 和 purge 核对同一 entry/lease/owner 权限。524 Rust、30 个受控真实 SIGKILL 场景、实际 Trace 双 Session/save/reopen/delete 与 18 个最终本地 gates 通过；磁盘、fixture/helper、编译与缓存冻结失败完整保留。C ABI/async/SDK/controller sidecar transport、兼容 URL IO 替换和 macOS 总验收仍未完成；见[本轮记录](../migration-runs/AT-RUST-008-012-2026-10-05-native-sidecar-write.md)，goal 保持 active。
 
-2026-10-05 native sidecar transport 增量：异步与 C ABI read/write/remove 使用独立 4 MiB 原始文档通道，普通请求保留 1 MiB；排队/运行输入共享 16 MiB actual-capacity credit，worker 校验与 IO 复用 Session-held authority。529 Rust、实际锁竞争额度/取消/drain/panic、save/reopen/delete/future 保留、79 现有 SDK tests 和本轮包外 SDK 实际消费通过，24 个最终 gates exit 0。ABI digest 更新、26 exports/record 布局不变。Swift sidecar SDK/controller、兼容 URL IO 替换、默认 App 与 macOS 总验收仍待完成；全部失败及实际 source/bin 记录见[本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-native-sidecar-wire.md)，goal 保持 active。
+2026-10-05 native sidecar transport 增量：异步与 C ABI read/write/remove 使用独立 4 MiB 原始文档通道，普通请求保留 1 MiB；排队/运行输入共享 16 MiB actual-capacity credit，worker 校验与 IO 复用 Session-held authority。529 Rust、实际锁竞争额度/取消/drain/panic、save/reopen/delete/future 保留、79 现有 SDK tests 和本轮包外 SDK 实际消费通过，24 个最终 gates exit 0。ABI digest 更新、26 exports/record 布局不变。Swift sidecar SDK/controller、兼容 URL IO 替换、默认 App 与 macOS 总验收仍待完成；全部失败及实际 source/bin 记录见[本轮记录](../migration-runs/AT-RUST-008-012-2026-10-05-native-sidecar-wire.md)，goal 保持 active。
 
-2026-10-05 native sidecar Swift SDK 增量：typed read/write/remove、原始格式与 provenance 检查、分配前完整 JSON 大小计数及 retained packed/text owner 已接通。87 SDK tests（新增 8 项、0 skip）、包外实际 Trace/save/reopen/exact 4 MiB/key-lock cancel/timeout/future 保留/ephemeral/Engine 后 facets/最终额度归零与 API baseline 通过，11 个最终本地 gates exit 0。复用已核对 472 当前 native source inputs 的不可变 artifact，本轮未重编 Rust。控制器 adapter、兼容 URL IO 替换、默认 App 与 macOS 总验收仍未完成；失败、输入、二进制及额度范围见[本轮记录](migration-runs/AT-RUST-012-2026-10-05-native-sidecar-sdk.md)，goal 保持 active。
+2026-10-05 native sidecar Swift SDK 增量：typed read/write/remove、原始格式与 provenance 检查、分配前完整 JSON 大小计数及 retained packed/text owner 已接通。87 SDK tests（新增 8 项、0 skip）、包外实际 Trace/save/reopen/exact 4 MiB/key-lock cancel/timeout/future 保留/ephemeral/Engine 后 facets/最终额度归零与 API baseline 通过，11 个最终本地 gates exit 0。复用已核对 472 当前 native source inputs 的不可变 artifact，本轮未重编 Rust。控制器 adapter、兼容 URL IO 替换、默认 App 与 macOS 总验收仍未完成；失败、输入、二进制及额度范围见[本轮记录](../migration-runs/AT-RUST-012-2026-10-05-native-sidecar-sdk.md)，goal 保持 active。
 
-2026-10-05 原生 sidecar 控制器增量：Session-held SDK 接入文档恢复与保存，失败可见且关闭仍释放 Session；极值与未知收藏兼容同步到 Swift/Rust。530 Rust、87 SDK、617 默认 Swift（6 显式 gate skips）、211 原生 AppSupport/Rendering、API 和两种 App 依赖图构建通过；实际 Trace 的未来格式保留、锁超时与关闭重开通过。默认 App/hot snapshot、备份导入、签名/性能/实际 GUI 与 macOS 总验收未完成；接续稳定 owner cache 与归档回收，goal 保持 active。见[本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-native-sidecar-controller.md)。
+2026-10-05 原生 sidecar 控制器增量：Session-held SDK 接入文档恢复与保存，失败可见且关闭仍释放 Session；极值与未知收藏兼容同步到 Swift/Rust。530 Rust、87 SDK、617 默认 Swift（6 显式 gate skips）、211 原生 AppSupport/Rendering、API 和两种 App 依赖图构建通过；实际 Trace 的未来格式保留、锁超时与关闭重开通过。默认 App/hot snapshot、备份导入、签名/性能/实际 GUI 与 macOS 总验收未完成；接续稳定 owner cache 与归档回收，goal 保持 active。见[本轮记录](../migration-runs/AT-RUST-008-012-2026-10-05-native-sidecar-controller.md)。
 
-2026-10-05 稳定 Cargo cache 增量：三个 owner 原位复用 mirror/target，独立 Git source pin/rebind、native host/target guard、独立 consumer 与全量证据归档/回收接口接通。35 工具回归、530 Rust、617 Swift passed（6 显式 skips）、API/unsigned App/SDK/contract 本地 gates 通过；完整 diff 选五车道，Windows native 未执行。三个真实 cache 均 active、实际回收 0；synthetic archive tests 不算迁移验收。默认 App native analysis/hot snapshot、旧状态备份导入与 GUI/性能/发行总验收继续，goal 保持 active。见[本轮缓存记录](migration-runs/AT-RUST-002-2026-10-05-cargo-cache-policy.md)。
+2026-10-05 稳定 Cargo cache 增量：三个 owner 原位复用 mirror/target，独立 Git source pin/rebind、native host/target guard、独立 consumer 与全量证据归档/回收接口接通。35 工具回归、530 Rust、617 Swift passed（6 显式 skips）、API/unsigned App/SDK/contract 本地 gates 通过；完整 diff 选五车道，Windows native 未执行。三个真实 cache 均 active、实际回收 0；synthetic archive tests 不算迁移验收。默认 App native analysis/hot snapshot、旧状态备份导入与 GUI/性能/发行总验收继续，goal 保持 active。见[本轮缓存记录](../migration-runs/AT-RUST-002-2026-10-05-cargo-cache-policy.md)。
 
-2026-10-05 旧状态导入 Engine 增量：固定且互不包含的 legacy/native/backup roots、既有只读锁、有界原 bytes 备份、digest/source record、按目标 identity 的 intent/completion 已落地。冲突不按 mtime 选赢家，跨 parser 收藏保留 unmatched，已有或未来目标状态不覆盖；原件、backup 和未证明 pending 不自动删除。真实 parser 重建 Ready 后八次正常 consumer 与两处实际 SIGKILL 恢复通过；最终检查和输入/失败证据见[本轮记录](migration-runs/AT-RUST-008-2026-10-05-legacy-view-state-import.md)。async/C ABI/SDK/App 冲突选择、回滚前导出、Windows 与 macOS 总验收仍未完成，goal 保持 active。
+2026-10-05 旧状态导入 Engine 增量：固定且互不包含的 legacy/native/backup roots、既有只读锁、有界原 bytes 备份、digest/source record、按目标 identity 的 intent/completion 已落地。冲突不按 mtime 选赢家，跨 parser 收藏保留 unmatched，已有或未来目标状态不覆盖；原件、backup 和未证明 pending 不自动删除。真实 parser 重建 Ready 后八次正常 consumer 与两处实际 SIGKILL 恢复通过；最终检查和输入/失败证据见[本轮记录](../migration-runs/AT-RUST-008-2026-10-05-legacy-view-state-import.md)。async/C ABI/SDK/App 冲突选择、回滚前导出、Windows 与 macOS 总验收仍未完成，goal 保持 active。
 
-2026-10-05 旧状态迁移 transport 增量：fixed roots、bounded async、C ABI import 与 typed Swift SDK 已接通，candidate 摘要与既有不可变 backup records 分离。557 Rust、94 SDK、617 默认 Swift（6 既有 opt-in skips）、包外 API、两种 unsigned App 依赖图与 16 次实际 parser/SDK consumer 通过；包含旧 key-lock 下 Swift Task 取消后 64-byte 输入 credit 归零、新状态保留与 IO 失败后恢复。ABI digest 更新；旧 library 不覆盖新 wire。App migration 提示/冲突选择、回滚导出、默认 native viewer、签名/性能/实际 GUI/Windows 与 macOS 总验收仍未完成，goal 保持 active。见[本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-legacy-view-state-transport.md)。
+2026-10-05 旧状态迁移 transport 增量：fixed roots、bounded async、C ABI import 与 typed Swift SDK 已接通，candidate 摘要与既有不可变 backup records 分离。557 Rust、94 SDK、617 默认 Swift（6 既有 opt-in skips）、包外 API、两种 unsigned App 依赖图与 16 次实际 parser/SDK consumer 通过；包含旧 key-lock 下 Swift Task 取消后 64-byte 输入 credit 归零、新状态保留与 IO 失败后恢复。ABI digest 更新；旧 library 不覆盖新 wire。App migration 提示/冲突选择、回滚导出、默认 native viewer、签名/性能/实际 GUI/Windows 与 macOS 总验收仍未完成，goal 保持 active。见[本轮记录](../migration-runs/AT-RUST-008-012-2026-10-05-legacy-view-state-transport.md)。
 
-2026-10-05 原生手动备份增量：固定独立根的完整不可变 snapshot、typed SDK、Controller flush/busy/cancel 与生产审阅 sheet 已接通。566 Rust、98 SDK、727 native Swift/626 默认 Swift（各 6 项既有 opt-in skip）、包外 API 与最终两种 unsigned App 构建通过；实际 native 键盘首次打开/导出/幂等重试/Escape/焦点恢复及公开 ABI 取消/异常目标/并发发布/purge 保留通过。详见[本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-native-rollback-backup.md)。macOS 总目标未完成。用户最新决定不保留未发布历史兼容：下一增量先独立手动备份配置，再移除旧 import/API/op/cap/UI 链；默认 native bootstrap/drain、CPU 目录预算、Viewer/analysis/Inspector 与整体 macOS 验收继续推进。
+2026-10-05 原生手动备份增量：固定独立根的完整不可变 snapshot、typed SDK、Controller flush/busy/cancel 与生产审阅 sheet 已接通。566 Rust、98 SDK、727 native Swift/626 默认 Swift（各 6 项既有 opt-in skip）、包外 API 与最终两种 unsigned App 构建通过；实际 native 键盘首次打开/导出/幂等重试/Escape/焦点恢复及公开 ABI 取消/异常目标/并发发布/purge 保留通过。详见[本轮记录](../migration-runs/AT-RUST-008-012-2026-10-05-native-rollback-backup.md)。macOS 总目标未完成。用户最新决定不保留未发布历史兼容：下一增量先独立手动备份配置，再移除旧 import/API/op/cap/UI 链；默认 native bootstrap/drain、CPU 目录预算、Viewer/analysis/Inspector 与整体 macOS 验收继续推进。
 
-2026-10-05 最新规则增量：按用户明确“尚未发布，不保留历史兼容逻辑”删除旧状态导入的配置/API/codec/Engine/operation/capability/UI/current probes，独立保留当前状态 read/write/remove/manual backup。543 Rust、91 SDK、716 native Swift / 622 default Swift passed（各 6 既有 opt-in skips）、API 与 unsigned App、真实公开备份 ABI、当前 Swift oracle 重放通过。默认 native bootstrap/drain 与完整 macOS 验收仍未完成；见[本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-latest-view-state-only.md)。
+2026-10-05 最新规则增量：按用户明确“尚未发布，不保留历史兼容逻辑”删除旧状态导入的配置/API/codec/Engine/operation/capability/UI/current probes，独立保留当前状态 read/write/remove/manual backup。543 Rust、91 SDK、716 native Swift / 622 default Swift passed（各 6 既有 opt-in skips）、API 与 unsigned App、真实公开备份 ABI、当前 Swift oracle 重放通过。默认 native bootstrap/drain 与完整 macOS 验收仍未完成；见[本轮记录](../migration-runs/AT-RUST-008-012-2026-10-05-latest-view-state-only.md)。
 
-2026-10-05 默认 native App 增量：默认 bootstrap、Controller 全部 owned tasks 的 join/flush/close 与 App Quit drain、正常 SDK 和实际只读 Developer ID helper/parser 接线完成。545 Rust、629 default Swift / 727 native Swift（各 6 既有 gate skips）、91 SDK、包外 API、当前 oracle、实际 Debug/优化签名 Release 与独立 native compile gate通过。真实打开仍因 CPU catalog 查询预算返回 QUERY_LIMIT；失败后的 active cache leases 归零及 native shutdown 已确认，桌面再次锁定，GUI/整体 macOS 未通过。96 份 receipts 和所有原失败留存；签名 candidate 未公证或发布，五 CI 车道 selected 不代表 Windows native 已执行。goal 管理器仍 blocked，继续已授权的独立迁移工作。见[本轮记录](migration-runs/AT-RUST-013-016-2026-10-05-native-default-bootstrap.md)。
+2026-10-05 默认 native App 增量：默认 bootstrap、Controller 全部 owned tasks 的 join/flush/close 与 App Quit drain、正常 SDK 和实际只读 Developer ID helper/parser 接线完成。545 Rust、629 default Swift / 727 native Swift（各 6 既有 gate skips）、91 SDK、包外 API、当前 oracle、实际 Debug/优化签名 Release 与独立 native compile gate通过。真实打开仍因 CPU catalog 查询预算返回 QUERY_LIMIT；失败后的 active cache leases 归零及 native shutdown 已确认，桌面再次锁定，GUI/整体 macOS 未通过。96 份 receipts 和所有原失败留存；签名 candidate 未公证或发布，五 CI 车道 selected 不代表 Windows native 已执行。goal 管理器仍 blocked，继续已授权的独立迁移工作。见[本轮记录](../migration-runs/AT-RUST-013-016-2026-10-05-native-default-bootstrap.md)。
 
-2026-10-06：真实 265 MB medium 的 density 全行流式聚合、args covering indexes/schema 4、Session/worker 的 held immutable Ready inspection 复用完成。558 Rust、635 default Swift / 736 fixture-native Swift（各 6 既有 opt-in skips）、正常 SDK API 与当前 Debug/优化 Release App 构建及本地签名通过；真实 cold/cache Controller 的精确事件、12 条参数、close/active0/shutdown 及只读原行核对通过。桌面仍锁定，>500 MiB 输入、GUI/性能/完整进程树及 ArkDeck schema-4 联调和适用发行验收仍 open；goal 管理器保持 blocked。见[当前 medium 查询记录](migration-runs/AT-RUST-007-013-2026-10-06-medium-queries.md)。
+2026-10-06：真实 265 MB medium 的 density 全行流式聚合、args covering indexes/schema 4、Session/worker 的 held immutable Ready inspection 复用完成。558 Rust、635 default Swift / 736 fixture-native Swift（各 6 既有 opt-in skips）、正常 SDK API 与当前 Debug/优化 Release App 构建及本地签名通过；真实 cold/cache Controller 的精确事件、12 条参数、close/active0/shutdown 及只读原行核对通过。桌面仍锁定，>500 MiB 输入、GUI/性能/完整进程树及 ArkDeck schema-4 联调和适用发行验收仍 open；goal 管理器保持 blocked。见[当前 medium 查询记录](../migration-runs/AT-RUST-007-013-2026-10-06-medium-queries.md)。
 
-2026-10-06 冷取消与性能增量：当前正常 SDK 的真实 medium 冷解析两次独立 Task.cancel 分别在 718/712 ms 汇合，公开 retained bytes 0、正常 shutdown/flush、7 个已观察 FD closes 和三个已登记 PID absence 通过；typed 报告保留 unknown，不声明完整 forest/peak/private counters。缓存打开 R5 的原 20 样本 p95 958.017 ms 通过，max 1531.744 ms 保留。577 Rust、22 条适用检查及当前 fixture 原生 Swift 787 passed / 0 failed / 8 skipped 通过；后续 physical guard 1 test / 15 cases 单独通过，实际 large recovery 仍审批阻塞。桌面仍锁定，其他性能、GUI、Capture、ArkDeck 及适用发行门未完成，goal 保持未完成。见[本轮记录](migration-runs/AT-RUST-013-019-2026-10-06-cold-cancellation.md)。
+2026-10-06 冷取消与性能增量：当前正常 SDK 的真实 medium 冷解析两次独立 Task.cancel 分别在 718/712 ms 汇合，公开 retained bytes 0、正常 shutdown/flush、7 个已观察 FD closes 和三个已登记 PID absence 通过；typed 报告保留 unknown，不声明完整 forest/peak/private counters。缓存打开 R5 的原 20 样本 p95 958.017 ms 通过，max 1531.744 ms 保留。577 Rust、22 条适用检查及当前 fixture 原生 Swift 787 passed / 0 failed / 8 skipped 通过；后续 physical guard 1 test / 15 cases 单独通过，实际 large recovery 仍审批阻塞。桌面仍锁定，其他性能、GUI、Capture、ArkDeck 及适用发行门未完成，goal 保持未完成。见[本轮记录](../migration-runs/AT-RUST-013-019-2026-10-06-cold-cancellation.md)。

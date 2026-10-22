@@ -31,7 +31,7 @@ kernel-mode eBPF sources are not part of this binary.
 
 Source repositories and exact revisions are recorded in
 `ThirdParty/TraceStreamer/source-lock.json`. Rebuild and source retrieval
-instructions are in `docs/TRACE_STREAMER.md`; those HTTPS repositories are the
+instructions are in `docs/design/TRACE_STREAMER.md`; those HTTPS repositories are the
 source offer for this distribution.
 
 ## Ported SmartPerf Host timeline palette
@@ -46,7 +46,7 @@ covers `ColorUtils.FUNC_COLOR_B`, `ColorUtils.JANK_COLOR`, `ColorUtils.hash`,
 `ColorUtils.funcTextColor` and `Utils.getStateColor` from
 `ide/src/trace/component/trace/base/`. It exists so a slice keeps the same
 color in ArkTrace as in SmartPerf Host, and it is behavior-compatible by
-design — see `docs/DESIGN.md` §13.5 and the parity vectors in
+design — see `docs/design/DESIGN.md` §13.5 and the parity vectors in
 `Tests/ArkTraceRenderingTests/TimelinePaletteTests.swift`.
 
 This is ArkTrace's only port of upstream *application* code; everything else

@@ -4,7 +4,7 @@
 > 基线日期：2026-08-12
 > 实现提交：`973a1d6`（P1-T05）、`ffd7595`（P1-T06/T07）、`4bf9bdb`（P1-T08）
 > 范围：Parser Vertical Slice
-> 规范基线：[DESIGN.md](./DESIGN.md)、[SPECIFICATION.md](./SPECIFICATION.md)、[TRACE_STREAMER.md](./TRACE_STREAMER.md)
+> 规范基线：[DESIGN.md](../design/DESIGN.md)、[SPECIFICATION.md](../design/SPECIFICATION.md)、[TRACE_STREAMER.md](../design/TRACE_STREAMER.md)
 
 ## 1. 目标与完成条件
 
@@ -40,7 +40,7 @@ Phase 1 的交付链路是：
 - **P1-T06：Parser lifecycle。** 子进程以直接 argv 固定 `-nm`，stdout/stderr/`.ohos.ts` diagnostics 有界；取消执行 TERM → 500 ms grace → 同 PID KILL 并显式 wait/reap，无 continuation double-resume；source symlink 只解析一次到 immutable snapshot，Ready output 拒绝 symlink，失败只清理 session-owned 文件。
 - **P1-T07：Atomic Ready。** private partial DB 在 promotion 前完成 raw DB provenance hash、quick_check、schema/range/relationship validation、`arktrace_v1_*` index migration、DB/sidecar/directory fsync；metadata sidecar 先移动，DB rename 作为 Ready marker，取消仅按 device/inode 删除本次产物；Repository read-only + `SQLITE_OPEN_NOFOLLOW` 打开。
 - **P1-T08：Mandatory gate。** `scripts/test_phase1.sh` fail closed 校验 binary/manifest/arm64、fixture/license SHA/byte count/Git blob，clean build 后运行真实 locked scheduling fixture；Phase 1 review hardening 完成时实测 94 tests、0 failed、0 skipped，并输出 4 KiB 内 machine evidence。后续阶段的 additive rerun 单独记录在对应阶段文档，不改写此冻结基线。
-- **P1-T09：Phase close。** README、TraceStreamer 实测记录、DESIGN、任务索引与 [PHASE_1_VERIFICATION.md](./PHASE_1_VERIFICATION.md) 已按实际实现收口。
+- **P1-T09：Phase close。** README、TraceStreamer 实测记录、DESIGN、任务索引与 [PHASE_1_VERIFICATION.md](PHASE_1_VERIFICATION.md) 已按实际实现收口。
 - DESIGN 已按当前定义关闭发布门 2；真实 fixture 发布门也已关闭。
 
 ### Phase 1 结束时仍开放的项（均已在后续阶段关闭）
