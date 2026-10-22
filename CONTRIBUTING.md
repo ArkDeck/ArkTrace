@@ -1,10 +1,12 @@
 # Contributing to ArkTrace
 
 Thanks for helping improve ArkTrace. This file is the public entry point. Day-to-day
-agent and maintainer boundaries live in [AGENTS.md](AGENTS.md). Product behavior is
-[docs/design/SPECIFICATION.md](docs/design/SPECIFICATION.md). Architecture is
-[docs/design/DESIGN.md](docs/design/DESIGN.md). The CLI contract is
-[docs/guides/CLI.md](docs/guides/CLI.md).
+agent and maintainer boundaries live in [AGENTS.md](AGENTS.md). Capability living
+specs are [openspec/specs/](openspec/specs/); the AT-* text is
+[docs/design/SPECIFICATION.md](docs/design/SPECIFICATION.md). A behavior change
+starts as a package under [openspec/changes/](openspec/changes/README.md).
+Architecture is [docs/design/DESIGN.md](docs/design/DESIGN.md). The CLI contract
+is [docs/guides/CLI.md](docs/guides/CLI.md).
 
 Please read the [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
 
