@@ -35,3 +35,35 @@ tools/**/fixtures/** linguist-vendored
 contracts/*.json linguist-generated
 rust/licenses/** linguist-vendored
 ThirdParty/** linguist-vendored
+
+# Files larger than 500 KiB. CI checkouts set lfs: true so receipt hashes see the bytes.
+Apps/ArkTraceApp/Assets.xcassets/AppIcon.appiconset/icon_512x512@2x.png filter=lfs diff=lfs merge=lfs -text
+Fixtures/release-evidence/accessibility/minimum-targets-2fef7556.png filter=lfs diff=lfs merge=lfs -text
+Fixtures/release-evidence/accessibility/minimum-window-2fef7556.png filter=lfs diff=lfs merge=lfs -text
+Fixtures/traces/hiprofiler_data_ability.htrace filter=lfs diff=lfs merge=lfs -text
+Fixtures/traces/trace_small_10.systrace filter=lfs diff=lfs merge=lfs -text
+docs/migration-runs/AT-RUST-001-2026-10-02-small-oracle.json filter=lfs diff=lfs merge=lfs -text
+docs/migration-runs/AT-RUST-007-009-2026-10-03-named-hot.json filter=lfs diff=lfs merge=lfs -text
+docs/migration-runs/AT-RUST-007-010-2026-10-03-counters.json filter=lfs diff=lfs merge=lfs -text
+docs/migration-runs/AT-RUST-007-2026-10-03-batch-queries.json filter=lfs diff=lfs merge=lfs -text
+docs/migration-runs/AT-RUST-007-2026-10-03-density-queries.json filter=lfs diff=lfs merge=lfs -text
+docs/migration-runs/AT-RUST-007-2026-10-03-frame-queries.json filter=lfs diff=lfs merge=lfs -text
+docs/migration-runs/AT-RUST-007-2026-10-03-scheduling-queries.json filter=lfs diff=lfs merge=lfs -text
+docs/migration-runs/AT-RUST-007-2026-10-03-search.json filter=lfs diff=lfs merge=lfs -text
+docs/migration-runs/AT-RUST-007-parallel-summary-facts-canonical-2026-10-04.json filter=lfs diff=lfs merge=lfs -text
+docs/migration-runs/AT-RUST-009-2026-10-03-mainline-analysis.json filter=lfs diff=lfs merge=lfs -text
+docs/migration-runs/AT-RUST-010-2026-10-03-named-cli.json filter=lfs diff=lfs merge=lfs -text
+docs/migration-runs/AT-RUST-010-2026-10-03-query-cli.json filter=lfs diff=lfs merge=lfs -text
+docs/migration-runs/AT-RUST-011-2026-10-04-viewport-owner.json filter=lfs diff=lfs merge=lfs -text
+docs/migration-runs/AT-RUST-012-2026-10-04-c-abi-owner.json filter=lfs diff=lfs merge=lfs -text
+docs/migration-runs/AT-RUST-012-2026-10-04-event-sdk.json filter=lfs diff=lfs merge=lfs -text
+docs/migration-runs/AT-RUST-012-2026-10-04-swift-sdk.json filter=lfs diff=lfs merge=lfs -text
+docs/migration-runs/AT-RUST-012-2026-10-04-typed-directory-sdk.json filter=lfs diff=lfs merge=lfs -text
+docs/migration-runs/AT-RUST-2026-10-03-main-delivery.json filter=lfs diff=lfs merge=lfs -text
+rust/crates/arktrace-analysis/tests/fixtures/inputs.json filter=lfs diff=lfs merge=lfs -text
+rust/crates/arktrace-analysis/tests/fixtures/mainline-inputs.json filter=lfs diff=lfs merge=lfs -text
+rust/crates/arktrace-viewer/tests/fixtures/annotation-swift-oracle.json filter=lfs diff=lfs merge=lfs -text
+rust/crates/arktrace-viewer/tests/fixtures/navigation-swift-oracle.json filter=lfs diff=lfs merge=lfs -text
+rust/crates/arktrace-viewer/tests/fixtures/presentation-swift-oracle.json filter=lfs diff=lfs merge=lfs -text
+rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json filter=lfs diff=lfs merge=lfs -text
+rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-oracle.json filter=lfs diff=lfs merge=lfs -text
