@@ -115,8 +115,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
-      "sha256": "f192c466dea365b053f35e1fd24413c1ef656abc00cdb07653821bb31cf89197",
-      "byteCount": 29092
+      "sha256": "2a6e5af91dda46f2de14df5346776a8e5c3d08b30eb350733df07f3492caca5b",
+      "byteCount": 29099
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
