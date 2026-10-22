@@ -37,6 +37,9 @@ docs_only='lane_swiftpm=false
 lane_app=false
 lane_contracts=false'
 
+expect "dependabot config skips every compile lane" "$docs_only" \
+    '.github/dependabot.yml'
+
 expect "docs-only change skips every compile lane" "$docs_only" \
     'docs/DESIGN.md
 docs/SPECIFICATION.md'
