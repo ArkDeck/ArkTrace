@@ -1,4 +1,3 @@
-
 use super::*;
 use arktrace_contract::{
     CounterScope, CpuSlice, DataQuality, DirectoryNameMatch, DirectoryPage, EventKey, EventPage,
