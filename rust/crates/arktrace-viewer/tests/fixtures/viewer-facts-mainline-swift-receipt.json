@@ -244,13 +244,13 @@
     },
     {
       "path": "README.md",
-      "byteCount": 15416,
-      "sha256": "7304be8e06d1851456b727f808e30932e5303a5a528226d278e26d8dfee7c442"
+      "byteCount": 16021,
+      "sha256": "26e2a8523749bd0e5eab1288f2d85f1e4b63551b2421ee208f5bbc6b3ef3b3da"
     },
     {
       "path": "README.zh-CN.md",
-      "byteCount": 14915,
-      "sha256": "24e5a032ff4b3b2d6ea86114e50c7d21737f650572cf458b5a0727acd3165cab"
+      "byteCount": 15485,
+      "sha256": "70deb183ca3c594143ad630e467b33a58d962f7403e0babadd53a9d5d6f93f38"
     },
     {
       "path": "Sources/ArkTraceAnalysis/TraceAgentQuery.swift",
