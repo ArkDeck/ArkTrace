@@ -93,7 +93,8 @@ verify_locked_file() {
         '.fixtures[] | select(.name == $name) | .upstreamBlob' "$schema_evidence")
     actual_sha=$(shasum -a 256 "$file_path" | awk '{print $1}')
     actual_bytes=$(stat -f '%z' "$file_path")
-    actual_blob=$(git -C "$repository_root" hash-object "$file_path")
+    # --no-filters keeps the locked content blob when the fixture is a Git LFS pointer.
+    actual_blob=$(git -C "$repository_root" hash-object --no-filters "$file_path")
     [ "$actual_sha" = "$expected_sha" ] || fail "fixture SHA drifted: $evidence_name"
     [ "$actual_bytes" = "$expected_bytes" ] || fail "fixture size drifted: $evidence_name"
     [ "$actual_blob" = "$expected_blob" ] || fail "fixture Git blob drifted: $evidence_name"
