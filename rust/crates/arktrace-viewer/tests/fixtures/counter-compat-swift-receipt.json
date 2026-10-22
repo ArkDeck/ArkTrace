@@ -274,47 +274,47 @@
       "sha256": "cebf85e2b8eb0831803c041afefedc07725e2362fbe018f029b1a0519292d289"
     },
     {
-      "path": "tools/parallel-counter-detail-presentation-compat-20261004/fixtures/cases.json",
+      "path": "docs/migration-runs/archived-tool-evidence/parallel-counter-detail-presentation-compat-20261004/fixtures/cases.json",
       "byteCount": 20556,
       "sha256": "e0904c2a842bdfa7817b03320e29268243681d01f2c997a642f318d94062e2a3"
     },
     {
-      "path": "tools/parallel-counter-detail-presentation-compat-20261004/fixtures/swift-vectors.json",
+      "path": "docs/migration-runs/archived-tool-evidence/parallel-counter-detail-presentation-compat-20261004/fixtures/swift-vectors.json",
       "byteCount": 6482,
       "sha256": "5f462decaec07187c0d57e2dd06e87d864ed11dcada10ee5acdb1ab2708d680a"
     },
     {
-      "path": "tools/parallel-counter-detail-presentation-compat-20261004/receipts/swift-canonical.json",
+      "path": "docs/migration-runs/archived-tool-evidence/parallel-counter-detail-presentation-compat-20261004/receipts/swift-canonical.json",
       "byteCount": 11327,
       "sha256": "5613dd5e6d8003bdcbb0c542562d424b8c2fa032a12c822a7f392524b88e42c2"
     },
     {
-      "path": "tools/parallel-counter-detail-presentation-compat-20261004/swift/CounterCombinationOracle.swift",
+      "path": "docs/migration-runs/archived-tool-evidence/parallel-counter-detail-presentation-compat-20261004/swift/CounterCombinationOracle.swift",
       "byteCount": 3166,
       "sha256": "0f5618f39200368c1b09a0d8468aac9344e91c69652cdbda153bc59d078ead65"
     },
     {
-      "path": "tools/parallel-counter-detail-presentation-compat-20261004/swift/RendererAccess.swift",
+      "path": "docs/migration-runs/archived-tool-evidence/parallel-counter-detail-presentation-compat-20261004/swift/RendererAccess.swift",
       "byteCount": 387,
       "sha256": "4cb0ffb80a6e4fccd7d6a04bbdb506947fec0f5b5cf524ba2da88a7a909c20dc"
     },
     {
-      "path": "tools/parallel-counter-reveal-compat-20261004/fixtures/cases.json",
+      "path": "docs/migration-runs/archived-tool-evidence/parallel-counter-reveal-compat-20261004/fixtures/cases.json",
       "byteCount": 13893,
       "sha256": "cebf85e2b8eb0831803c041afefedc07725e2362fbe018f029b1a0519292d289"
     },
     {
-      "path": "tools/parallel-counter-reveal-compat-20261004/fixtures/swift-controller-output.json",
+      "path": "docs/migration-runs/archived-tool-evidence/parallel-counter-reveal-compat-20261004/fixtures/swift-controller-output.json",
       "byteCount": 94224,
       "sha256": "47c7da4e18ba3a7207957452a5fce0740c6dbc879259be6cd7ed09bcafd5f293"
     },
     {
-      "path": "tools/parallel-counter-reveal-compat-20261004/swift/ControllerAccess.swift",
+      "path": "docs/migration-runs/archived-tool-evidence/parallel-counter-reveal-compat-20261004/swift/ControllerAccess.swift",
       "byteCount": 828,
       "sha256": "d3f58699174005d1086c8c81c5f024951834312d1f80543224ea01c5c99d03b0"
     },
     {
-      "path": "tools/parallel-counter-reveal-compat-20261004/swift/CounterRevealCompatibilityOracleTests.swift",
+      "path": "docs/migration-runs/archived-tool-evidence/parallel-counter-reveal-compat-20261004/swift/CounterRevealCompatibilityOracleTests.swift",
       "byteCount": 7835,
       "sha256": "dddefa150a92a05dafc0cc8ce2642623e3c9a211b3eb18efcf587da13c57bfa3"
     }

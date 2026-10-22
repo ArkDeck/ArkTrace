@@ -134,8 +134,8 @@ def main():
     assert counter_receipt["sourceModules"] == ["ArkTraceCore", "ArkTraceStore", "ArkTraceRendering", "ArkTraceAppSupport"]
     for name in counter_receipt["sourceModules"]:
         assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "Sources" / name).rglob("*.swift")} == {p for p in counter_seen if p.startswith(f"Sources/{name}/")}
-    detail_tool = "tools/parallel-counter-detail-presentation-compat-20261004/"
-    navigation_tool = "tools/parallel-counter-reveal-compat-20261004/"
+    detail_tool = "docs/migration-runs/archived-tool-evidence/parallel-counter-detail-presentation-compat-20261004/"
+    navigation_tool = "docs/migration-runs/archived-tool-evidence/parallel-counter-reveal-compat-20261004/"
     for local, inherited in (
         ("counter-compat-inputs.json", detail_tool + "fixtures/cases.json"),
         ("counter-compat-swift-oracle.json", detail_tool + "receipts/swift-canonical.json"),

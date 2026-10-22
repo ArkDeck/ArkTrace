@@ -12,9 +12,9 @@
 *.log -text
 
 # Original Swift construction SQL/logs retain their receipt-bound whitespace.
-/tools/parallel-summary-facts-canonical-20261004/fixtures/*.sql -text whitespace=-blank-at-eol,-blank-at-eof
+/docs/migration-runs/archived-tool-evidence/parallel-summary-facts-canonical-20261004/fixtures/*.sql -text whitespace=-blank-at-eol,-blank-at-eof
 /rust/crates/arktrace-store/tests/fixtures/summary-*.sql -text whitespace=-blank-at-eol,-blank-at-eof
-/tools/parallel-summary-facts-canonical-20261004/verification/construction-seam-oracle-build.log whitespace=-blank-at-eol
+/docs/migration-runs/archived-tool-evidence/parallel-summary-facts-canonical-20261004/verification/construction-seam-oracle-build.log whitespace=-blank-at-eol
 
 # Windows resource inputs participate in the recipe hash as exact bytes.
 ThirdParty/TraceStreamer/windows/** -text
