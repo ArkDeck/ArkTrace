@@ -75,7 +75,7 @@ jobs:
       lane_rust_macos: ${{ steps.plan.outputs.lane_rust_macos }}
       lane_rust_windows: ${{ steps.plan.outputs.lane_rust_windows }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -136,7 +136,7 @@ jobs:
     runs-on: xcode-27
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Pin Xcode 27.0 (fail closed)
         run: |
@@ -172,7 +172,7 @@ jobs:
       - name: Restore SwiftPM build cache
         id: spm-cache
         continue-on-error: true
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ${{ runner.temp }}/arktrace-swiftpm/workspace
@@ -249,7 +249,7 @@ jobs:
       - name: Save SwiftPM build cache (protected main only)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         continue-on-error: true
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ${{ runner.temp }}/arktrace-swiftpm/workspace
@@ -262,7 +262,7 @@ jobs:
 
       - name: Upload logs
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: swiftpm-logs
           path: |
@@ -278,7 +278,7 @@ jobs:
     runs-on: xcode-27
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Pin Xcode 27.0 (fail closed)
         run: |
@@ -325,7 +325,7 @@ jobs:
       # ignored parser is also excluded from source-mirror archives.
       - name: Restore Xcode object cache
         continue-on-error: true
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ${{ runner.temp }}/arktrace-xcode/workspace
@@ -388,7 +388,7 @@ jobs:
       - name: Save Xcode object cache (protected main only)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.app_build.outcome == 'success'
         continue-on-error: true
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ${{ runner.temp }}/arktrace-xcode/workspace
@@ -405,7 +405,7 @@ jobs:
 
       - name: Upload logs
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: app-logs
           path: xcodebuild.log
@@ -419,7 +419,7 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # These need no parser binary and no external inputs.
       - name: Offline release gates
@@ -451,7 +451,7 @@ jobs:
     env:
       ARKTRACE_EXPECT_NATIVE_HOST: macos-arm64
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Select pinned Xcode
         run: |
           if [ ! -d "$PINNED_DEVELOPER_DIR" ]; then
@@ -497,7 +497,7 @@ jobs:
 
       - name: Upload Swift SDK compile receipts
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: swift-sdk-compile-receipts
           path: |
@@ -530,11 +530,11 @@ jobs:
     env:
       ARKTRACE_EXPECT_NATIVE_HOST: windows-x64
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install exact Rust toolchain
         run: rustup toolchain install 1.99.0 --profile minimal --component rustfmt --component clippy
       - name: Install C# consumer SDK
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
         with:
           dotnet-version: '8.0.x'
       - name: Set external Cargo cache
@@ -619,7 +619,7 @@ jobs:
     runs-on: xcode-27
     timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Pin Xcode 27.0 (fail closed)
         run: |
@@ -636,7 +636,7 @@ jobs:
       - name: Restore pinned parser cache
         id: parser-cache
         continue-on-error: true
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ThirdParty/TraceStreamer/macx/trace_streamer
           key: trace-streamer-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ThirdParty/TraceStreamer/macx/manifest.json', 'ThirdParty/TraceStreamer/source-lock.json', 'ThirdParty/TraceStreamer/patches/**', 'scripts/build_trace_streamer.sh', 'scripts/phase3_shell_safety.sh') }}
@@ -675,7 +675,7 @@ jobs:
       - name: Save pinned parser cache
         if: steps.parser-cache.outputs.cache-hit != 'true'
         continue-on-error: true
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ThirdParty/TraceStreamer/macx/trace_streamer
           key: ${{ steps.parser-cache.outputs.cache-primary-key }}
@@ -685,7 +685,7 @@ jobs:
       - name: Restore locked medium fixture cache
         id: fixture-cache
         continue-on-error: true
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             .build/phase3-fixtures/.arktrace-phase3-fixtures-v1
@@ -698,7 +698,7 @@ jobs:
       - name: Save locked medium fixture cache
         if: steps.fixture-cache.outputs.cache-hit != 'true'
         continue-on-error: true
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             .build/phase3-fixtures/.arktrace-phase3-fixtures-v1
