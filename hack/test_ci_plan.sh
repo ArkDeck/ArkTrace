@@ -84,11 +84,11 @@ expect "app change selects app and contract lanes" \
     'lane_swiftpm=false
 lane_app=true
 lane_contracts=true' \
-    'Apps/ArkTraceApp/ArkTraceApp.swift
-ArkTrace.xcodeproj/project.pbxproj'
+    'apple/Apps/ArkTraceApp/ArkTraceApp.swift
+apple/ArkTrace.xcodeproj/project.pbxproj'
 
 expect "product config selects every lane" "$all_lanes" \
-    'Config/ArkTraceProduct.xcconfig'
+    'apple/Config/ArkTraceProduct.xcconfig'
 
 expect "script change selects the contract lane" \
     'lane_swiftpm=false

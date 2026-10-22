@@ -29,7 +29,7 @@ def main():
     for module in receipt["sourceModules"]:
         prefix = f"Sources/{module}/"
         assert {p.relative_to(ROOT).as_posix() for p in (ROOT / prefix).rglob("*.swift")} == {p for p in seen if p.startswith(prefix)}
-    for prefix in ("Apps/ArkTraceApp/", "Tests/ArkTraceRenderingTests/", "Tests/ArkTraceAppSupportTests/", "Tests/ArkTraceCoreTests/"):
+    for prefix in ("apple/Apps/ArkTraceApp/", "Tests/ArkTraceRenderingTests/", "Tests/ArkTraceAppSupportTests/", "Tests/ArkTraceCoreTests/"):
         assert {p.relative_to(ROOT).as_posix() for p in (ROOT / prefix).rglob("*.swift")} == {p for p in seen if p.startswith(prefix)}
     required = {
         "inspector-projection-inputs.json", "inspector-projection-swift.json",

@@ -7,7 +7,8 @@ cache=Path(os.environ['ARKTRACE_SWIFTPM_CACHE_ROOT']).resolve()
 assert cache.is_absolute() and not cache.is_relative_to(ROOT)
 source=cache/'snapshot-event-index-oracle-source'; source.mkdir(parents=True,exist_ok=True)
 for directory in ('Sources','Tests','hack','third_party','test/fixtures','Apps'):
- shutil.copytree(ROOT/directory,source/directory,dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__','trace_streamer'))
+ origin=ROOT/'apple/Apps' if directory=='Apps' else ROOT/directory
+ shutil.copytree(origin,source/directory,dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__','trace_streamer'))
 for path in ROOT.iterdir():
  if path.is_file() and not path.is_symlink(): shutil.copyfile(path,source/path.name)
 controller='Sources/ArkTraceAppSupport/TraceDocumentController.swift'

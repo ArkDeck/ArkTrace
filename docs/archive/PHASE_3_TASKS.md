@@ -47,7 +47,7 @@ P3-T01、P3-T02、P3-T05 可以并行。
 
 **交付**
 
-1. ArkTrace.xcodeproj 与 Apps/ArkTraceApp；SPM 仍是 library/CLI/test 的构建事实源；
+1. apple/ArkTrace.xcodeproj 与 apple/Apps/ArkTraceApp；SPM 仍是 library/CLI/test 的构建事实源；
 2. macOS 14+、Apple silicon 首发 target；
 3. 记录 App Sandbox、child process、security-scoped bookmark、cache location 和签名方案；
 4. bundle 固定 TraceStreamer/manifest，不搜索 PATH；

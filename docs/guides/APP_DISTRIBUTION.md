@@ -137,7 +137,7 @@ existing unsafe permissions or linked storage components.
 
 The native target consumes local Swift package products. It does not copy
 Core, Parser, Store, Runtime, Analysis, or Rendering sources. The canonical App
-version/build/bundle identifier live in `Config/ArkTraceProduct.xcconfig`;
+version/build/bundle identifier live in `apple/Config/ArkTraceProduct.xcconfig`;
 `ArkTraceCore.ArkTraceProduct` is the checked SwiftPM/CLI mirror, while Info.plist
 expands the same Xcode build settings. Tests and the app gate fail closed on drift.
 
@@ -153,7 +153,7 @@ the independent Agent or human review result is recorded in Git history. A
 separate accessibility reviewer key is deliberately not required because it
 would not establish additional independence inside the same build workspace.
 The large-trace reviewer and redistribution-grant issuer remain independently
-key-bound in `Config/ArkTraceReleaseReviewers.json`. A caller cannot mutate the
+key-bound in `apple/Config/ArkTraceReleaseReviewers.json`. A caller cannot mutate the
 accessibility evidence or large-trace trust configuration during packaging. The
 live packaging path still requires the Developer ID identity/team/notary profile.
 For an already notarized exact candidate, the complete gate alternatively accepts

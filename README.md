@@ -1,4 +1,4 @@
-<img src="Apps/ArkTraceApp/Assets.xcassets/AppIcon.appiconset/icon_256x256.png" alt="ArkTrace" width="128" height="128">
+<img src="apple/Apps/ArkTraceApp/Assets.xcassets/AppIcon.appiconset/icon_256x256.png" alt="ArkTrace" width="128" height="128">
 
 # ArkTrace
 
@@ -84,7 +84,7 @@ Full command reference, Machine JSON contract, limits, signal handling and priva
 
 ### 4. Run the viewer
 
-Open `ArkTrace.xcodeproj` in Xcode, select the `ArkTraceApp` scheme and run. Open `.htrace` / `.ftrace` / `.systrace` files via **File → Open**, Finder “Open With”, drag & drop, or Recents; **Reload** reopens the current trace from its original file.
+Open `apple/ArkTrace.xcodeproj` in Xcode, select the `ArkTraceApp` scheme and run. Open `.htrace` / `.ftrace` / `.systrace` files via **File → Open**, Finder “Open With”, drag & drop, or Recents; **Reload** reopens the current trace from its original file.
 
 To capture a new trace, connect an OpenHarmony device with USB or network debugging enabled, then choose **File → Capture Trace…** (<kbd>⌘N</kbd>). ArkTrace finds `hdc` in the configured SDK/PATH or lets you choose it directly. Select a device, profile, duration and buffer size, choose the local destination, and start capture. The completed file opens automatically. Full behavior and failure recovery: [docs/design/CAPTURE.md](docs/design/CAPTURE.md).
 

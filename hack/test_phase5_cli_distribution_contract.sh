@@ -483,7 +483,7 @@ grep -F 'mktemp -d "$artifact_directory/.publication.XXXXXX"' \
     && grep -F 'partial_zip="$publication_staging/' \
         "$script_directory/package_phase5_cli_distribution.sh" >/dev/null \
     || fail "artifact partial is not staged on the output filesystem"
-if grep -F 'Apps/ArkTraceApp/ArkTraceApp.entitlements' \
+if grep -F 'apple/Apps/ArkTraceApp/ArkTraceApp.entitlements' \
     "$script_directory/build_phase5_cli_distribution_candidate.sh" >/dev/null
 then
     fail "candidate signing still injects an empty entitlement blob"

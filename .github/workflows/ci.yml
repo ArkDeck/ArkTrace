@@ -343,9 +343,9 @@ jobs:
             ${{ runner.temp }}/arktrace-xcode/source-state
             ${{ runner.temp }}/sym/Debug
             !${{ runner.temp }}/sym/Debug/ArkTrace.app
-          key: xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**', 'hack/run-xcodebuild.sh') }}-${{ github.sha }}
+          key: xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'apple/Apps/**', 'apple/ArkTrace.xcodeproj/**', 'apple/Config/**', 'hack/run-xcodebuild.sh') }}-${{ github.sha }}
           restore-keys: |
-            xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**', 'hack/run-xcodebuild.sh') }}-
+            xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'apple/Apps/**', 'apple/ArkTrace.xcodeproj/**', 'apple/Config/**', 'hack/run-xcodebuild.sh') }}-
             xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-
 
       # The app target lives in the Xcode project, outside the SwiftPM graph,
@@ -406,7 +406,7 @@ jobs:
             ${{ runner.temp }}/arktrace-xcode/source-state
             ${{ runner.temp }}/sym/Debug
             !${{ runner.temp }}/sym/Debug/ArkTrace.app
-          key: xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**', 'hack/run-xcodebuild.sh') }}-${{ github.sha }}
+          key: xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'apple/Apps/**', 'apple/ArkTrace.xcodeproj/**', 'apple/Config/**', 'hack/run-xcodebuild.sh') }}-${{ github.sha }}
 
       - name: Upload logs
         if: always()

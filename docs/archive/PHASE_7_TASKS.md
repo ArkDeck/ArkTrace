@@ -214,7 +214,7 @@ limit 取页 —— 两条路径不是「实现得一样」，而是**同一份�
    两条路径必须给出同一结果（这是 DESIGN §4.3 不变量 3「App/CLI/ArkDeck 复用同一 Analysis」的要求）；
 3. 沿用现有 bounded 语义：state interval 的取回走 `repository.threadStates(...)` 的 bounded page，
    超限时在 `dataQuality.warnings` 里表达 truncation，不静默截断；
-4. `Apps/ArkTraceApp/ArkTraceApp.swift` `RangeInspectorView`（`:772-800`）新增一段渲染，列出
+4. `apple/Apps/ArkTraceApp/ArkTraceApp.swift` `RangeInspectorView`（`:772-800`）新增一段渲染，列出
    thread × state 的 duration / 占区间百分比 / interval 数，排序确定；
 5. 状态不得只靠颜色表达（AT-APP-011）：state 名必须以文字出现，并进入 accessibility value；
 6. 更新 `docs/design/SPECIFICATION.md` AT-APP-006 的「必须显示」清单，加入 thread state 分布。
@@ -412,7 +412,7 @@ ArkTrace 的 repository 只有一处 `GROUP BY`（`SQLiteTraceRepository.swift:1
    受限，要么本任务先不做 selfTime 并在验收里说明 —— **不允许给出无标注的错误 selfTime**；
 3. 所有时间聚合用 clipped overlap（DESIGN §12.2），与区间边界语义一致（AT-TIME-003/004）；
    instant（`dur = 0`）计入 occurrences 但不贡献时长（AT-TIME-006）；
-4. `Apps/ArkTraceApp/ArkTraceApp.swift` `RangeInspectorView` 新增该表，列可排序，默认按总时长降序；
+4. `apple/Apps/ArkTraceApp/ArkTraceApp.swift` `RangeInspectorView` 新增该表，列可排序，默认按总时长降序；
 5. 从表格行跳回时间轴：点击一行选中该名字在区间内的第一个 occurrence 并 reveal，复用
    `TraceDocumentController.reveal(_:)`（`Sources/ArkTraceAppSupport/TraceDocumentController.swift:534-553`）
    的既有路径，不要新写一条 reveal；

@@ -44,7 +44,7 @@ export ARKTRACE_RUST_XCFRAMEWORK
 unset ARKTRACE_RUST_SDK_FIXTURES
 
 if ! xcodebuild -quiet \
-    -project "$native_workspace/ArkTrace.xcodeproj" \
+    -project "$native_workspace/apple/ArkTrace.xcodeproj" \
     -scheme ArkTraceApp \
     -configuration Debug \
     -derivedDataPath "$derived_data" \
@@ -58,7 +58,7 @@ then
 fi
 
 if ! xcodebuild -quiet \
-    -project "$native_workspace/ArkTrace.xcodeproj" \
+    -project "$native_workspace/apple/ArkTrace.xcodeproj" \
     -scheme ArkTraceApp \
     -configuration Release \
     -derivedDataPath "$derived_data" \

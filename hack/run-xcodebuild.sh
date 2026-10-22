@@ -146,7 +146,7 @@ if [ -L "$workspace_path" ]; then
     rm "$workspace_path"
 elif [ -e "$workspace_path" ] && [ ! -d "$workspace_path" ]; then
     fail "cache workspace exists and is not a directory: $workspace_path" 73
-elif [ -f "$workspace_path/ArkTrace.xcodeproj/project.pbxproj" ]; then
+elif [ -f "$workspace_path/apple/ArkTrace.xcodeproj/project.pbxproj" ]; then
     workspace_ready=true
 fi
 mkdir -p "$workspace_path"
@@ -226,7 +226,7 @@ exec env \
     CLANG_MODULE_CACHE_PATH="$module_cache" \
     SWIFTPM_MODULECACHE_OVERRIDE="$module_cache" \
     "$xcodebuild_executable" \
-    -project "$workspace_path/ArkTrace.xcodeproj" \
+    -project "$workspace_path/apple/ArkTrace.xcodeproj" \
     -target ArkTraceApp \
     -configuration Debug \
     -clonedSourcePackagesDirPath "$source_packages" \

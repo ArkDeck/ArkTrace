@@ -13,13 +13,13 @@
   "sourceDigests": [
     {
       "path": "rust/crates/arktrace-viewer/oracle/ScopedSliceOracle.swift",
-      "sha256": "e17fa05d5940165fa953f80a473f1082ae766cb7b5bd3d11cebfbf0ec1d16971",
-      "byteCount": 3151
+      "sha256": "8efc22cbbbead8ad8cf3490312e6da5b1c977d2b3320ed9c0eff6e1c08b4b85f",
+      "byteCount": 4013
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/run_scoped_slice_oracle.py",
-      "sha256": "4bfb3c9e31b29388a35d29503cdb28e20163ddbda1d02ed47ec02738c4286d83",
-      "byteCount": 4984
+      "sha256": "878dc7fa997759ff06ed5cb6c63183d769879ee3a9739c63f071a457f1246012",
+      "byteCount": 5464
     },
     {
       "path": "rust/crates/arktrace-viewer/tests/fixtures/scoped-slices-inputs.json",
@@ -48,8 +48,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
-      "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2",
-      "byteCount": 375
+      "sha256": "10734224b0b15b736c7620623ef7a7591ec59913912097b951df4224eaa162ee",
+      "byteCount": 381
     },
     {
       "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
@@ -68,8 +68,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
-      "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626",
-      "byteCount": 11916
+      "sha256": "ad2ec7a333007ddb6b525920adc7c113382bfb6a243b413a956333db24ff60e9",
+      "byteCount": 13541
     },
     {
       "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
@@ -103,8 +103,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
-      "sha256": "64e9dce79e3bb74534539e360750a0ef1fed4403ea1abc040c732b44f16d01d8",
-      "byteCount": 8888
+      "sha256": "aca5ec6f3e2e864a4329537ccf26de56dc2fb386d0f2a92a0367b2fdce11f989",
+      "byteCount": 9744
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
@@ -113,8 +113,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
-      "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770",
-      "byteCount": 16274
+      "sha256": "6bca47633ca3ee379f9931f7130d509390157c834e073062862fcdfacd44b604",
+      "byteCount": 17200
     },
     {
       "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
@@ -123,8 +123,8 @@
     },
     {
       "path": "Sources/ArkTraceStore/SQLiteTraceRepository.swift",
-      "sha256": "a5c021b13533aa5cdb036fb0f5740ff03eab1bdc03d516aa7716d1649bcdc594",
-      "byteCount": 160358
+      "sha256": "a5e5744b240ee347c357fc0371c5c3a284673cbc87c92ad23c4573101d13e761",
+      "byteCount": 163579
     },
     {
       "path": "Sources/ArkTraceStore/TraceDatabase.swift",
@@ -133,8 +133,8 @@
     },
     {
       "path": "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
-      "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a",
-      "byteCount": 32838
+      "sha256": "f2e517ac327c6be82bbb31099a57ee73f82bf5e2051760bf0c6727b6cdd57b11",
+      "byteCount": 33831
     },
     {
       "path": "Sources/ArkTraceStore/TraceEventIntersection.swift",
@@ -148,33 +148,33 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
-      "sha256": "8ca7fe808486bb727df285c5563b1f9d10a189482c0f2309c923ca9f37284f24",
-      "byteCount": 6210
+      "sha256": "0344cd987512a24c45071f47e1cdd59c103661326c5abd62bdcb6601bbecfc56",
+      "byteCount": 6608
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
-      "sha256": "86af0ba5ce3e89248b7106c07dcf7c77d715e17a652e51129966a057ac1630d0",
-      "byteCount": 29018
+      "sha256": "10d43f4808a4f02178618cba8cf7c660a668bc463cf2c9b688714b23a59f64cc",
+      "byteCount": 29086
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
-      "sha256": "1b290c0a4e5ce8c960d192867ad84eb506783f5701a09ce61ba0fc181fc858b5",
-      "byteCount": 8131
+      "sha256": "ef5c1239ba6fc8e780f0fcd1932a8c49049a1bd1454811dd961bea82aa137ac8",
+      "byteCount": 8339
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineModels.swift",
-      "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8",
-      "byteCount": 24339
+      "sha256": "6277f0095d896e56a6bbc8ff342ccc4d82f3863113a95e51a9cd2d3ad428b997",
+      "byteCount": 27152
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
-      "sha256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9",
-      "byteCount": 101313
+      "sha256": "2f075ef959c47e64fa8b1364dcb94e18eeb9151f6ecc01e4be49c658ee853be6",
+      "byteCount": 102182
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
-      "sha256": "70e59a93777099a49e27bd4dc778148a5950bb68cdf565cabac5fc579449af29",
-      "byteCount": 40352
+      "sha256": "81e784d31a7b24b224213ea4fc12cc494191b90ab5a533f90c5862887210b1e9",
+      "byteCount": 41220
     }
   ]
 }

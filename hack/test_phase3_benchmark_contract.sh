@@ -26,7 +26,7 @@ chmod +x "$repository/hack/"*
 
 issuer_key_relative=test/fixtures/release-evidence/phase3-large/grant-issuer-public.pem
 issuer_key="$source_root/$issuer_key_relative"
-trust_configuration="$source_root/Config/ArkTraceReleaseReviewers.json"
+trust_configuration="$source_root/apple/Config/ArkTraceReleaseReviewers.json"
 [ -f "$issuer_key" ] && [ ! -L "$issuer_key" ] \
     || fail "grant issuer public key is not a regular non-symlink"
 git -C "$source_root" ls-files --error-unmatch "$issuer_key_relative" \
@@ -301,12 +301,12 @@ jq -n --arg sha "$(printf fake | shasum -a 256 | awk '{print $1}')" '
   review:{manifestPath:"test/fixtures/review.json",manifestSHA256:$sha,signaturePath:"test/fixtures/review.sig",reviewerPublicKeyPath:"test/fixtures/review.pem",reviewerPublicKeySHA256:$sha}
 }
 ' >"$provenance"
-mkdir -p "$repository/Config"
+mkdir -p "$repository/apple/Config"
 jq -n --arg trusted "$(printf trusted | shasum -a 256 | awk '{print $1}')" '
  {formatVersion:1,
   largeTraceReviewerPublicKeySHA256:$trusted,
   redistributionGrantIssuerPublicKeySHA256:$trusted}
-' >"$repository/Config/ArkTraceReleaseReviewers.json"
+' >"$repository/apple/Config/ArkTraceReleaseReviewers.json"
 provenance_sha=$(shasum -a 256 "$provenance" | awk '{print $1}')
 jq -n --arg path 'test/fixtures/release-evidence/large.json' --arg sha "$provenance_sha" '
 {

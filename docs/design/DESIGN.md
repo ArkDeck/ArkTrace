@@ -243,7 +243,7 @@ ArkTraceApp        → Core + Analysis + Rendering + AppSupport + Capture
 ```
 
 `Package.swift` 是这张图的事实源。`ArkTraceAppSupport` 承载 App 的 document/session
-生命周期与 viewer 状态机，使 `Apps/ArkTraceApp` 只剩 SwiftUI shell，并让这部分逻辑
+生命周期与 viewer 状态机，使 `apple/Apps/ArkTraceApp` 只剩 SwiftUI shell，并让这部分逻辑
 可以在无窗口测试中覆盖。`ArkTraceCLI` 直接依赖 `Parser`/`Store` 是因为 `doctor`
 需要报告 parser identity 与 SQLite runtime 事实，`--no-cache` 需要选择 storage
 policy；这些都不经过 `Runtime` 的 session 编排。
@@ -273,8 +273,8 @@ ArkTrace/
 ├── README.md
 ├── LICENSE
 ├── Package.swift
-├── ArkTrace.xcodeproj
-├── Apps/
+├── apple/ArkTrace.xcodeproj
+├── apple/Apps/
 │   └── ArkTraceApp/
 ├── Sources/
 │   ├── ArkTraceCore/

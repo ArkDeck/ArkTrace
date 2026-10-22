@@ -105,7 +105,7 @@ independently captured >500 MiB evidence required by Gates 6/7 and P4-T06 large.
 `Hanfeng Fu (GitHub: lvye, account ID 4340161)`, the declared issuer of the
 trace-bound `CC-BY-4.0` redistribution grant. Its exact file SHA-256 is
 `06566ab2804b7a213236c45aa9a799157fcd00a190d542039df29cd08bc804dd`
-and is pinned by `Config/ArkTraceReleaseReviewers.json`.
+and is pinned by `apple/Config/ArkTraceReleaseReviewers.json`.
 
 `phase3-large/reviewer-public.pem` is a separate RSA-3072 role key controlled by
 the same named human for the post-capture technical review. The reviewer did

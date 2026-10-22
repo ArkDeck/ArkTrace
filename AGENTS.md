@@ -23,8 +23,8 @@
 | Parser、SQLite、cache | `Sources/ArkTraceCore/`、`Sources/ArkTraceParser/`、`Sources/ArkTraceStore/`、`Sources/ArkTraceRuntime/`；[TRACE_STREAMER.md](docs/design/TRACE_STREAMER.md) |
 | 包外消费的离线检查与 cache 维护 | `Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift`、`Sources/ArkTraceRuntime/TraceCache.swift`；`hack/api-baseline/` |
 | CLI、查询、分析 | `Sources/ArkTraceCLI/`、`Sources/arktrace/`、`Sources/ArkTraceAnalysis/`；[CLI.md](docs/guides/CLI.md) |
-| Viewer、交互与本地化 | `Apps/ArkTraceApp/`、`Sources/ArkTraceAppSupport/`、`Sources/ArkTraceRendering/`；DESIGN §13–14 |
-| GUI 设备采集 | `Sources/ArkTraceCapture/`、`Apps/ArkTraceApp/Capture/`；[CAPTURE.md](docs/design/CAPTURE.md) |
+| Viewer、交互与本地化 | `apple/Apps/ArkTraceApp/`、`Sources/ArkTraceAppSupport/`、`Sources/ArkTraceRendering/`；DESIGN §13–14 |
+| GUI 设备采集 | `Sources/ArkTraceCapture/`、`apple/Apps/ArkTraceApp/Capture/`；[CAPTURE.md](docs/design/CAPTURE.md) |
 | ArkDeck 消费或分发 | [ARKDECK_INTEGRATION.md](docs/guides/ARKDECK_INTEGRATION.md)、[CLI_DISTRIBUTION.md](docs/guides/CLI_DISTRIBUTION.md)、[APP_DISTRIBUTION.md](docs/guides/APP_DISTRIBUTION.md) |
 | 构建与 CI | [ci.yml](.github/workflows/ci.yml)、[ci_plan.sh](hack/ci_plan.sh)、对应 `hack/` 入口 |
 

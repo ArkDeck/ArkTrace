@@ -173,8 +173,8 @@ def main():
         "rust/crates/arktrace-viewer/oracle/annotation_access.swift",
         "rust/crates/arktrace-viewer/oracle/annotation_harness.swift",
         "rust/crates/arktrace-viewer/oracle/annotation_swift.py",
-        "Apps/ArkTraceApp/Viewer/TraceTimelinePane.swift",
-        "Apps/ArkTraceApp/Inspector/AnnotationInspectorView.swift",
+        "apple/Apps/ArkTraceApp/Viewer/TraceTimelinePane.swift",
+        "apple/Apps/ArkTraceApp/Inspector/AnnotationInspectorView.swift",
         "Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
         "Tests/ArkTraceAppSupportTests/TraceViewStateStoreTests.swift",
         "Tests/ArkTraceRenderingTests/TimelineAnnotationKeyTests.swift",
@@ -189,7 +189,7 @@ def main():
     assert sum(len(entry["states"]) for entry in annotation_outputs) == annotation_receipt["states"] == 748
     assert all(len(inputs["steps"]) + 1 == len(outputs["states"]) for inputs, outputs in zip(annotation_inputs, annotation_outputs))
     rename = annotation_receipt["deferredRenameCompiledOriginalBlock"]
-    assert rename["source"] == "Apps/ArkTraceApp/Viewer/TraceTimelinePane.swift"
+    assert rename["source"] == "apple/Apps/ArkTraceApp/Viewer/TraceTimelinePane.swift"
     body = re.search(r'rename: \{ label in\n(.*?)\n\s*\},', (ROOT / rename["source"]).read_text(encoding="utf-8"), re.S)[1]
     assert body == rename["utf8"] and hashlib.sha256(body.encode("utf-8")).hexdigest() == rename["sha256"]
     print("Annotation oracle: 74 scenarios, 674 actions and 748 actual Swift states with source/output and deferred editor identities")

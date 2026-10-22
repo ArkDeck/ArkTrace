@@ -138,11 +138,11 @@ while IFS= read -r path; do
             rust_macos=true
             contracts=true
             ;;
-        Apps/*|ArkTrace.xcodeproj/*)
+        apple/Apps/*|apple/ArkTrace.xcodeproj/*)
             app=true
             contracts=true
             ;;
-        Config/*)
+        apple/Config/*)
             # Product identity is mirrored into Swift constants (SwiftPM
             # tests), stamped into the app, and pinned by release contracts.
             select_all

@@ -47,15 +47,15 @@ class RunXcodebuildTests(unittest.TestCase):
             "p.add_argument('--sdk');p.add_argument('--signing-identity');a=p.parse_args()\n"
             "if os.environ.get('FAKE_PREPARATION_EXIT'): sys.exit(int(os.environ['FAKE_PREPARATION_EXIT']))\n"
             "target=a.workspace/'.arktrace-native';target.mkdir(exist_ok=True)\n"
-            "(target/'source.txt').write_text((a.workspace/'Apps/ArkTraceApp/App.swift').read_text())\n"
+            "(target/'source.txt').write_text((a.workspace/'apple/Apps/ArkTraceApp/App.swift').read_text())\n"
             "print(json.dumps({'relativeSDK':'.arktrace-native/test/CArkTrace.xcframework',"
             "'sdkArgument':a.sdk,'signingIdentityArgument':a.signing_identity}))\n",
             encoding="utf-8",
         )
-        project = root / "ArkTrace.xcodeproj/project.pbxproj"
+        project = root / "apple/ArkTrace.xcodeproj/project.pbxproj"
         project.parent.mkdir(parents=True)
         project.write_text("// project\n", encoding="utf-8")
-        source = root / "Apps/ArkTraceApp/App.swift"
+        source = root / "apple/Apps/ArkTraceApp/App.swift"
         source.parent.mkdir(parents=True)
         source.write_text(source_contents, encoding="utf-8")
         parser = root / "third_party/TraceStreamer/macx/trace_streamer"
@@ -119,7 +119,7 @@ class RunXcodebuildTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         lines = result.stdout.splitlines()
         arguments = [line.removeprefix("ARG:") for line in lines if line.startswith("ARG:")]
-        self.assertEqual(arguments[0:2], ["-project", str(canonical / "workspace/ArkTrace.xcodeproj")])
+        self.assertEqual(arguments[0:2], ["-project", str(canonical / "workspace/apple/ArkTrace.xcodeproj")])
         self.assertIn(f"OBJROOT={canonical / 'Objects'}", arguments)
         self.assertIn(f"INDEX_DATA_STORE_DIR={canonical / 'Index.noindex/DataStore'}", arguments)
         self.assertIn(str(canonical / "SourcePackages"), arguments)
@@ -167,7 +167,7 @@ class RunXcodebuildTests(unittest.TestCase):
         xcodebuild = self.make_fake_xcodebuild(temporary)
 
         self.assertEqual(self.invoke(first, cache_root, xcodebuild).returncode, 0)
-        mirror = cache_root / "workspace/Apps/ArkTraceApp/App.swift"
+        mirror = cache_root / "workspace/apple/Apps/ArkTraceApp/App.swift"
         first_stat = mirror.stat()
         self.assertEqual(self.invoke(second, cache_root, xcodebuild).returncode, 0)
         second_stat = mirror.stat()

@@ -3,7 +3,7 @@
 # tracked Info.plist declares.
 #
 # The reviewed root is ArkTraceAppDistribution.supportedTraceExtensions;
-# AppDistributionTests binds that constant to Apps/ArkTraceApp/Info.plist, and
+# AppDistributionTests binds that constant to apple/Apps/ArkTraceApp/Info.plist, and
 # this script binds that plist to the built bundle. Keeping the comparison in
 # one place stops the expected list from being copied into each caller, which
 # is how a positional assertion in the Phase 3 batch gate came to report a
@@ -20,7 +20,7 @@ fail() {
 test $# -eq 1 || fail "usage: verify_app_document_types.sh <ArkTrace.app>"
 candidate_app=$1
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-source_plist="$repo_root/Apps/ArkTraceApp/Info.plist"
+source_plist="$repo_root/apple/Apps/ArkTraceApp/Info.plist"
 
 test -f "$source_plist" || fail "tracked Info.plist is missing"
 test -f "$candidate_app/Contents/Info.plist" \

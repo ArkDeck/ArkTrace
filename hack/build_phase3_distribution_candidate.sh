@@ -67,13 +67,13 @@ fi
 # root.  The final release gate exports signing credentials to its inherited
 # safety tests; an invalid or partial checkout must still fail without leaving
 # any output directory behind merely because those credentials are present.
-[ -d "$repository_root/ArkTrace.xcodeproj" ] \
-    && [ ! -L "$repository_root/ArkTrace.xcodeproj" ] \
+[ -d "$repository_root/apple/ArkTrace.xcodeproj" ] \
+    && [ ! -L "$repository_root/apple/ArkTrace.xcodeproj" ] \
     && arktrace_assert_physical_directory_chain \
-        "$repository_root" "$repository_root/ArkTrace.xcodeproj" \
+        "$repository_root" "$repository_root/apple/ArkTrace.xcodeproj" \
     || fail "Xcode project is unavailable or non-physical"
 for candidate_input in \
-    "$repository_root/Apps/ArkTraceApp/ArkTraceApp.entitlements" \
+    "$repository_root/apple/Apps/ArkTraceApp/ArkTraceApp.entitlements" \
     "$repository_root/third_party/TraceStreamer/macx/trace_streamer" \
     "$repository_root/third_party/TraceStreamer/macx/manifest.json" \
     "$repository_root/third_party/TraceStreamer/license-inventory.json" \
@@ -144,7 +144,7 @@ export ARKTRACE_RUST_XCFRAMEWORK
 unset ARKTRACE_RUST_SDK_FIXTURES
 native_inputs="$native_workspace/.arktrace-native/AppInputs"
 if ! xcodebuild -quiet \
-    -project "$native_workspace/ArkTrace.xcodeproj" \
+    -project "$native_workspace/apple/ArkTrace.xcodeproj" \
     -scheme ArkTraceApp \
     -configuration Release \
     -destination 'generic/platform=macOS' \
@@ -235,7 +235,7 @@ jq -n \
 chmod 444 "$native_distribution_record"
 arktrace_verify_native_app_closure "$app" "archive"
 run_external "outer App signing failed" codesign --force --sign "$certificate_sha1" --options runtime --timestamp \
-    --entitlements "$repository_root/Apps/ArkTraceApp/ArkTraceApp.entitlements" \
+    --entitlements "$repository_root/apple/Apps/ArkTraceApp/ArkTraceApp.entitlements" \
     "$app"
 app_certificate_sha1=$(signature_certificate_sha1 "$app" app)
 [ "$app_certificate_sha1" = "$certificate_sha1" ] \

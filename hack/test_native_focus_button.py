@@ -22,7 +22,7 @@ def main() -> None:
         "xcrun", "swiftc", "-parse-as-library", "-swift-version", "6",
         "-warnings-as-errors", "-module-name", "ArkTraceNativeFocusButtonRegression",
         "-target", "arm64-apple-macos26.0", "-module-cache-path", str(cache / "ModuleCache"),
-        str(repo / "Apps/ArkTraceApp/Inspector/InspectorFocusButton.swift"),
+        str(repo / "apple/Apps/ArkTraceApp/Inspector/InspectorFocusButton.swift"),
         str(repo / "hack/native-focus-button/Regression.swift"), "-o", str(output),
     ], check=True, timeout=180)
     subprocess.run([str(output)], check=True, timeout=15)
