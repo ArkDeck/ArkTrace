@@ -53,11 +53,18 @@ while IFS= read -r path; do
             rust_macos=true
             rust_windows=true
             ;;
+        rust/crates/arktrace-contract/src/lib.rs)
+            # These literals are the ArkDeck contract. A bump has to refresh
+            # contracts/arkdeck-contract.json in the same change.
+            contracts=true
+            rust_macos=true
+            rust_windows=true
+            ;;
         rust/*)
             rust_macos=true
             rust_windows=true
             ;;
-        scripts/generate_ffi_bindings.py|scripts/ffi_test_support.py|scripts/test_ffi_contract.py|scripts/verify_migration_contracts.py|scripts/test_migration_contracts.py)
+        scripts/generate_ffi_bindings.py|scripts/ffi_test_support.py|scripts/test_ffi_contract.py|scripts/verify_migration_contracts.py|scripts/test_migration_contracts.py|scripts/verify_arkdeck_contract.py)
             contracts=true
             rust_macos=true
             rust_windows=true
@@ -95,6 +102,12 @@ while IFS= read -r path; do
             # scripts/verify_palette.py reads this file and re-measures every
             # figure AT-RENDER-008 quotes, so an edit here has to run the
             # contract lane as well as both compile lanes.
+            swiftpm=true
+            app=true
+            contracts=true
+            ;;
+        Sources/ArkTraceParser/TraceStreamerProcessParser.swift|Sources/ArkTraceStore/TraceSchemaAdapter.swift|Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift)
+            # Parser, schema, and index versions are exported for ArkDeck.
             swiftpm=true
             app=true
             contracts=true

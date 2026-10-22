@@ -90,6 +90,23 @@ not changed ArkDeck or re-pinned its distribution; its existing schema-3 fixture
 records do not prove the new candidate compatible. See the
 [current migration record](migration-runs/AT-RUST-007-013-2026-10-06-medium-queries.md).
 
+ArkTrace now exports those three literals in
+[`contracts/arkdeck-contract.json`](../contracts/arkdeck-contract.json):
+
+| JSON field | Swift constant | Rust constant |
+|---|---|---|
+| `parser_adapter_version` | `TraceStreamerProcessParser.adapterVersion` | `PARSER_ADAPTER_VERSION` |
+| `schema_adapter_version` | `TraceSchemaAdapter.version` | `SCHEMA_ADAPTER_VERSION` |
+| `index_schema_version` | `TraceDatabaseStagingPreparer.indexVersion` | `INDEX_SCHEMA_VERSION` |
+
+`scripts/verify_arkdeck_contract.py` fails when the file disagrees with either
+implementation or with `contracts/index-definitions.json`. ArkDeck should replace
+the hardcoded `index_schema_version: 3` in `arktrace_profile.rs`, and the matching
+parser and schema adapter literals, with a read of this file at the pinned
+ArkTrace revision. That consumption change belongs in ArkDeck; this repository
+does not vendor or update the ArkDeck profile. Until that lands, ArkDeck still
+compares jobs against schema 3.
+
 ## Real Artifact chain
 
 The reviewed Phase 5 run exercised the production path:

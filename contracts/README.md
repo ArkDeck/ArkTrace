@@ -1,5 +1,11 @@
 # Migration contracts
 
+`arkdeck-contract.json` is the machine-readable export of
+`parser_adapter_version`, `schema_adapter_version`, and `index_schema_version`.
+`scripts/verify_arkdeck_contract.py` checks it against the Swift and Rust
+constants. ArkDeck still hardcodes the previous index schema and should consume
+this file in its own change. See [ArkDeck integration](../docs/ARKDECK_INTEGRATION.md).
+
 The existing Swift implementation is the initial behavior oracle. Machine JSON
 1.0 fixtures remain authoritative in `Tests/ArkTraceCLITests/Fixtures/MachineJSON`;
 `machine-fixtures-index.json` records their original bytes, rather than copying

@@ -99,6 +99,22 @@ lane_app=true
 lane_contracts=true' \
     'Sources/ArkTraceRendering/TimelineColorPalette.swift'
 
+expect "ArkDeck version sources also run the contract lane" \
+    'lane_swiftpm=true
+lane_app=true
+lane_contracts=true' \
+    'Sources/ArkTraceParser/TraceStreamerProcessParser.swift
+Sources/ArkTraceStore/TraceSchemaAdapter.swift
+Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift'
+
+expect "Rust ArkDeck constants select both hosts and the contract lane" \
+    'lane_swiftpm=false
+lane_app=false
+lane_contracts=true
+lane_rust_macos=true
+lane_rust_windows=true' \
+    'rust/crates/arktrace-contract/src/lib.rs'
+
 expect "another rendering source keeps the compile lanes only" \
     'lane_swiftpm=true
 lane_app=true
@@ -269,7 +285,7 @@ lane_rust_macos=true
 lane_rust_windows=false' "$path"
 done
 
-for path in scripts/generate_ffi_bindings.py scripts/ffi_test_support.py scripts/test_ffi_contract.py scripts/verify_migration_contracts.py scripts/test_migration_contracts.py rust/dependency-licenses.json rust/licenses/serde-1.0.229/LICENSE-MIT; do
+for path in scripts/generate_ffi_bindings.py scripts/ffi_test_support.py scripts/test_ffi_contract.py scripts/verify_migration_contracts.py scripts/test_migration_contracts.py scripts/verify_arkdeck_contract.py rust/dependency-licenses.json rust/licenses/serde-1.0.229/LICENSE-MIT; do
     expect "shared ABI and oracle gates select both Rust host consumers" \
         'lane_swiftpm=false
 lane_app=false

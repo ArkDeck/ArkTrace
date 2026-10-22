@@ -61,6 +61,16 @@ class MigrationEncodingTests(unittest.TestCase):
             with contextlib.redirect_stdout(io.StringIO()):
                 verify_migration_contracts.main()
 
+    def test_arkdeck_contract_matches_swift_and_rust_constants(self):
+        import verify_arkdeck_contract
+
+        with contextlib.redirect_stdout(io.StringIO()):
+            verify_arkdeck_contract.main(["--check"])
+        before = (verify_arkdeck_contract.CONTRACT).read_bytes()
+        with contextlib.redirect_stdout(io.StringIO()):
+            verify_arkdeck_contract.main(["--write"])
+        self.assertEqual(verify_arkdeck_contract.CONTRACT.read_bytes(), before)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
