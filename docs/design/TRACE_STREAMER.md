@@ -60,7 +60,7 @@ GitHub 托管 runner 不重新认定自己构建的字节。nightly/manual bench
 - SHA-256：`0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a`；
 - 架构：`arm64`；
 - 上游 revision：`447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6`；
-- build recipe：`a2e47752e1353d627b442e607eed513564aa66a94c54f2660042383a0f6f3b20`。
+- build recipe：`8ed97c8eb0e4420be25222bba83661e3741b844832b7df16e6ffed3c37a5c2ec`。
 
 Release asset 是 CI 的字节传输渠道，不是新的信任根；提交中的 manifest SHA 仍是执行许可。asset 即使被替换，
 下载步骤也会 fail closed。重新构建产生不同 SHA 时不得覆盖该 asset，须先完成 §5 的 re-pin 审阅。
