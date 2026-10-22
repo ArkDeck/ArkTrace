@@ -62,7 +62,8 @@ def source_contract():
 
 
 def render(document):
-    return json.dumps(document, indent=2, sort_keys=True) + "\n"
+    # LF bytes only. Windows text mode would rewrite the checked contract as CRLF.
+    return (json.dumps(document, indent=2, sort_keys=True) + "\n").encode("utf-8")
 
 
 def main(argv=None):
@@ -75,16 +76,16 @@ def main(argv=None):
         raise SystemExit("contract key set drifted")
     encoded = render(document)
     if write:
-        CONTRACT.write_text(encoded, encoding="utf-8")
+        CONTRACT.write_bytes(encoded)
         print(f"wrote {CONTRACT.relative_to(ROOT)}")
         return
-    actual = CONTRACT.read_text(encoding="utf-8")
+    actual = CONTRACT.read_bytes()
     if actual != encoded:
         raise SystemExit(
             "contracts/arkdeck-contract.json drifted from Swift and Rust constants; "
             "regenerate with scripts/verify_arkdeck_contract.py --write"
         )
-    loaded = json.loads(actual)
+    loaded = json.loads(actual.decode("utf-8"))
     if loaded != document:
         raise SystemExit("arkdeck contract JSON does not match source constants")
     print(
