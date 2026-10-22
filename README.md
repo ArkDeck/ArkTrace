@@ -3,8 +3,8 @@
 # ArkTrace
 
 [![CI](https://github.com/ArkDeck/ArkTrace/actions/workflows/ci.yml/badge.svg)](https://github.com/ArkDeck/ArkTrace/actions/workflows/ci.yml)
-[![Swift](https://img.shields.io/badge/Swift-6.0-F05138?logo=swift&logoColor=white)](Package.swift)
-[![Platform](https://img.shields.io/badge/platform-macOS%2014%2B%20·%20Apple%20silicon-blue?logo=apple)](docs/APP_DISTRIBUTION.md)
+[![Swift](https://img.shields.io/badge/Swift-6.4-F05138?logo=swift&logoColor=white)](Package.swift)
+[![Platform](https://img.shields.io/badge/platform-macOS%2026%2B%20·%20Apple%20silicon-blue?logo=apple)](docs/APP_DISTRIBUTION.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 **English** | [简体中文](README.zh-CN.md)
@@ -30,6 +30,7 @@ ArkTrace captures traces from an explicitly selected OpenHarmony device or opens
 
 - Apple silicon Mac running macOS 26 or later
 - Swift 6.4 toolchain / Xcode 27.0 (Xcode for building the app)
+- Rust 1.99.0 for the shared engine workspace ([rust/README.md](rust/README.md))
 - OpenHarmony SDK `hdc` and a connected device with `hiprofiler_cmd` (capture only)
 - `jq` — ships with macOS 15+
 - Network access the first time you build the pinned TraceStreamer
@@ -151,12 +152,15 @@ CI builds, tests and runs the offline gates on every pull request, but hosted ru
 
 Phases 0–7 are complete and **all 10 release gates are closed**. Phase 7 (upstream alignment, 13/13) closed every actionable gap in [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) behind `scripts/test_phase7.sh`. The final gate closed a real debug loop on a DAYU 200 board — typed capture → structured analysis → agent judgement → typed re-verification — with the target app's CPU usage judged `improved` (−87.09%). Full task index: [docs/TASKS.md](docs/TASKS.md); final report: [docs/PHASE_6_VERIFICATION.md](docs/PHASE_6_VERIFICATION.md).
 
-Known limitations: Apple silicon / macOS 26+ only; capture requires an OpenHarmony SDK `hdc`, a connected device and device-side `hiprofiler_cmd`. The viewer does not draw irq / hilog / syscall lanes (those tables are empty in every real capture checked so far), does not offer user-defined colour themes, and its range statistics have no min/avg/max percentiles yet — see [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) §10 for the next-round list. The CLI and ArkDeck analyzer remain host-only and have no device authority. The macOS 26 minimum is the current baseline; distribution artifacts signed before this bump were built against macOS 14 and remain valid only as historical evidence — the next signed release must be produced and verified against the new baseline.
+The shared engine is migrating into the Rust workspace ([rust/README.md](rust/README.md)): exact Rust 1.99.0, edition 2024, macOS arm64 and Windows x64. The macOS app remains the SwiftUI product on Apple silicon and macOS 26 or later. The Windows x64 CLI is built and tested on the native Windows CI lane, including the clean-host acceptance workflow; it does not replace the macOS app.
+
+Known limitations: the macOS app is Apple silicon / macOS 26 or later; capture requires an OpenHarmony SDK `hdc`, a connected device and device-side `hiprofiler_cmd`. The viewer does not draw irq / hilog / syscall lanes (those tables are empty in every real capture checked so far), does not offer user-defined colour themes, and its range statistics have no min/avg/max percentiles yet — see [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) §10 for the next-round list. The CLI and ArkDeck analyzer remain host-only and have no device authority. The macOS 26 minimum is the current baseline; distribution artifacts signed before this bump were built against macOS 14 and remain valid only as historical evidence — the next signed release must be produced and verified against the new baseline.
 
 ## Documentation
 
 | Document | Contents |
 |---|---|
+| [rust/README.md](rust/README.md) | Rust workspace toolchain, macOS and Windows host ports, and migration status |
 | [docs/DESIGN.md](docs/DESIGN.md) | Product and technical design: evidence baseline, architecture, domain model, TraceStreamer integration, renderer, ArkDeck boundary, release gates |
 | [docs/CAPTURE.md](docs/CAPTURE.md) | App-only HDC capture workflow, profiles, lifecycle, security boundary and troubleshooting |
 | [docs/SPECIFICATION.md](docs/SPECIFICATION.md) | Normative requirements (`AT-*`), machine JSON contract, end-to-end acceptance scenarios (`AC-AT-*`), Definition of Done |

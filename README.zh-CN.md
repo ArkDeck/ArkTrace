@@ -3,8 +3,8 @@
 # ArkTrace
 
 [![CI](https://github.com/ArkDeck/ArkTrace/actions/workflows/ci.yml/badge.svg)](https://github.com/ArkDeck/ArkTrace/actions/workflows/ci.yml)
-[![Swift](https://img.shields.io/badge/Swift-6.0-F05138?logo=swift&logoColor=white)](Package.swift)
-[![Platform](https://img.shields.io/badge/platform-macOS%2014%2B%20·%20Apple%20silicon-blue?logo=apple)](docs/APP_DISTRIBUTION.md)
+[![Swift](https://img.shields.io/badge/Swift-6.4-F05138?logo=swift&logoColor=white)](Package.swift)
+[![Platform](https://img.shields.io/badge/platform-macOS%2026%2B%20·%20Apple%20silicon-blue?logo=apple)](docs/APP_DISTRIBUTION.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 [English](README.md) | **简体中文**
@@ -30,6 +30,7 @@ ArkTrace 可从用户明确选择的 OpenHarmony 设备采集 Trace，也可打�
 
 - Apple silicon Mac，macOS 26 及以上
 - Swift 6.4 toolchain / Xcode 27.0（构建 App 需要 Xcode）
+- 共享引擎工作区使用 Rust 1.99.0（见 [rust/README.md](rust/README.md)）
 - OpenHarmony SDK `hdc`，以及带 `hiprofiler_cmd` 的已连接设备（仅采集需要）
 - `jq` —— macOS 15 起随系统提供
 - 首次构建 pinned TraceStreamer 需要网络访问
@@ -150,12 +151,15 @@ CI 会在每个 pull request 上构建、测试并运行离线 gate，但托管 
 
 Phase 0–7 全部完成，**10 个发布门全部关闭**。Phase 7（上游对齐，13/13）把 [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) 里每一条可动手的 GAP 关闭在 `scripts/test_phase7.sh` 之后。最后一道门以 DAYU 200 真机闭合了一次真实调试闭环——typed capture → structured analysis → Agent 判断 → typed 复验——目标 App 的 CPU 占用判定为 `improved`（−87.09%）。完整任务索引见 [docs/TASKS.md](docs/TASKS.md)，最终报告见 [docs/PHASE_6_VERIFICATION.md](docs/PHASE_6_VERIFICATION.md)。
 
-已知限制：仅支持 Apple silicon / macOS 26+；采集需要 OpenHarmony SDK `hdc`、已连接设备和设备侧 `hiprofiler_cmd`。查看器不画 irq / hilog / syscall 泳道（这几张表在目前核对过的每个真机库里都是 0 行），不提供用户自定义配色，区间统计也还没有 min/avg/max 分位——下一轮清单见 [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) §10。CLI 与 ArkDeck analyzer 仍是 host-only，不获得设备权限。macOS 26 是当前基线；此前签名的分发产物基于 macOS 14 构建，仅作为历史 evidence 保留——下一次签名发布必须在新基线上重新产出并验证。
+共享引擎正在迁入 Rust 工作区（[rust/README.md](rust/README.md)）：精确 Rust 1.99.0、edition 2024，目标为 macOS arm64 与 Windows x64。macOS App 仍是 Apple silicon、macOS 26 及以上的 SwiftUI 产品。Windows x64 CLI 在原生 Windows CI 车道构建和测试，并包含 clean-host acceptance workflow；它不替代 macOS App。
+
+已知限制：macOS App 为 Apple silicon / macOS 26 及以上；采集需要 OpenHarmony SDK `hdc`、已连接设备和设备侧 `hiprofiler_cmd`。查看器不画 irq / hilog / syscall 泳道（这几张表在目前核对过的每个真机库里都是 0 行），不提供用户自定义配色，区间统计也还没有 min/avg/max 分位——下一轮清单见 [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) §10。CLI 与 ArkDeck analyzer 仍是 host-only，不获得设备权限。macOS 26 是当前基线；此前签名的分发产物基于 macOS 14 构建，仅作为历史 evidence 保留——下一次签名发布必须在新基线上重新产出并验证。
 
 ## 文档
 
 | 文档 | 内容 |
 |---|---|
+| [rust/README.md](rust/README.md) | Rust 工作区工具链、macOS 与 Windows host port，以及迁移状态 |
 | [docs/DESIGN.md](docs/DESIGN.md) | 产品与技术设计：证据基线、架构、域模型、TraceStreamer 集成、Renderer、ArkDeck 边界、发布门 |
 | [docs/CAPTURE.md](docs/CAPTURE.md) | App-only HDC 采集流程、预设、生命周期、安全边界与故障排查 |
 | [docs/SPECIFICATION.md](docs/SPECIFICATION.md) | 规范性需求（`AT-*`）、machine JSON contract、端到端验收场景（`AC-AT-*`）、Definition of Done |
