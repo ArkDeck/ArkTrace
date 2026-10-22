@@ -236,6 +236,28 @@ def main():
         })
     assert len(frozen) == 28 and definitions["definitions"] == frozen, "Swift/Rust index definition drift"
     assert len({d["name"] for d in frozen}) == 28
+    benchmark = (ROOT / "scripts/benchmark_phase3.sh").read_text(encoding="utf-8")
+
+    def shell_json_array(name):
+        match = re.search(rf"^{name}='(\[[\s\S]*?\])'", benchmark, re.M)
+        assert match, f"benchmark is missing {name}"
+        return json.loads(match.group(1))
+
+    permitted = shell_json_array("permitted_index_names")
+    required = shell_json_array("required_index_names")
+    medium_indexes = shell_json_array("medium_index_names")
+    defined_names = [item["name"] for item in frozen]
+    assert set(permitted) == set(defined_names), "benchmark index allowlist drifted from index definitions"
+    assert len(permitted) == len(set(permitted))
+    assert set(required) <= set(defined_names)
+    assert set(medium_indexes) <= set(defined_names)
+    assert medium_indexes == [
+        "arktrace_v4_args_argset_id_values",
+        "arktrace_v4_args_argset_values",
+        "arktrace_v4_data_dict_id_data",
+        "arktrace_v4_data_type_id_desc",
+    ], "medium benchmark must require the schema-4 optional indexes"
+    assert "length <= 72" in benchmark, "benchmark metric cap drifted"
     metadata = json.loads((ROOT / "contracts/ready-metadata.json").read_text(encoding="utf-8"))
     runtime = (ROOT / "Sources/ArkTraceRuntime/TraceCache.swift").read_text(encoding="utf-8")
     keys = runtime.split("private enum CodingKeys: String, CodingKey, CaseIterable {", 1)[1].split("\n    }", 1)[0]
