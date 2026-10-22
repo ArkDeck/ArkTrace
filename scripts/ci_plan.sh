@@ -160,7 +160,7 @@ while IFS= read -r path; do
         scripts/*|ThirdParty/*)
             contracts=true
             ;;
-        docs/PHASE_6_SCENARIO.md)
+        docs/archive/PHASE_6_SCENARIO.md)
             # The phase6 offline gate binds this frozen scenario document.
             contracts=true
             ;;

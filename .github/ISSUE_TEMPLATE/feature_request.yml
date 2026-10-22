@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         Describe the journey you need. Product behavior is specified in
-        docs/SPECIFICATION.md. See CONTRIBUTING.md before opening a pull request.
+        docs/design/SPECIFICATION.md. See CONTRIBUTING.md before opening a pull request.
   - type: textarea
     id: problem
     attributes:

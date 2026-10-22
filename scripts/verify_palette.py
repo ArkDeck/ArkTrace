@@ -3,7 +3,7 @@
 
 Why this exists
 ---------------
-Between 2026-08-19 and 2026-08-24 `AT-RENDER-008` and `docs/DESIGN.md` §13.5
+Between 2026-08-19 and 2026-08-24 `AT-RENDER-008` and `docs/design/DESIGN.md` §13.5
 carried inline measurements of the twenty-entry palette -- OKLab ΔE, colour
 vision deficiency, contrast -- produced by a tool that was never committed.
 Nothing re-ran them, so nobody noticed that the headline figure ("worst
@@ -675,7 +675,7 @@ def report(palette: list[str], states: dict[str, str], unknown: str,
         print(f"  {kind:>7}: closest palette pair ΔE {worst:5.1f}  ({a} / {b})")
 
     if jank:
-        print("\nJank table (upstream values, NOT gated -- outstanding, see docs/DESIGN.md §13.5)")
+        print("\nJank table (upstream values, NOT gated -- outstanding, see docs/design/DESIGN.md §13.5)")
         for value in jank[:4]:
             print(f"  {value}  C {oklch(value)[1]:.3f}  "
                   + " ".join(f"{contrast(value, cv):5.2f}" for _, cv in CANVASES))

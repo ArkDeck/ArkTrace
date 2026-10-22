@@ -1,7 +1,7 @@
 # ArkDeck integration
 
-The Rust migration is defined in [the migration design](RUST_CORE_MIGRATION_DESIGN.md)
-and [tasks AT-RUST-017/018](RUST_CORE_MIGRATION_TASKS.md). It covers both the daemon's
+The Rust migration is defined in [the migration design](../archive/RUST_CORE_MIGRATION_DESIGN.md)
+and [tasks AT-RUST-017/018](../archive/RUST_CORE_MIGRATION_TASKS.md). It covers both the daemon's
 reviewed CLI distribution and the macOS App's directly linked Swift SDK. The current
 distribution and historical evidence below do not certify the future Rust or Windows builds.
 ArkDeck's 2026-09-25 ruling answers `trace.inspect` from the loaded reviewed CLI once two
@@ -24,7 +24,7 @@ The 2026-10-06 native Rendering migration uses ABI/snapshot format **2**.
 The contract file is `contracts/ffi-v2.json`. An SDK consumer must rebuild with
 the matching generated headers/records and static library; format 1 is rejected. The current ArkTrace App and public consumer were checked against
 the new SDK. No ArkDeck SDK cutover or App acceptance is implied by that result;
-see the [native rendering run](migration-runs/AT-RUST-011-013-2026-10-06-native-rendering.md).
+see the [native rendering run](../migration-runs/AT-RUST-011-013-2026-10-06-native-rendering.md).
 
 `TraceProductConfiguration` is the composition boundary for legitimate product differences. It
 fixes the consumer bundle, cache/staging roots, recent-document preference key, signpost subsystem
@@ -87,10 +87,10 @@ injected contract. A new schema-4 CLI candidate therefore needs a matching ArkDe
 fresh consumer validation before it can replace the reviewed distribution. This increment has
 not changed ArkDeck or re-pinned its distribution; its existing schema-3 fixtures and release
 records do not prove the new candidate compatible. See the
-[current migration record](migration-runs/AT-RUST-007-013-2026-10-06-medium-queries.md).
+[current migration record](../migration-runs/AT-RUST-007-013-2026-10-06-medium-queries.md).
 
 ArkTrace now exports those three literals in
-[`contracts/arkdeck-contract.json`](../contracts/arkdeck-contract.json):
+[`contracts/arkdeck-contract.json`](../../contracts/arkdeck-contract.json):
 
 | JSON field | Swift constant | Rust constant |
 |---|---|---|
@@ -146,6 +146,6 @@ relationships.
 
 This Phase 5 run used a real small Trace captured by ArkDeck and closed Gate 9. At that time it
 did not close the separate >500 MiB fixture and performance gates. Gates 6/7 were subsequently
-closed with independent large-trace evidence on 2026-08-15, as recorded in [DESIGN.md](./DESIGN.md)
-§24 and [TASKS.md](./TASKS.md) §4. That historical result does not replace a new candidate's
+closed with independent large-trace evidence on 2026-08-15, as recorded in [DESIGN.md](../design/DESIGN.md)
+§24 and [TASKS.md](../archive/TASKS.md) §4. That historical result does not replace a new candidate's
 required validation: missing required large-trace inputs still fail the applicable gate.

@@ -3,7 +3,7 @@
 > 状态：Completed，9/9 —— 真实闭环已跑通并判定 improved，发布门 10 关闭
 > 阶段：Real Debug Loop
 > 验收目标：至少闭合一次真实 OpenHarmony App → ArkDeck → ArkTrace → Agent → typed request → ArkDeck 复验链路
-> 冻结件：[PHASE_6_SCENARIO.md](./PHASE_6_SCENARIO.md)；能力与阻塞证据：`Fixtures/release-evidence/phase6-capability-probe.json`
+> 冻结件：[PHASE_6_SCENARIO.md](PHASE_6_SCENARIO.md)；能力与阻塞证据：`Fixtures/release-evidence/phase6-capability-probe.json`
 
 ## 1. 进入条件
 
@@ -46,7 +46,7 @@ flowchart LR
 ### P6-T01 — 选择真实问题并冻结验收假设
 
 **优先级：P0。状态：Completed（2026-08-16）。**
-**冻结件：[PHASE_6_SCENARIO.md](./PHASE_6_SCENARIO.md)。**
+**冻结件：[PHASE_6_SCENARIO.md](PHASE_6_SCENARIO.md)。**
 
 冻结内容：场景 S1（嵌套 WaterFlow feed 在固定频率 reload 下的主线程开销）、被测 App/设备/OS
 identity、授权、baseline typed request 的逐字段参数、预期 evidence、候选诊断 C1～C4 与排除条件、
@@ -228,7 +228,7 @@ inconclusive 判定阈值。冻结发生在任何 baseline 采集之前；冻结
 - [x] 结论由结构化 evidence 支撑（M1～M5 全部取自 typed analysis artifact，判定按 §10 冻结规则；
   `scripts/test_phase6.sh` 从记录数值离线重算同一判定）；
 - [x] 发布门 10 关闭（DESIGN §11 发布门 10 已标记关闭并引用本证据包）；
-- [x] 输出 Final Verification Report（[PHASE_6_VERIFICATION.md](./PHASE_6_VERIFICATION.md)）；
+- [x] 输出 Final Verification Report（[PHASE_6_VERIFICATION.md](PHASE_6_VERIFICATION.md)）；
 - [x] 若阻塞，报告最小真实 blocker、owner、所需 authority/state change，发布门保持开放（§5.1 记录了
   运行期出现的全部 blocker、owner 与解除方式；`kind=context` 的那条由 ArkDeck#1318 修复后端到端复验关闭，
   没有在未解除时被记成通过）。
@@ -249,7 +249,7 @@ inconclusive 判定阈值。冻结发生在任何 baseline 采集之前；冻结
 - **`analyzer.analyze-trace@1` schemaMismatch** —— 已安装 daemon 运行修复前的 analysis
   envelope 校验器。从 ArkDeck HEAD 重建、按 `Distribution/macOS/build-helpers.sh` 布局签名
   `ArkDeckAgent.app` 后 `agentd update` 解除；descriptor pin 保留。详见
-  [PHASE_6_SCENARIO.md](./PHASE_6_SCENARIO.md) §11.1。
+  [PHASE_6_SCENARIO.md](PHASE_6_SCENARIO.md) §11.1。
 - **`workspace.sign-openharmony-hap@1` presetUnavailable** —— 更换 daemon 二进制使签名
   preset receipt 的 `trustedDaemonApplicationSHA256` 失配。以独立重实现的
   `daemonFingerprint` 计算新值（known-answer test 先复现旧值验证算法正确），刷新该字段后

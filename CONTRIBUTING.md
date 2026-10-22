@@ -2,9 +2,9 @@
 
 Thanks for helping improve ArkTrace. This file is the public entry point. Day-to-day
 agent and maintainer boundaries live in [AGENTS.md](AGENTS.md). Product behavior is
-[docs/SPECIFICATION.md](docs/SPECIFICATION.md). Architecture is
-[docs/DESIGN.md](docs/DESIGN.md). The CLI contract is
-[docs/CLI.md](docs/CLI.md).
+[docs/design/SPECIFICATION.md](docs/design/SPECIFICATION.md). Architecture is
+[docs/design/DESIGN.md](docs/design/DESIGN.md). The CLI contract is
+[docs/guides/CLI.md](docs/guides/CLI.md).
 
 Please read the [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
 

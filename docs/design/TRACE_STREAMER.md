@@ -75,7 +75,7 @@ scripts/verify_trace_streamer_lock.sh
 scripts/test_trace_streamer_reproducibility.sh
 ```
 
-该 gate 不接受 binary/manifest/fixture/license 缺失或漂移，也不允许 integration skip；它在 private partial DB 上完成 quick_check、schema/range/relationship validation、versioned index migration 与 fsync 后，才以 DB rename 作为 Ready marker。详细结果见 [PHASE_1_VERIFICATION.md](./PHASE_1_VERIFICATION.md)。
+该 gate 不接受 binary/manifest/fixture/license 缺失或漂移，也不允许 integration skip；它在 private partial DB 上完成 quick_check、schema/range/relationship validation、versioned index migration 与 fsync 后，才以 DB rename 作为 Ready marker。详细结果见 [PHASE_1_VERIFICATION.md](../archive/PHASE_1_VERIFICATION.md)。
 
 ## 4a. Windows x64 锁定构建（AT-RUST-003）
 

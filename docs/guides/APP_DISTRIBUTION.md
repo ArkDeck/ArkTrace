@@ -55,7 +55,7 @@ general remote console. Duration and buffers are bounded, output is
 bounded, device-side names are per-request UUIDs, and the local trace is exposed
 only after a non-empty partial file is atomically promoted. Success, failure,
 and cancellation all attempt to stop the profiler and remove only paths owned
-by that capture request. See `docs/CAPTURE.md` and AT-APP-014…019.
+by that capture request. See `docs/design/CAPTURE.md` and AT-APP-014…019.
 
 ## Native runtime bundle boundary
 

@@ -3,7 +3,7 @@
 > 日期：2026-08-16
 > 结论：**真实闭环已跑通，判定 improved，发布门 10 关闭。**
 > 机器证据：`Fixtures/release-evidence/phase6-real-debug-loop.json`
-> 冻结件：[PHASE_6_SCENARIO.md](./PHASE_6_SCENARIO.md) ｜ Gate：`scripts/test_phase6.sh`
+> 冻结件：[PHASE_6_SCENARIO.md](PHASE_6_SCENARIO.md) ｜ Gate：`scripts/test_phase6.sh`
 
 ## 1. 闭环链路
 
@@ -280,7 +280,7 @@ Agent 判断复现了首轮结论：baseline `topProcesses` 首位 `e.waterflowd
 
 ### 8.1 分发前 hardening 之后的复跑（2026-08-16）
 
-上表描述的是 `356abef` 那棵树。之后 [PHASE_1_TASKS.md](./PHASE_1_TASKS.md) §6 的最后两条 hardening 落地，
+上表描述的是 `356abef` 那棵树。之后 [PHASE_1_TASKS.md](PHASE_1_TASKS.md) §6 的最后两条 hardening 落地，
 其中 benchmark evidence schema 由 `formatVersion: 3` 升到 `4`（新增 `storage` 块），属于会影响 gate
 断言的改动，因此重跑了受影响的链路。缺少外部输入的三项仍按设计 fail closed，未被伪装成通过。
 

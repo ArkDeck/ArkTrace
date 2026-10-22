@@ -14,7 +14,7 @@ set -u
 
 repository_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 evidence="$repository_root/Fixtures/release-evidence/phase6-real-debug-loop.json"
-scenario="$repository_root/docs/PHASE_6_SCENARIO.md"
+scenario="$repository_root/docs/archive/PHASE_6_SCENARIO.md"
 failures=0
 
 fail() {
@@ -28,7 +28,7 @@ pass() {
 
 command -v jq >/dev/null 2>&1 || { fail "jq is required"; exit 1; }
 [ -f "$evidence" ] || { fail "evidence document is absent: Fixtures/release-evidence/phase6-real-debug-loop.json"; exit 1; }
-[ -f "$scenario" ] || { fail "frozen scenario is absent: docs/PHASE_6_SCENARIO.md"; exit 1; }
+[ -f "$scenario" ] || { fail "frozen scenario is absent: docs/archive/PHASE_6_SCENARIO.md"; exit 1; }
 jq -e . "$evidence" >/dev/null 2>&1 || { fail "evidence document is not valid JSON"; exit 1; }
 
 # The evidence must never carry a user's absolute path or a secret.
@@ -48,7 +48,7 @@ fi
 #
 # The 2026-08-16 CLI re-pin therefore did not update them on its own — it left
 # this gate attesting a retired binary until the DAYU 200 scenario in
-# docs/PHASE_6_SCENARIO.md was re-run. The same discipline applied to the
+# docs/archive/PHASE_6_SCENARIO.md was re-run. The same discipline applied to the
 # 2026-08-17 macOS 26 / Swift 6.3 re-pin (source 61d0f2a): the scenario was
 # re-run end to end on that distribution (PHASE_6_SCENARIO.md §10.3), both
 # rounds reached the same verdict, and tool and parser below moved together

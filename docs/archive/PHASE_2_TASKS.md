@@ -6,7 +6,7 @@
 
 ## 1. 进入条件
 
-- [x] [Phase 1](./PHASE_1_TASKS.md) Exit Checklist 全部完成；
+- [x] [Phase 1](PHASE_1_TASKS.md) Exit Checklist 全部完成；
 - [x] real Parser integration 零 skip；
 - [x] Parser identity、schema/index version 和 ready DB contract 稳定；
 - [x] 不存在会改变 CLI JSON provenance 的未决 Phase 1 contract。
@@ -360,7 +360,7 @@ Machine payload validation 全链路独立；output budget 同时约束 stdout +
 2. real trace end-to-end test，Phase 2 gate 禁止 skip；
 3. malformed args、wrong parser、corrupt DB、timeout、cancel、output overflow；
 4. cached open和 metadata query benchmark，记录机器/trace/parser identity；
-5. docs/CLI.md：安装、global flags、命令、JSON、exit codes、privacy；
+5. docs/guides/CLI.md：安装、global flags、命令、JSON、exit codes、privacy；
 6. README 更新可执行命令；
 7. scripts/test_phase2.sh 一条命令执行 Phase 1 + Phase 2 gate。
 
@@ -374,8 +374,8 @@ cache hit 的 open/metadata p50/p95、test/skip count 与 CLI status checks。�
 237 tests、0 failure、0 skip；Mac15,12/arm64/16 GiB、locked zlib fixture 上 cached open p95
 170.608375 ms、metadata p95 0.003709 ms。该 small baseline 不替代 P3-T09 medium/large/viewport gate，
 发布门 3、6、7 均保持开放。安装、flags、commands、Machine JSON、exit/signal/privacy 已写入
-[CLI.md](./CLI.md)，README 已更新 executable/gate 用法，完整候选证据见
-[PHASE_2_VERIFICATION.md](./PHASE_2_VERIFICATION.md)。
+[CLI.md](../guides/CLI.md)，README 已更新 executable/gate 用法，完整候选证据见
+[PHASE_2_VERIFICATION.md](PHASE_2_VERIFICATION.md)。
 
 ## 5. Exit Checklist
 

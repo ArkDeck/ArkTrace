@@ -5,7 +5,7 @@
 // Neither fill table is: the twenty-entry identity palette and the thread
 // state table are both ArkTrace's own values sitting in upstream's structure,
 // for the reasons recorded on `funcColorLiterals`, on `stateColors`, and in
-// docs/DESIGN.md §13.5. `scripts/verify_palette.py` measures both.
+// docs/design/DESIGN.md §13.5. `scripts/verify_palette.py` measures both.
 // See THIRD_PARTY_NOTICES.md.
 
 import ArkTraceCore

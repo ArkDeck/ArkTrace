@@ -15,7 +15,7 @@
 
 ## 2. 责任边界
 
-在此集成路径中，ArkDeck 负责 device/capture/job/capability/artifact lease；ArkTrace analyzer/CLI 只处理 Host 上已有 Trace。GUI Capture 是后续独立能力，见 AT-SYS-003 与 [CAPTURE.md](./CAPTURE.md)。集成禁止：
+在此集成路径中，ArkDeck 负责 device/capture/job/capability/artifact lease；ArkTrace analyzer/CLI 只处理 Host 上已有 Trace。GUI Capture 是后续独立能力，见 AT-SYS-003 与 [CAPTURE.md](../design/CAPTURE.md)。集成禁止：
 
 - 创建重复 summary operation；
 - 让调用方提供 executable path/argv；
@@ -307,7 +307,7 @@ context/analyze lowering、严格 envelope validation、exact Artifact persisten
 - [x] source/derived hashes 和 provenance 一致；
 - [x] 无手工打开 ArkTrace、无 GUI automation；
 - [x] 发布门 9 按真实 Trace Artifact → ArkTrace → derived analysis Artifact evidence 关闭；
-- [x] docs/ARKDECK_INTEGRATION.md 和 scripts/test_phase5.sh 完成。
+- [x] docs/guides/ARKDECK_INTEGRATION.md 和 scripts/test_phase5.sh 完成。
 
 **完成证据：** ArkDeck production daemon 在 submit 前确认 `capture.diagnostics@1` 与
 `analyzer.summarize-trace@1` available。真实 capture Job

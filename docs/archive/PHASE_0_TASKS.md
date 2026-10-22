@@ -6,7 +6,7 @@
 
 ## 1. 阶段范围
 
-Phase 0 只调查会改变实现方向的事实，不实现产品功能，不展开长期架构评审。证据基线以 [DESIGN.md](./DESIGN.md) §2 和 [TRACE_STREAMER.md](./TRACE_STREAMER.md) 为准。
+Phase 0 只调查会改变实现方向的事实，不实现产品功能，不展开长期架构评审。证据基线以 [DESIGN.md](../design/DESIGN.md) §2 和 [TRACE_STREAMER.md](../design/TRACE_STREAMER.md) 为准。
 
 ## 2. 已完成任务
 

@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/ArkDeck/ArkTrace/actions/workflows/ci.yml/badge.svg)](https://github.com/ArkDeck/ArkTrace/actions/workflows/ci.yml)
 [![Swift](https://img.shields.io/badge/Swift-6.4-F05138?logo=swift&logoColor=white)](Package.swift)
-[![Platform](https://img.shields.io/badge/platform-macOS%2026%2B%20·%20Apple%20silicon-blue?logo=apple)](docs/APP_DISTRIBUTION.md)
+[![Platform](https://img.shields.io/badge/platform-macOS%2026%2B%20·%20Apple%20silicon-blue?logo=apple)](docs/guides/APP_DISTRIBUTION.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 [English](README.md) | **简体中文**
@@ -45,7 +45,7 @@ TraceStreamer 二进制是本机构建产物，已被 `.gitignore` 排除——�
 scripts/build_trace_streamer.sh
 ```
 
-该脚本生成 `ThirdParty/TraceStreamer/macx/trace_streamer` 及其 identity manifest。pinned revision 与构建配方见 [docs/TRACE_STREAMER.md](docs/TRACE_STREAMER.md)。
+该脚本生成 `ThirdParty/TraceStreamer/macx/trace_streamer` 及其 identity manifest。pinned revision 与构建配方见 [docs/design/TRACE_STREAMER.md](docs/design/TRACE_STREAMER.md)。
 
 ### 2. 构建与测试
 
@@ -77,15 +77,15 @@ PARSER="$PWD/ThirdParty/TraceStreamer/macx/trace_streamer"
 .build/release/arktrace --trace-streamer "$PARSER" --json analyze Fixtures/traces/zlib.htrace --kind range --start-ns 0 --end-ns 1000000
 ```
 
-> **注意** —— 裸 `swift build` 产物只是开发构建：不携带 reviewed parser 与 license 资源，因此 `doctor --self-test` 与 `licenses` 会 typed fail closed，且 parser 必须显式传入（CLI 从不搜索 `PATH`）。完整安装单位是 [docs/CLI_DISTRIBUTION.md](docs/CLI_DISTRIBUTION.md) 定义的签名、notarized `ArkTraceCLI.app`；生产与 ArkDeck 直接执行其 `Contents/MacOS/arktrace`，它能自行定位捆绑的 parser。
+> **注意** —— 裸 `swift build` 产物只是开发构建：不携带 reviewed parser 与 license 资源，因此 `doctor --self-test` 与 `licenses` 会 typed fail closed，且 parser 必须显式传入（CLI 从不搜索 `PATH`）。完整安装单位是 [docs/guides/CLI_DISTRIBUTION.md](docs/guides/CLI_DISTRIBUTION.md) 定义的签名、notarized `ArkTraceCLI.app`；生产与 ArkDeck 直接执行其 `Contents/MacOS/arktrace`，它能自行定位捆绑的 parser。
 
-完整命令参考、Machine JSON contract、limits、signal 处理与隐私契约见 [docs/CLI.md](docs/CLI.md)。
+完整命令参考、Machine JSON contract、limits、signal 处理与隐私契约见 [docs/guides/CLI.md](docs/guides/CLI.md)。
 
 ### 4. 运行 Viewer
 
 用 Xcode 打开 `ArkTrace.xcodeproj`，选择 `ArkTraceApp` scheme 后运行。可通过 **File → Open**、Finder「打开方式」、拖放或 Recents 打开 `.htrace` / `.ftrace` / `.systrace`；**Reload** 会从原始文件重新打开当前 Trace。
 
-要采集新 Trace，请先通过 USB 或网络调试连接 OpenHarmony 设备，再选择 **File → Capture Trace…**（<kbd>⌘N</kbd>）。ArkTrace 会从已配置的 SDK/PATH 查找 `hdc`，也允许直接选择其位置；随后选择设备、预设、时长与缓冲区，指定本地保存位置并开始采集。完成的文件会自动打开。完整行为与故障恢复见 [docs/CAPTURE.md](docs/CAPTURE.md)。
+要采集新 Trace，请先通过 USB 或网络调试连接 OpenHarmony 设备，再选择 **File → Capture Trace…**（<kbd>⌘N</kbd>）。ArkTrace 会从已配置的 SDK/PATH 查找 `hdc`，也允许直接选择其位置；随后选择设备、预设、时长与缓冲区，指定本地保存位置并开始采集。完成的文件会自动打开。完整行为与故障恢复见 [docs/design/CAPTURE.md](docs/design/CAPTURE.md)。
 
 Sidebar 控制轨道显隐，并可按进程名或 PID 过滤出某个进程；Timeline 支持鼠标/触控板 pan 与 zoom、range selection 与真实 event selection；工具栏的 Search 按 TID / thread / slice 名称定位 event；Inspector 展示 event 详情或 range analysis。
 
@@ -129,7 +129,7 @@ Sidebar 控制轨道显隐，并可按进程名或 PID 过滤出某个进程；T
 
 Slice 的**配色分配**与 SmartPerf Host 一致：CPU slice 取所属进程身份，named slice 用自身名称（去掉数字后）散列进一张二十槽的表，因此 `ipc::41` 与 `ipc::42` 同色；thread state 走上游的状态链。在上游同色的两个 slice 在这里也同色。
 
-二十个槽里的色值、以及状态色，是 ArkTrace 自己的。设计依据是「上游 hash 有 74% 的概率只落在其中五个槽」这一实测事实，每一项都由 `scripts/verify_palette.py` 按阈值把关——两两 ΔE、对浅色与深色画布均 ≥ 3:1、对自己的 label ≥ 4.5:1——该脚本在 CI 中运行。细节见 [docs/DESIGN.md](docs/DESIGN.md) §13.5。
+二十个槽里的色值、以及状态色，是 ArkTrace 自己的。设计依据是「上游 hash 有 74% 的概率只落在其中五个槽」这一实测事实，每一项都由 `scripts/verify_palette.py` 按阈值把关——两两 ΔE、对浅色与深色画布均 ≥ 3:1、对自己的 label ≥ 4.5:1——该脚本在 CI 中运行。细节见 [docs/design/DESIGN.md](docs/design/DESIGN.md) §13.5。
 
 ## 测试与发布门
 
@@ -149,32 +149,32 @@ CI 会在每个 pull request 上构建、测试并运行离线 gate，但托管 
 
 ## 项目状态
 
-Phase 0–7 全部完成，**10 个发布门全部关闭**。Phase 7（上游对齐，13/13）把 [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) 里每一条可动手的 GAP 关闭在 `scripts/test_phase7.sh` 之后。最后一道门以 DAYU 200 真机闭合了一次真实调试闭环——typed capture → structured analysis → Agent 判断 → typed 复验——目标 App 的 CPU 占用判定为 `improved`（−87.09%）。完整任务索引见 [docs/TASKS.md](docs/TASKS.md)，最终报告见 [docs/PHASE_6_VERIFICATION.md](docs/PHASE_6_VERIFICATION.md)。
+Phase 0–7 全部完成，**10 个发布门全部关闭**。Phase 7（上游对齐，13/13）把 [docs/archive/UPSTREAM_ALIGNMENT_AUDIT.md](docs/archive/UPSTREAM_ALIGNMENT_AUDIT.md) 里每一条可动手的 GAP 关闭在 `scripts/test_phase7.sh` 之后。最后一道门以 DAYU 200 真机闭合了一次真实调试闭环——typed capture → structured analysis → Agent 判断 → typed 复验——目标 App 的 CPU 占用判定为 `improved`（−87.09%）。完整任务索引见 [docs/archive/TASKS.md](docs/archive/TASKS.md)，最终报告见 [docs/archive/PHASE_6_VERIFICATION.md](docs/archive/PHASE_6_VERIFICATION.md)。
 
 共享引擎正在迁入 Rust 工作区（[rust/README.md](rust/README.md)）：精确 Rust 1.99.0、edition 2024，目标为 macOS arm64 与 Windows x64。macOS App 仍是 Apple silicon、macOS 26 及以上的 SwiftUI 产品。Windows x64 CLI 在原生 Windows CI 车道构建和测试，并包含 clean-host acceptance workflow；它不替代 macOS App。
 
-已知限制：macOS App 为 Apple silicon / macOS 26 及以上；采集需要 OpenHarmony SDK `hdc`、已连接设备和设备侧 `hiprofiler_cmd`。查看器不画 irq / hilog / syscall 泳道（这几张表在目前核对过的每个真机库里都是 0 行），不提供用户自定义配色，区间统计也还没有 min/avg/max 分位——下一轮清单见 [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) §10。CLI 与 ArkDeck analyzer 仍是 host-only，不获得设备权限。macOS 26 是当前基线；此前签名的分发产物基于 macOS 14 构建，仅作为历史 evidence 保留——下一次签名发布必须在新基线上重新产出并验证。
+已知限制：macOS App 为 Apple silicon / macOS 26 及以上；采集需要 OpenHarmony SDK `hdc`、已连接设备和设备侧 `hiprofiler_cmd`。查看器不画 irq / hilog / syscall 泳道（这几张表在目前核对过的每个真机库里都是 0 行），不提供用户自定义配色，区间统计也还没有 min/avg/max 分位——下一轮清单见 [docs/archive/UPSTREAM_ALIGNMENT_AUDIT.md](docs/archive/UPSTREAM_ALIGNMENT_AUDIT.md) §10。CLI 与 ArkDeck analyzer 仍是 host-only，不获得设备权限。macOS 26 是当前基线；此前签名的分发产物基于 macOS 14 构建，仅作为历史 evidence 保留——下一次签名发布必须在新基线上重新产出并验证。
 
 ## 文档
 
 | 文档 | 内容 |
 |---|---|
 | [rust/README.md](rust/README.md) | Rust 工作区工具链、macOS 与 Windows host port，以及迁移状态 |
-| [docs/DESIGN.md](docs/DESIGN.md) | 产品与技术设计：证据基线、架构、域模型、TraceStreamer 集成、Renderer、ArkDeck 边界、发布门 |
-| [docs/CAPTURE.md](docs/CAPTURE.md) | App-only HDC 采集流程、预设、生命周期、安全边界与故障排查 |
-| [docs/SPECIFICATION.md](docs/SPECIFICATION.md) | 规范性需求（`AT-*`）、machine JSON contract、端到端验收场景（`AC-AT-*`）、Definition of Done |
-| [docs/TASKS.md](docs/TASKS.md) | Phase 0–7 任务索引与发布门状态 |
-| [docs/CLI.md](docs/CLI.md) | `arktrace` 安装、命令、flags、Machine JSON、exit status、signal 与隐私 |
-| [docs/CLI_DISTRIBUTION.md](docs/CLI_DISTRIBUTION.md) | 可固定的 CLI App layout、manifest、签名/notarization、升级与回滚 |
-| [docs/APP_DISTRIBUTION.md](docs/APP_DISTRIBUTION.md) | ArkTrace.app 签名、notarization 与分发决策 |
-| [docs/ARKDECK_INTEGRATION.md](docs/ARKDECK_INTEGRATION.md) | ArkDeck production profile、真实 Artifact 链路、restart 与 Gate 9 证据 |
-| [docs/TRACE_STREAMER.md](docs/TRACE_STREAMER.md) | Pinned TraceStreamer revision、构建配方、identity 与调用约束 |
-| [docs/DAYU200_LARGE_HTRACE_INTEGRITY.md](docs/DAYU200_LARGE_HTRACE_INTEGRITY.md) | 真机 large Trace 的完整性调查；该 Trace 以 content-addressed Release artifact 形式保存在 Git 之外 |
-| 验证报告：[Phase 1](docs/PHASE_1_VERIFICATION.md) · [Phase 2](docs/PHASE_2_VERIFICATION.md) · [Phase 3](docs/PHASE_3_VERIFICATION.md) · [Phase 6](docs/PHASE_6_VERIFICATION.md) | 各阶段证据：fixture、hash、benchmark、gate 与已知限制 |
+| [docs/design/DESIGN.md](docs/design/DESIGN.md) | 产品与技术设计：证据基线、架构、域模型、TraceStreamer 集成、Renderer、ArkDeck 边界、发布门 |
+| [docs/design/CAPTURE.md](docs/design/CAPTURE.md) | App-only HDC 采集流程、预设、生命周期、安全边界与故障排查 |
+| [docs/design/SPECIFICATION.md](docs/design/SPECIFICATION.md) | 规范性需求（`AT-*`）、machine JSON contract、端到端验收场景（`AC-AT-*`）、Definition of Done |
+| [docs/archive/TASKS.md](docs/archive/TASKS.md) | Phase 0–7 任务索引与发布门状态 |
+| [docs/guides/CLI.md](docs/guides/CLI.md) | `arktrace` 安装、命令、flags、Machine JSON、exit status、signal 与隐私 |
+| [docs/guides/CLI_DISTRIBUTION.md](docs/guides/CLI_DISTRIBUTION.md) | 可固定的 CLI App layout、manifest、签名/notarization、升级与回滚 |
+| [docs/guides/APP_DISTRIBUTION.md](docs/guides/APP_DISTRIBUTION.md) | ArkTrace.app 签名、notarization 与分发决策 |
+| [docs/guides/ARKDECK_INTEGRATION.md](docs/guides/ARKDECK_INTEGRATION.md) | ArkDeck production profile、真实 Artifact 链路、restart 与 Gate 9 证据 |
+| [docs/design/TRACE_STREAMER.md](docs/design/TRACE_STREAMER.md) | Pinned TraceStreamer revision、构建配方、identity 与调用约束 |
+| [docs/archive/DAYU200_LARGE_HTRACE_INTEGRITY.md](docs/archive/DAYU200_LARGE_HTRACE_INTEGRITY.md) | 真机 large Trace 的完整性调查；该 Trace 以 content-addressed Release artifact 形式保存在 Git 之外 |
+| 验证报告：[Phase 1](docs/archive/PHASE_1_VERIFICATION.md) · [Phase 2](docs/archive/PHASE_2_VERIFICATION.md) · [Phase 3](docs/archive/PHASE_3_VERIFICATION.md) · [Phase 6](docs/archive/PHASE_6_VERIFICATION.md) | 各阶段证据：fixture、hash、benchmark、gate 与已知限制 |
 
 ## ArkDeck 集成
 
-ArkDeck 通过 typed operation `analyzer.summarize-trace@1` 与 `analyzer.analyze-trace@1` 调用 pinned `arktrace` CLI——输入为 immutable Trace Artifact lease，输出为 derived analysis Artifact。两条 operation 均通过 [CLI distribution contract](docs/CLI_DISTRIBUTION.md) 固定签名 tool、parser 与 JSON identity；ArkTrace 永不获得设备控制能力。细节与完整 identity 链见 [docs/ARKDECK_INTEGRATION.md](docs/ARKDECK_INTEGRATION.md)。
+ArkDeck 通过 typed operation `analyzer.summarize-trace@1` 与 `analyzer.analyze-trace@1` 调用 pinned `arktrace` CLI——输入为 immutable Trace Artifact lease，输出为 derived analysis Artifact。两条 operation 均通过 [CLI distribution contract](docs/guides/CLI_DISTRIBUTION.md) 固定签名 tool、parser 与 JSON identity；ArkTrace 永不获得设备控制能力。细节与完整 identity 链见 [docs/guides/ARKDECK_INTEGRATION.md](docs/guides/ARKDECK_INTEGRATION.md)。
 
 ## TraceStreamer 来源
 

@@ -1,7 +1,7 @@
 # ArkTrace Agent Guide
 
 帮助用户完成可验证的 ArkTrace 改动：定位实际问题，复用现有实现，完成必要验证，明确结果与剩余限制。
-本文件用于仓库开发；产品 CLI 的使用契约见 [docs/CLI.md](docs/CLI.md)。
+本文件用于仓库开发；产品 CLI 的使用契约见 [docs/guides/CLI.md](docs/guides/CLI.md)。
 
 ## 任务执行
 
@@ -14,28 +14,28 @@
 ## 事实源与按需阅读
 
 遵循运行环境的指令优先级；在其允许范围内，用户明确请求优先于本地流程建议和 skill。
-本文件说明执行方式，[SPECIFICATION.md](docs/SPECIFICATION.md) 定义产品行为，[DESIGN.md](docs/DESIGN.md) 解释架构。
+本文件说明执行方式，[SPECIFICATION.md](docs/design/SPECIFICATION.md) 定义产品行为，[DESIGN.md](docs/design/DESIGN.md) 解释架构。
 以当前代码、配置和实际检查确认实现状态；发现规格与实现冲突时定位差异，不能仅为让测试通过而放宽需求。
 
 | 涉及的工作 | 首选入口 |
 |---|---|
-| 平台、模块与依赖 | [Package.swift](Package.swift)、`Sources/`、[SPECIFICATION.md](docs/SPECIFICATION.md) §2–4 |
-| Parser、SQLite、cache | `Sources/ArkTraceCore/`、`Sources/ArkTraceParser/`、`Sources/ArkTraceStore/`、`Sources/ArkTraceRuntime/`；[TRACE_STREAMER.md](docs/TRACE_STREAMER.md) |
+| 平台、模块与依赖 | [Package.swift](Package.swift)、`Sources/`、[SPECIFICATION.md](docs/design/SPECIFICATION.md) §2–4 |
+| Parser、SQLite、cache | `Sources/ArkTraceCore/`、`Sources/ArkTraceParser/`、`Sources/ArkTraceStore/`、`Sources/ArkTraceRuntime/`；[TRACE_STREAMER.md](docs/design/TRACE_STREAMER.md) |
 | 包外消费的离线检查与 cache 维护 | `Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift`、`Sources/ArkTraceRuntime/TraceCache.swift`；`scripts/api-baseline/` |
-| CLI、查询、分析 | `Sources/ArkTraceCLI/`、`Sources/arktrace/`、`Sources/ArkTraceAnalysis/`；[CLI.md](docs/CLI.md) |
+| CLI、查询、分析 | `Sources/ArkTraceCLI/`、`Sources/arktrace/`、`Sources/ArkTraceAnalysis/`；[CLI.md](docs/guides/CLI.md) |
 | Viewer、交互与本地化 | `Apps/ArkTraceApp/`、`Sources/ArkTraceAppSupport/`、`Sources/ArkTraceRendering/`；DESIGN §13–14 |
-| GUI 设备采集 | `Sources/ArkTraceCapture/`、`Apps/ArkTraceApp/Capture/`；[CAPTURE.md](docs/CAPTURE.md) |
-| ArkDeck 消费或分发 | [ARKDECK_INTEGRATION.md](docs/ARKDECK_INTEGRATION.md)、[CLI_DISTRIBUTION.md](docs/CLI_DISTRIBUTION.md)、[APP_DISTRIBUTION.md](docs/APP_DISTRIBUTION.md) |
+| GUI 设备采集 | `Sources/ArkTraceCapture/`、`Apps/ArkTraceApp/Capture/`；[CAPTURE.md](docs/design/CAPTURE.md) |
+| ArkDeck 消费或分发 | [ARKDECK_INTEGRATION.md](docs/guides/ARKDECK_INTEGRATION.md)、[CLI_DISTRIBUTION.md](docs/guides/CLI_DISTRIBUTION.md)、[APP_DISTRIBUTION.md](docs/guides/APP_DISTRIBUTION.md) |
 | 构建与 CI | [ci.yml](.github/workflows/ci.yml)、[ci_plan.sh](scripts/ci_plan.sh)、对应 `scripts/` 入口 |
 
-`docs/TASKS.md`、`PHASE_*_TASKS.md`、历史验证报告中的排程、旧 pin 和验收状态属于当时的记录。
+`docs/archive/TASKS.md`、`PHASE_*_TASKS.md`、历史验证报告中的排程、旧 pin 和验收状态属于当时的记录。
 按需追溯相关证据；新任务不必重走阶段入口、请求已完成的设计裁决或改写历史 Completed 状态。
 历史发布通过不证明当前工作树或新分发已通过；留存的未验证项仍需如实报告。
 ArkDeck 是独立仓库，其治理流程不自动适用于 ArkTrace；跨仓库修改需要属于用户任务范围。
 
 ## 规格流程
 
-本仓库的现行产品行为以 [SPECIFICATION.md](docs/SPECIFICATION.md) 和 [DESIGN.md](docs/DESIGN.md) 为准。这里不复制一份 ArkDeck `openspec/` 树，也不要为了形式新建未接入检查的 constitution 或空 spec 目录。
+本仓库的现行产品行为以 [SPECIFICATION.md](docs/design/SPECIFICATION.md) 和 [DESIGN.md](docs/design/DESIGN.md) 为准。这里不复制一份 ArkDeck `openspec/` 树，也不要为了形式新建未接入检查的 constitution 或空 spec 目录。
 
 和 ArkDeck 交叉的行为沿用 ArkDeck 的 spec-driven 过程（Living Spec 与 change package，入口是 ArkDeck 仓库的 `openspec/README.md`）：
 
@@ -70,7 +70,7 @@ python3 scripts/run-cargo.py test -p '<相关crate>'
 按改动选择命令，不要求每次全部运行。runner 管理稳定 source mirror 与缓存；不要给 SwiftPM runner 传它禁止的 `--package-path`、`--scratch-path` 或 `--cache-path`。
 Rust workspace 使用 exact 1.99.0 / edition 2024；Cargo runner 同样管理仓库外稳定缓存，使用 `--locked`。
 Rust 日常按 crate 做 `check -p` 和相关 `test -p`；需要链接或执行时再构建具体 bin/example。SDK 静态库使用 `build -p arktrace-ffi --release`，提交前保留所选 CI 的 workspace/all-targets/all-features 检查。
-受限环境用 `ARKTRACE_CARGO_CACHE_ROOT` 指定固定可写根。同一会话复用一个 owner 的 mirror/target；已有缓存原位登记、源码快照切换与结束后的归档回收见 [CARGO_CACHE.md](docs/CARGO_CACHE.md)。Rust 改动运行 fmt、clippy、相关测试及 `verify_rust_workspace.py`。
+受限环境用 `ARKTRACE_CARGO_CACHE_ROOT` 指定固定可写根。同一会话复用一个 owner 的 mirror/target；已有缓存原位登记、源码快照切换与结束后的归档回收见 [CARGO_CACHE.md](docs/guides/CARGO_CACHE.md)。Rust 改动运行 fmt、clippy、相关测试及 `verify_rust_workspace.py`。
 Windows 产品验证必须在 Windows x64 原生 runner 执行；macOS 交叉编译不形成 Windows 通过证据。
 受限环境可使用 runner 文档中的 `ARKTRACE_SWIFTPM_CACHE_ROOT` / `ARKTRACE_XCODE_CACHE_ROOT` 指定仓库外可写缓存，或按环境流程申请访问。
 

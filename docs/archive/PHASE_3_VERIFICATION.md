@@ -22,7 +22,7 @@ DAYU 200 large fixture、真实 parser cancellation 与 20-sample production ben
 - entitlement 不含 App Sandbox、network、device/HDC、camera、microphone、location 或
   automation 权限；0.1 Developer ID 直发候选已获 Apple notarization `Accepted`，ticket
   staple、Gatekeeper、最终 ZIP 解包复验均通过，详见
-  [APP_DISTRIBUTION.md](./APP_DISTRIBUTION.md)。
+  [APP_DISTRIBUTION.md](../guides/APP_DISTRIBUTION.md)。
 
 ## Event/LOD/renderer 候选
 
@@ -111,7 +111,7 @@ DAYU 200 large fixture、真实 parser cancellation 与 20-sample production ben
   2026-08-15 的 DAYU 200 真实 large 采集调查发现 verifier 的 100,000 packet 上限不是
   OHOSPROF wire-format 上限，同时确认 HiProfiler 离线 writer repeated `SHA256_Final` 会令
   header digest 偏离完整 payload；协议证据、字节结果与安全处置见
-  [DAYU200_LARGE_HTRACE_INTEGRITY.md](./DAYU200_LARGE_HTRACE_INTEGRITY.md)。原 480/600 秒文件
+  [DAYU200_LARGE_HTRACE_INTEGRITY.md](DAYU200_LARGE_HTRACE_INTEGRITY.md)。原 480/600 秒文件
   仍在 digest 处 fail closed，不作为 release fixture；只有重新采集的 exact hash 能进入门禁。
   `scripts/benchmark_phase3.sh large` 和 `scripts/test_phase3.sh` 在缺少或漂移
   `ARKTRACE_LARGE_TRACE`/provenance evidence 时继续 fail closed。

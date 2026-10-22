@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/ArkDeck/ArkTrace/actions/workflows/ci.yml/badge.svg)](https://github.com/ArkDeck/ArkTrace/actions/workflows/ci.yml)
 [![Swift](https://img.shields.io/badge/Swift-6.4-F05138?logo=swift&logoColor=white)](Package.swift)
-[![Platform](https://img.shields.io/badge/platform-macOS%2026%2B%20·%20Apple%20silicon-blue?logo=apple)](docs/APP_DISTRIBUTION.md)
+[![Platform](https://img.shields.io/badge/platform-macOS%2026%2B%20·%20Apple%20silicon-blue?logo=apple)](docs/guides/APP_DISTRIBUTION.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 **English** | [简体中文](README.zh-CN.md)
@@ -45,7 +45,7 @@ The TraceStreamer binary is a locally built artifact excluded from Git — cloni
 scripts/build_trace_streamer.sh
 ```
 
-This produces `ThirdParty/TraceStreamer/macx/trace_streamer` and its identity manifest. Pinned revision and build recipe: [docs/TRACE_STREAMER.md](docs/TRACE_STREAMER.md).
+This produces `ThirdParty/TraceStreamer/macx/trace_streamer` and its identity manifest. Pinned revision and build recipe: [docs/design/TRACE_STREAMER.md](docs/design/TRACE_STREAMER.md).
 
 ### 2. Build and test
 
@@ -78,15 +78,15 @@ PARSER="$PWD/ThirdParty/TraceStreamer/macx/trace_streamer"
 .build/release/arktrace --trace-streamer "$PARSER" --json analyze Fixtures/traces/zlib.htrace --kind range --start-ns 0 --end-ns 1000000
 ```
 
-> **Note** — the bare `swift build` product is a development build: it carries no reviewed parser or license resources, so `doctor --self-test` and `licenses` fail closed, and the parser must be passed explicitly (the CLI never searches `PATH`). The full install unit is the signed, notarized `ArkTraceCLI.app` described in [docs/CLI_DISTRIBUTION.md](docs/CLI_DISTRIBUTION.md); production and ArkDeck execute its `Contents/MacOS/arktrace` directly, which locates the bundled parser on its own.
+> **Note** — the bare `swift build` product is a development build: it carries no reviewed parser or license resources, so `doctor --self-test` and `licenses` fail closed, and the parser must be passed explicitly (the CLI never searches `PATH`). The full install unit is the signed, notarized `ArkTraceCLI.app` described in [docs/guides/CLI_DISTRIBUTION.md](docs/guides/CLI_DISTRIBUTION.md); production and ArkDeck execute its `Contents/MacOS/arktrace` directly, which locates the bundled parser on its own.
 
-Full command reference, Machine JSON contract, limits, signal handling and privacy guarantees: [docs/CLI.md](docs/CLI.md).
+Full command reference, Machine JSON contract, limits, signal handling and privacy guarantees: [docs/guides/CLI.md](docs/guides/CLI.md).
 
 ### 4. Run the viewer
 
 Open `ArkTrace.xcodeproj` in Xcode, select the `ArkTraceApp` scheme and run. Open `.htrace` / `.ftrace` / `.systrace` files via **File → Open**, Finder “Open With”, drag & drop, or Recents; **Reload** reopens the current trace from its original file.
 
-To capture a new trace, connect an OpenHarmony device with USB or network debugging enabled, then choose **File → Capture Trace…** (<kbd>⌘N</kbd>). ArkTrace finds `hdc` in the configured SDK/PATH or lets you choose it directly. Select a device, profile, duration and buffer size, choose the local destination, and start capture. The completed file opens automatically. Full behavior and failure recovery: [docs/CAPTURE.md](docs/CAPTURE.md).
+To capture a new trace, connect an OpenHarmony device with USB or network debugging enabled, then choose **File → Capture Trace…** (<kbd>⌘N</kbd>). ArkTrace finds `hdc` in the configured SDK/PATH or lets you choose it directly. Select a device, profile, duration and buffer size, choose the local destination, and start capture. The completed file opens automatically. Full behavior and failure recovery: [docs/design/CAPTURE.md](docs/design/CAPTURE.md).
 
 The sidebar toggles tracks and filters them to one process by name or PID; the timeline supports mouse/trackpad pan and zoom, range selection and real event selection; the toolbar search locates events by TID / thread / slice name; the inspector shows event details or range analysis.
 
@@ -130,7 +130,7 @@ Hold a key to keep zooming or panning — macOS key repeat drives it. Unlike the
 
 Slices are *assigned* colours the way SmartPerf Host assigns them: a CPU slice takes its running process's identity, a named slice hashes its own name (digits stripped, so `ipc::41` and `ipc::42` match) into a twenty-slot table, and thread states go through upstream's state chain. Two slices that share a colour upstream share one here.
 
-The twenty values in those slots, and the state colours, are ArkTrace's own. They are designed around the fact that upstream's hash reaches five of the twenty slots 74% of the time, and every entry is held to measured thresholds — pairwise ΔE, 3:1 against both the light and dark canvas, 4.5:1 for its label — by `scripts/verify_palette.py`, which runs in CI. Details: [docs/DESIGN.md](docs/DESIGN.md) §13.5.
+The twenty values in those slots, and the state colours, are ArkTrace's own. They are designed around the fact that upstream's hash reaches five of the twenty slots 74% of the time, and every entry is held to measured thresholds — pairwise ΔE, 3:1 against both the light and dark canvas, 4.5:1 for its label — by `scripts/verify_palette.py`, which runs in CI. Details: [docs/design/DESIGN.md](docs/design/DESIGN.md) §13.5.
 
 ## Testing and release gates
 
@@ -150,32 +150,32 @@ CI builds, tests and runs the offline gates on every pull request, but hosted ru
 
 ## Status
 
-Phases 0–7 are complete and **all 10 release gates are closed**. Phase 7 (upstream alignment, 13/13) closed every actionable gap in [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) behind `scripts/test_phase7.sh`. The final gate closed a real debug loop on a DAYU 200 board — typed capture → structured analysis → agent judgement → typed re-verification — with the target app's CPU usage judged `improved` (−87.09%). Full task index: [docs/TASKS.md](docs/TASKS.md); final report: [docs/PHASE_6_VERIFICATION.md](docs/PHASE_6_VERIFICATION.md).
+Phases 0–7 are complete and **all 10 release gates are closed**. Phase 7 (upstream alignment, 13/13) closed every actionable gap in [docs/archive/UPSTREAM_ALIGNMENT_AUDIT.md](docs/archive/UPSTREAM_ALIGNMENT_AUDIT.md) behind `scripts/test_phase7.sh`. The final gate closed a real debug loop on a DAYU 200 board — typed capture → structured analysis → agent judgement → typed re-verification — with the target app's CPU usage judged `improved` (−87.09%). Full task index: [docs/archive/TASKS.md](docs/archive/TASKS.md); final report: [docs/archive/PHASE_6_VERIFICATION.md](docs/archive/PHASE_6_VERIFICATION.md).
 
 The shared engine is migrating into the Rust workspace ([rust/README.md](rust/README.md)): exact Rust 1.99.0, edition 2024, macOS arm64 and Windows x64. The macOS app remains the SwiftUI product on Apple silicon and macOS 26 or later. The Windows x64 CLI is built and tested on the native Windows CI lane, including the clean-host acceptance workflow; it does not replace the macOS app.
 
-Known limitations: the macOS app is Apple silicon / macOS 26 or later; capture requires an OpenHarmony SDK `hdc`, a connected device and device-side `hiprofiler_cmd`. The viewer does not draw irq / hilog / syscall lanes (those tables are empty in every real capture checked so far), does not offer user-defined colour themes, and its range statistics have no min/avg/max percentiles yet — see [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) §10 for the next-round list. The CLI and ArkDeck analyzer remain host-only and have no device authority. The macOS 26 minimum is the current baseline; distribution artifacts signed before this bump were built against macOS 14 and remain valid only as historical evidence — the next signed release must be produced and verified against the new baseline.
+Known limitations: the macOS app is Apple silicon / macOS 26 or later; capture requires an OpenHarmony SDK `hdc`, a connected device and device-side `hiprofiler_cmd`. The viewer does not draw irq / hilog / syscall lanes (those tables are empty in every real capture checked so far), does not offer user-defined colour themes, and its range statistics have no min/avg/max percentiles yet — see [docs/archive/UPSTREAM_ALIGNMENT_AUDIT.md](docs/archive/UPSTREAM_ALIGNMENT_AUDIT.md) §10 for the next-round list. The CLI and ArkDeck analyzer remain host-only and have no device authority. The macOS 26 minimum is the current baseline; distribution artifacts signed before this bump were built against macOS 14 and remain valid only as historical evidence — the next signed release must be produced and verified against the new baseline.
 
 ## Documentation
 
 | Document | Contents |
 |---|---|
 | [rust/README.md](rust/README.md) | Rust workspace toolchain, macOS and Windows host ports, and migration status |
-| [docs/DESIGN.md](docs/DESIGN.md) | Product and technical design: evidence baseline, architecture, domain model, TraceStreamer integration, renderer, ArkDeck boundary, release gates |
-| [docs/CAPTURE.md](docs/CAPTURE.md) | App-only HDC capture workflow, profiles, lifecycle, security boundary and troubleshooting |
-| [docs/SPECIFICATION.md](docs/SPECIFICATION.md) | Normative requirements (`AT-*`), machine JSON contract, end-to-end acceptance scenarios (`AC-AT-*`), Definition of Done |
-| [docs/TASKS.md](docs/TASKS.md) | Phase 0–6 task index and release-gate status |
-| [docs/CLI.md](docs/CLI.md) | `arktrace` installation, commands, flags, Machine JSON, exit status, signals and privacy |
-| [docs/CLI_DISTRIBUTION.md](docs/CLI_DISTRIBUTION.md) | Pinnable CLI app layout, manifest, signing/notarization, upgrade and rollback |
-| [docs/APP_DISTRIBUTION.md](docs/APP_DISTRIBUTION.md) | ArkTrace.app signing, notarization and distribution decisions |
-| [docs/ARKDECK_INTEGRATION.md](docs/ARKDECK_INTEGRATION.md) | ArkDeck production profile, real artifact chain, restart and Gate 9 evidence |
-| [docs/TRACE_STREAMER.md](docs/TRACE_STREAMER.md) | Pinned TraceStreamer revision, build recipe, identity and invocation constraints |
-| [docs/DAYU200_LARGE_HTRACE_INTEGRITY.md](docs/DAYU200_LARGE_HTRACE_INTEGRITY.md) | Integrity investigation of the real-device large trace kept outside Git as a content-addressed release artifact |
-| Verification reports: [Phase 1](docs/PHASE_1_VERIFICATION.md) · [Phase 2](docs/PHASE_2_VERIFICATION.md) · [Phase 3](docs/PHASE_3_VERIFICATION.md) · [Phase 6](docs/PHASE_6_VERIFICATION.md) | Per-phase evidence: fixtures, hashes, benchmarks, gates and known limitations |
+| [docs/design/DESIGN.md](docs/design/DESIGN.md) | Product and technical design: evidence baseline, architecture, domain model, TraceStreamer integration, renderer, ArkDeck boundary, release gates |
+| [docs/design/CAPTURE.md](docs/design/CAPTURE.md) | App-only HDC capture workflow, profiles, lifecycle, security boundary and troubleshooting |
+| [docs/design/SPECIFICATION.md](docs/design/SPECIFICATION.md) | Normative requirements (`AT-*`), machine JSON contract, end-to-end acceptance scenarios (`AC-AT-*`), Definition of Done |
+| [docs/archive/TASKS.md](docs/archive/TASKS.md) | Phase 0–6 task index and release-gate status |
+| [docs/guides/CLI.md](docs/guides/CLI.md) | `arktrace` installation, commands, flags, Machine JSON, exit status, signals and privacy |
+| [docs/guides/CLI_DISTRIBUTION.md](docs/guides/CLI_DISTRIBUTION.md) | Pinnable CLI app layout, manifest, signing/notarization, upgrade and rollback |
+| [docs/guides/APP_DISTRIBUTION.md](docs/guides/APP_DISTRIBUTION.md) | ArkTrace.app signing, notarization and distribution decisions |
+| [docs/guides/ARKDECK_INTEGRATION.md](docs/guides/ARKDECK_INTEGRATION.md) | ArkDeck production profile, real artifact chain, restart and Gate 9 evidence |
+| [docs/design/TRACE_STREAMER.md](docs/design/TRACE_STREAMER.md) | Pinned TraceStreamer revision, build recipe, identity and invocation constraints |
+| [docs/archive/DAYU200_LARGE_HTRACE_INTEGRITY.md](docs/archive/DAYU200_LARGE_HTRACE_INTEGRITY.md) | Integrity investigation of the real-device large trace kept outside Git as a content-addressed release artifact |
+| Verification reports: [Phase 1](docs/archive/PHASE_1_VERIFICATION.md) · [Phase 2](docs/archive/PHASE_2_VERIFICATION.md) · [Phase 3](docs/archive/PHASE_3_VERIFICATION.md) · [Phase 6](docs/archive/PHASE_6_VERIFICATION.md) | Per-phase evidence: fixtures, hashes, benchmarks, gates and known limitations |
 
 ## ArkDeck integration
 
-ArkDeck invokes the pinned `arktrace` CLI through its typed operations `analyzer.summarize-trace@1` and `analyzer.analyze-trace@1` — immutable trace artifact leases in, derived analysis artifacts out. Both operations pin the signed tool, parser and JSON identity via the [CLI distribution contract](docs/CLI_DISTRIBUTION.md), and ArkTrace never gains device control. Details and the full identity chain: [docs/ARKDECK_INTEGRATION.md](docs/ARKDECK_INTEGRATION.md).
+ArkDeck invokes the pinned `arktrace` CLI through its typed operations `analyzer.summarize-trace@1` and `analyzer.analyze-trace@1` — immutable trace artifact leases in, derived analysis artifacts out. Both operations pin the signed tool, parser and JSON identity via the [CLI distribution contract](docs/guides/CLI_DISTRIBUTION.md), and ArkTrace never gains device control. Details and the full identity chain: [docs/guides/ARKDECK_INTEGRATION.md](docs/guides/ARKDECK_INTEGRATION.md).
 
 ## TraceStreamer provenance
 

@@ -6,17 +6,17 @@
 > 导致截图全黑、System Events 取不到窗口）。
 > 阶段：Upstream Alignment
 > 验收目标：在 ArkTrace 已声明的边界内，把「上游 SmartPerf Host 能做而 ArkTrace 不能做」的离线看 trace 能力补齐到不再影响真实分析
-> 证据基线：[UPSTREAM_ALIGNMENT_AUDIT.md](./UPSTREAM_ALIGNMENT_AUDIT.md)（36 项核实结果、`path:line` 双边引用、非目标清单）
+> 证据基线：[UPSTREAM_ALIGNMENT_AUDIT.md](UPSTREAM_ALIGNMENT_AUDIT.md)（36 项核实结果、`path:line` 双边引用、非目标清单）
 
 ## 0. 阶段实施依据与按需阅读
 
-本文件保留 Phase 7 实施与验收记录。新任务从 [AGENTS.md](../AGENTS.md) 进入，
+本文件保留 Phase 7 实施与验收记录。新任务从 [AGENTS.md](../../AGENTS.md) 进入，
 仅按所改行为读取以下相关部分；当时的非目标与排程不自动否决用户后续明确的新需求：
 
-1. [UPSTREAM_ALIGNMENT_AUDIT.md](./UPSTREAM_ALIGNMENT_AUDIT.md) §1 审计边界、§5 ALIGNED、§6 INTENTIONAL-DIFFERENCE、§7 OUT-OF-SCOPE —— 避免把有意差异误判为缺陷或擅自扩大上游对齐范围；
-2. [DESIGN.md](./DESIGN.md) §13 Timeline Renderer（含 §13.5 配色）、§14 macOS App；
-3. [SPECIFICATION.md](./SPECIFICATION.md) 的 `AT-APP-*`、`AT-RENDER-*`、`AT-DB-*`；
-4. [TASKS.md](./TASKS.md) §5 跨阶段不变量、§7 变更与状态更新 —— contract 变化同步规格、实现与验收，不因测试失败降低 requirement。
+1. [UPSTREAM_ALIGNMENT_AUDIT.md](UPSTREAM_ALIGNMENT_AUDIT.md) §1 审计边界、§5 ALIGNED、§6 INTENTIONAL-DIFFERENCE、§7 OUT-OF-SCOPE —— 避免把有意差异误判为缺陷或擅自扩大上游对齐范围；
+2. [DESIGN.md](../design/DESIGN.md) §13 Timeline Renderer（含 §13.5 配色）、§14 macOS App；
+3. [SPECIFICATION.md](../design/SPECIFICATION.md) 的 `AT-APP-*`、`AT-RENDER-*`、`AT-DB-*`；
+4. [TASKS.md](TASKS.md) §5 跨阶段不变量、§7 变更与状态更新 —— contract 变化同步规格、实现与验收，不因测试失败降低 requirement。
 
 **取上游源码**：按 AUDIT §2.1 的 sparse-checkout 步骤，落点必须精确等于 `source-lock.json` 的
 `upstream.revision`。不要用 master、不要凭记忆、不要看博客 —— 上游有多处实现与「常识」不符
@@ -25,7 +25,7 @@
 
 **Parser 缺失的处理**：新 worktree 不携带被 Git 忽略的
 `ThirdParty/TraceStreamer/macx/trace_streamer`。需要真实 parser 时按
-[TRACE_STREAMER.md](./TRACE_STREAMER.md) 构建并校验；无法取得时记录受影响检查。
+[TRACE_STREAMER.md](../design/TRACE_STREAMER.md) 构建并校验；无法取得时记录受影响检查。
 只有 `.github/workflows/ci.yml` 明列的 parser-dependent 排除和 skip 可用于 hosted CI；
 不要按历史失败数量或整个测试类豁免，其他失败仍需排查。App 构建和 Phase 7 gate 需要真实 parser。
 
@@ -36,9 +36,9 @@ digest re-pin（`Sources/ArkTraceCLI/CLILicenseResources.swift`、`scripts/verif
 
 ## 1. 进入条件
 
-- [x] Phase 0–6 全部完成，10 个发布门全部关闭（[TASKS.md](./TASKS.md) §4）；
+- [x] Phase 0–6 全部完成，10 个发布门全部关闭（[TASKS.md](TASKS.md) §4）；
 - [x] 上游 pin 为 `447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6`，与 `source-lock.json` 一致；
-- [x] 上游对齐审计完成并有双边证据（[UPSTREAM_ALIGNMENT_AUDIT.md](./UPSTREAM_ALIGNMENT_AUDIT.md)）；
+- [x] 上游对齐审计完成并有双边证据（[UPSTREAM_ALIGNMENT_AUDIT.md](UPSTREAM_ALIGNMENT_AUDIT.md)）；
 - [ ] U01（irq / hilog / syscall 是否要做）已由 ArkDeck 侧裁决 —— **仅阻塞该项本身，不阻塞本阶段其他任务**。
 
 ## 2. 阶段输出
@@ -80,7 +80,7 @@ P7-T04 先于 P7-T06，以避免重复修改 track 高度和分组布局。这�
 ### P7-T01 — 修复 process counter 的样本来源表
 
 **状态：Completed（2026-08-17）。** 决策：**方案 B，不 bump `TraceSchemaAdapter.version`**（保持 `"2"`），
-理由与核对证据记录在 [DESIGN.md](./DESIGN.md) §9.1.1 —— 核对推翻了本任务原先对方案 B 代价的描述：
+理由与核对证据记录在 [DESIGN.md](../design/DESIGN.md) §9.1.1 —— 核对推翻了本任务原先对方案 B 代价的描述：
 capabilities 从未被持久化，旧 cache 条目会被复用并在打开时重算，升级后立即生效，**用户无需 purge**。
 因此无需 ArkDeck 配套 release，不重新 pin distribution。
 
@@ -105,7 +105,7 @@ ArkTrace 从 `measure` 读。四个真机库 `measure` 全为 0 行、`process_m
 
 - 进入 cache parser key（`Sources/ArkTraceRuntime/TraceCache.swift:70-88`），bump 即整体失效重解析；
 - **被 ArkDeck 作为源码字面量断言**在 `ArkTraceSummaryInvocationContract` 里，其 envelope validator
-  要求与我们 `provenance` 块精确相等（[ARKDECK_INTEGRATION.md](./ARKDECK_INTEGRATION.md):27-40）。
+  要求与我们 `provenance` 块精确相等（[ARKDECK_INTEGRATION.md](../guides/ARKDECK_INTEGRATION.md):27-40）。
   bump 之后、匹配的 ArkDeck release 落地之前，**每个 analyzer Job 都会在 admission 之后**失败于
   `analyzer.schemaMismatch`，而 `arkdeck operation list` 仍报 `available` —— 对早于 bump 的 pin 完全不可见。
   先例：`95ab38d` 把 index schema 从 2 移到 3，由 ArkDeck PR #1340 承载。
@@ -121,7 +121,7 @@ ArkTrace 从 `measure` 读。四个真机库 `measure` 全为 0 行、`process_m
   匹配 release，在其落地前不得重新 pin ArkTrace distribution。
 - **方案 B（不 bump）**：无跨仓库代价。**代价**：已缓存的 trace 会继续带着 `processCounters: false`
   的过时 metadata，直到用户手动 purge（`Settings → Cache` / `purgeUnusedCache()`）。选 B 必须提供
-  明确的迁移说明，并在 `docs/CLI.md` 与 App cache UI 里写清「升级后需 purge 一次」。
+  明确的迁移说明，并在 `docs/guides/CLI.md` 与 App cache UI 里写清「升级后需 purge 一次」。
 
 **推荐 A**，因为 B 会让「修好了但用户看不到」成为默认体验，且 cache 失效本来就是
 `schemaAdapterVersion` 存在的理由。但 A 需要跨仓库排程，**该选择属产品决策，实现者应把两个方案的
@@ -147,8 +147,8 @@ ArkTrace 从 `measure` 读。四个真机库 `measure` 全为 0 行、`process_m
    同时覆盖 `measure` 与 `process_measure` 两个物理表；
 5. 保留 `measure` 作为 process scope 的第二来源（向后兼容旧的、确实把样本写进 `measure` 的库），
    两来源都有数据时的去重与排序必须确定（AT-QUERY-001）；
-6. 按上面的决策约束处理 `TraceSchemaAdapter.version`，并把选择与理由写进 `docs/DESIGN.md` §9；
-7. 更新 `docs/SPECIFICATION.md` AT-DB-003 的 required/optional schema 表与 `docs/DESIGN.md` §2.1
+6. 按上面的决策约束处理 `TraceSchemaAdapter.version`，并把选择与理由写进 `docs/design/DESIGN.md` §9；
+7. 更新 `docs/design/SPECIFICATION.md` AT-DB-003 的 required/optional schema 表与 `docs/design/DESIGN.md` §2.1
    的已核对上游表清单，加入 `process_measure`；
 8. 回归测试：新增一个只有 `process_measure` 有样本、`measure` 为空的 store 级 fixture 或内存库用例，
    断言 `capabilities.processCounters == true` 且 `counters()` 返回非空 series。**这个用例必须在没有
@@ -217,7 +217,7 @@ limit 取页 —— 两条路径不是「实现得一样」，而是**同一份�
 4. `Apps/ArkTraceApp/ArkTraceApp.swift` `RangeInspectorView`（`:772-800`）新增一段渲染，列出
    thread × state 的 duration / 占区间百分比 / interval 数，排序确定；
 5. 状态不得只靠颜色表达（AT-APP-011）：state 名必须以文字出现，并进入 accessibility value；
-6. 更新 `docs/SPECIFICATION.md` AT-APP-006 的「必须显示」清单，加入 thread state 分布。
+6. 更新 `docs/design/SPECIFICATION.md` AT-APP-006 的「必须显示」清单，加入 thread state 分布。
 
 **验收**
 
@@ -337,8 +337,8 @@ loader 也没传 depth（`Sources/ArkTraceRendering/TimelineSnapshotLoader.swift
    `TimelineAccessibilityLayout` 随之更新；
 6. 折叠态语义与上游对齐：collapsed 时只画 depth 0（AT-APP-004 的 track expand/collapse），
    且 collapse 只影响可见 layout/query，不丢弃 session 数据（DESIGN §13.3）；
-7. 重新论证并调整 primitive 预算，把结论写进 `docs/DESIGN.md` §13.3；
-8. 更新 `docs/DESIGN.md` §13.3 与 `docs/SPECIFICATION.md` AT-RENDER-002 的 track layout 描述。
+7. 重新论证并调整 primitive 预算，把结论写进 `docs/design/DESIGN.md` §13.3；
+8. 更新 `docs/design/DESIGN.md` §13.3 与 `docs/design/SPECIFICATION.md` AT-RENDER-002 的 track layout 描述。
 
 **验收**
 
@@ -416,7 +416,7 @@ ArkTrace 的 repository 只有一处 `GROUP BY`（`SQLiteTraceRepository.swift:1
 5. 从表格行跳回时间轴：点击一行选中该名字在区间内的第一个 occurrence 并 reveal，复用
    `TraceDocumentController.reveal(_:)`（`Sources/ArkTraceAppSupport/TraceDocumentController.swift:534-553`）
    的既有路径，不要新写一条 reveal；
-6. 更新 `docs/SPECIFICATION.md` AT-APP-006。
+6. 更新 `docs/design/SPECIFICATION.md` AT-APP-006。
 
 **验收**
 
@@ -491,7 +491,7 @@ DESIGN §13.3 把 "Process" 列为 MVP track 类型但实现中无对应 group k
    按进程分组后这个规则不再合理，需要新的、可解释的默认（例如按进程活动量排序后展开前 N 个进程）；
 6. 折叠/展开必须可键盘触达且有可见 focus（AT-APP-009），focus order 与阅读顺序一致；
    pane 折叠且含当前 focus 时 focus 转移到对应 disclosure control；
-7. 更新 `docs/DESIGN.md` §13.3 与 §14.1、`docs/SPECIFICATION.md` AT-APP-003/004。
+7. 更新 `docs/design/DESIGN.md` §13.3 与 §14.1、`docs/design/SPECIFICATION.md` AT-APP-003/004。
 
 **验收**
 
@@ -548,7 +548,7 @@ entry 目录内**，而不是 trace 级。原因：eviction 只对 trace 目录�
    security-scoped bookmark 思路，且**不得把用户路径写入 analysis JSON**（AT-APP-001）；
    若不持久化，需在 UI 上明确「关闭窗口即丢失」；
 7. session 替换语义：打开新 trace 时旧 annotation 必须清除，不得出现在新 session（AT-APP-002）；
-8. 更新 `docs/DESIGN.md` §14.2/§14.3 与 `docs/SPECIFICATION.md` AT-APP-004/009 的键位表，
+8. 更新 `docs/design/DESIGN.md` §14.2/§14.3 与 `docs/design/SPECIFICATION.md` AT-APP-004/009 的键位表，
    同步 `README.md:75-88` 与 `README.zh-CN.md` 的键位表。
 
 **验收**
@@ -699,7 +699,7 @@ FROM args A LEFT JOIN data_type D ON D.typeId = A.datatype
 3. `TraceEventInspector` 增加参数段；`datatype` 的解释逐类对齐上游；
 4. 若本任务需要 bump `TraceSchemaAdapter.version`，**适用 P7-T01 的同一条 ArkDeck 耦合约束** ——
    不得自行 bump，须走同一决策路径；
-5. 更新 `docs/SPECIFICATION.md` AT-DB-003 与 AT-APP-005。
+5. 更新 `docs/design/SPECIFICATION.md` AT-DB-003 与 AT-APP-005。
 
 **验收**
 
@@ -781,7 +781,7 @@ FROM args A LEFT JOIN data_type D ON D.typeId = A.datatype
    **状态不得只靠颜色表达**（AT-APP-011）—— jank 必须同时出现在 label / Inspector / accessibility value；
 4. `flag` 与 `type` 的取值语义必须在 pin 版上游核准后再编码，不得猜测；
 5. 若需 bump `TraceSchemaAdapter.version`，适用 P7-T01 的同一条 ArkDeck 耦合约束；
-6. 更新 `docs/DESIGN.md` §13.3、`docs/SPECIFICATION.md` AT-DB-003 与 AT-APP-004。
+6. 更新 `docs/design/DESIGN.md` §13.3、`docs/design/SPECIFICATION.md` AT-DB-003 与 AT-APP-004。
 
 **验收**
 
@@ -832,7 +832,7 @@ AT-APP-009（Help 键位表同源）。
 
 **一处顺带修的 CI 漏洞**：README 现在被 SwiftPM 测试绑定，而 `ci_plan.sh` 原先把 `README*.md` 归入
 docs-only、跳过 SwiftPM lane —— 也就是「只改 README」这个断言最该拦住的改动，恰好会跳过该断言。
-已按 `docs/PHASE_6_SCENARIO.md` 的同一先例给两份 README 加规则选中 SwiftPM lane，并补了 planner 用例。
+已按 `docs/archive/PHASE_6_SCENARIO.md` 的同一先例给两份 README 加规则选中 SwiftPM lane，并补了 planner 用例。
 
 **未做（保持非目标）**：搜索历史（§6 第 8 条）。
 
@@ -996,7 +996,7 @@ docs-only、跳过 SwiftPM lane —— 也就是「只改 README」这个断言�
 
 ## 6. 本阶段非目标（明确不做，不得「顺手」实现）
 
-以下已在 [UPSTREAM_ALIGNMENT_AUDIT.md](./UPSTREAM_ALIGNMENT_AUDIT.md) §6/§7 论证，**实现者不得因为
+以下已在 [UPSTREAM_ALIGNMENT_AUDIT.md](UPSTREAM_ALIGNMENT_AUDIT.md) §6/§7 论证，**实现者不得因为
 「上游有」而补上**：
 
 1. **用户自定义配色**（上游 `CustomThemeColor.ts`）—— 仍不做，但**理由已于 2026-08-24 更换**，以
@@ -1009,7 +1009,7 @@ docs-only、跳过 SwiftPM lane —— 也就是「只改 README」这个断言�
 4. **`v` 键 VSync 叠加** —— 是 P7-T01 的下游装饰，先修 P7-T01；
 5. **WASD 的 `tan` 加速曲线** —— DESIGN §14.3 已决策；
 6. **thread state 标签硬编码白色** —— 回退会违反 AT-RENDER-008 与 AT-APP-011；
-7. **`Ctrl+B` 隐藏菜单**、**任意 SQL 查询页**、**插件来源的泳道族** —— 本阶段非目标或数据源缺失；**采集**当时未纳入 Phase 7，后续已通过独立 GUI Capture 实现（AT-SYS-003、[CAPTURE.md](./CAPTURE.md)），不属于当前产品禁令；
+7. **`Ctrl+B` 隐藏菜单**、**任意 SQL 查询页**、**插件来源的泳道族** —— 本阶段非目标或数据源缺失；**采集**当时未纳入 Phase 7，后续已通过独立 GUI Capture 实现（AT-SYS-003、[CAPTURE.md](../design/CAPTURE.md)），不属于当前产品禁令；
 8. **搜索历史** —— 价值最低，P7-T12 明确不做；
 9. **上游的底部 sheet 架构** —— ArkTrace 用 Inspector 承载同等语义，不移植 Web 的 tab sheet。
 
