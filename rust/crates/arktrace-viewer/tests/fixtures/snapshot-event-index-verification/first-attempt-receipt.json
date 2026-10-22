@@ -2,7 +2,7 @@
   {
     "command": [
       "python3",
-      "scripts/run-cargo.py",
+      "hack/run-cargo.py",
       "fmt",
       "--all"
     ],
@@ -21,7 +21,7 @@
   {
     "command": [
       "python3",
-      "scripts/run-cargo.py",
+      "hack/run-cargo.py",
       "fmt",
       "--all",
       "--check"
@@ -41,7 +41,7 @@
   {
     "command": [
       "python3",
-      "scripts/run-cargo.py",
+      "hack/run-cargo.py",
       "clippy",
       "--workspace",
       "--all-targets",

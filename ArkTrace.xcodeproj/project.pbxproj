@@ -66,8 +66,8 @@
 		020000000000000000000001 /* ArkTraceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArkTraceApp.swift; sourceTree = "<group>"; };
 		020000000000000000000002 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		020000000000000000000003 /* ArkTraceApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ArkTraceApp.entitlements; sourceTree = "<group>"; };
-		020000000000000000000004 /* trace_streamer */ = {isa = PBXFileReference; lastKnownFileType = compiled.mach-o.executable; name = trace_streamer; path = ThirdParty/TraceStreamer/macx/trace_streamer; sourceTree = SOURCE_ROOT; };
-		020000000000000000000005 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = ThirdParty/TraceStreamer/macx/manifest.json; sourceTree = SOURCE_ROOT; };
+		020000000000000000000004 /* trace_streamer */ = {isa = PBXFileReference; lastKnownFileType = compiled.mach-o.executable; name = trace_streamer; path = third_party/TraceStreamer/macx/trace_streamer; sourceTree = SOURCE_ROOT; };
+		020000000000000000000005 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = third_party/TraceStreamer/macx/manifest.json; sourceTree = SOURCE_ROOT; };
 		020000000000000000000006 /* ArkTrace.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ArkTrace.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		020000000000000000000007 /* ArkTraceProduct.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ArkTraceProduct.xcconfig; sourceTree = "<group>"; };
 		020000000000000000000008 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -338,12 +338,12 @@
 				"$(SRCROOT)/.arktrace-native/AppInputs/Helpers/arktrace-host-process",
 				"$(SRCROOT)/.arktrace-native/AppInputs/ArkTraceRuntime/manifest.json",
 				"$(SRCROOT)/.arktrace-native/AppInputs/receipt.json",
-				"$(SRCROOT)/scripts/copy_native_app_resources.py",
+				"$(SRCROOT)/hack/copy_native_app_resources.py",
 				"$(SRCROOT)/.arktrace-native/AppInputs/TraceStreamer/manifest.json",
 				"$(SRCROOT)/LICENSE",
 				"$(SRCROOT)/THIRD_PARTY_NOTICES.md",
-				"$(SRCROOT)/ThirdParty/TraceStreamer/license-inventory.json",
-				"$(SRCROOT)/ThirdParty/TraceStreamer/LICENSES",
+				"$(SRCROOT)/third_party/TraceStreamer/license-inventory.json",
+				"$(SRCROOT)/third_party/TraceStreamer/LICENSES",
 			);
 			name = "Copy Pinned TraceStreamer Bytes";
 			outputPaths = (
@@ -358,7 +358,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -eu\npython3 \"${SRCROOT}/scripts/copy_native_app_resources.py\" --inputs \"${SRCROOT}/.arktrace-native/AppInputs\" --bundle \"${TARGET_BUILD_DIR}/${WRAPPER_NAME}\"\nresources=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\nhelpers=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Helpers\"\nmanifest_dir=\"${resources}/TraceStreamer\"\n/bin/mkdir -p \"${helpers}\" \"${manifest_dir}\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/LICENSE\" \"${resources}/LICENSE\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/THIRD_PARTY_NOTICES.md\" \"${resources}/THIRD_PARTY_NOTICES.md\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/ThirdParty/TraceStreamer/license-inventory.json\" \"${resources}/license-inventory.json\"\n/bin/rm -rf \"${resources}/Licenses\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/ThirdParty/TraceStreamer/LICENSES\" \"${resources}/Licenses\"\n/bin/chmod 644 \"${manifest_dir}/manifest.json\" \"${resources}/LICENSE\" \"${resources}/THIRD_PARTY_NOTICES.md\" \"${resources}/license-inventory.json\"\n";
+			shellScript = "set -eu\npython3 \"${SRCROOT}/hack/copy_native_app_resources.py\" --inputs \"${SRCROOT}/.arktrace-native/AppInputs\" --bundle \"${TARGET_BUILD_DIR}/${WRAPPER_NAME}\"\nresources=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\nhelpers=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Helpers\"\nmanifest_dir=\"${resources}/TraceStreamer\"\n/bin/mkdir -p \"${helpers}\" \"${manifest_dir}\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/LICENSE\" \"${resources}/LICENSE\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/THIRD_PARTY_NOTICES.md\" \"${resources}/THIRD_PARTY_NOTICES.md\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/third_party/TraceStreamer/license-inventory.json\" \"${resources}/license-inventory.json\"\n/bin/rm -rf \"${resources}/Licenses\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/third_party/TraceStreamer/LICENSES\" \"${resources}/Licenses\"\n/bin/chmod 644 \"${manifest_dir}/manifest.json\" \"${resources}/LICENSE\" \"${resources}/THIRD_PARTY_NOTICES.md\" \"${resources}/license-inventory.json\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

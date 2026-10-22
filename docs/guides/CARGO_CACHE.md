@@ -14,17 +14,17 @@ Rust 固定为 1.99.0 / edition 2024；macOS 原生构建使用 arm64、Xcode 27
 已有缓存使用原位登记，保持 mirror、target、lock 路径和 inode。下面的 `<owner>` 和 `<cache>` 在同一会话中固定：
 
 ```sh
-python3 scripts/cargo_cache.py register --owner '<owner>' --cache-root '<cache>' --source-root '<checkout>' --adopt-existing
+python3 hack/cargo_cache.py register --owner '<owner>' --cache-root '<cache>' --source-root '<checkout>' --adopt-existing
 ```
 
-`<checkout>` 必须是实际独立的 Git top-level。源码列举隔离 ambient `GIT_*` 变量，使用该 checkout 自己的 repository/index。源码身份覆盖 Git 列出的 `rust/`、`contracts/` 与 parser manifest 的文件路径、字节数和 SHA256，包含实际 Cargo.lock；不依赖 owner snapshot 是否有 commit。
+`<checkout>` 必须是实际独立的 Git top-level。源码列举隔离 ambient `GIT_*` 变量，使用该 checkout 自己的 repository/index。源码身份覆盖 Git 列出的 `rust/`、`api/` 与 parser manifest 的文件路径、字节数和 SHA256，包含实际 Cargo.lock；不依赖 owner snapshot 是否有 commit。
 
 固定快照构建另设 `ARKTRACE_CARGO_SOURCE_ROOT` 和由 `source-identity --source-root '<snapshot>'` 返回的 `ARKTRACE_CARGO_SOURCE_SHA256`。runner 在持锁时再次校验身份，且禁止此模式的写入型 fmt/generate-lockfile。
 
 同一 owner 的新任务需要换快照时，显式切换绑定：
 
 ```sh
-python3 scripts/cargo_cache.py rebind --owner '<owner>' --cache-root '<cache>' --source-root '<next-snapshot>' --source-sha256 '<exact-source-sha256>'
+python3 hack/cargo_cache.py rebind --owner '<owner>' --cache-root '<cache>' --source-root '<next-snapshot>' --source-sha256 '<exact-source-sha256>'
 ```
 
 rebind 要求 owner active、runner lock 空闲；更新 source binding 和 epoch，使旧 plan 失效。它不移动或复制 mirror/target。下一次 runner 同步只改内容不同的源码，内容相同的快照保留 mirror mtime，Cargo 可复用原 fingerprint。
@@ -44,15 +44,15 @@ context 覆盖初始化、generate-lockfile、run、metadata 全流程；`Consum
 只在该缓存的生产任务确实结束后显式 `end`，再生成新 plan：
 
 ```sh
-python3 scripts/cargo_cache.py end --owner '<owner>' --cache-root '<cache>'
-python3 scripts/cargo_cache.py plan --owner '<owner>' --cache-root '<cache>' --output '<fresh-plan.json>'
+python3 hack/cargo_cache.py end --owner '<owner>' --cache-root '<cache>'
+python3 hack/cargo_cache.py plan --owner '<owner>' --cache-root '<cache>' --output '<fresh-plan.json>'
 ```
 
 另备 producer evidence manifest，必须 `formatVersion: 1`、匹配 `owner`、`producerEnded: true`，并包含唯一绝对路径的 `files`。每项包含 `kind`、`path`、`byteCount`、`sha256`；必须同时覆盖 `source`、`manifest`、`lockfile`、`dependencyRecord`、`binary`、`log`。这些 pin 由实际结束的检查产出，不能把单测替代真实构建证据。
 
 ```sh
-python3 scripts/cargo_cache.py archive --owner '<owner>' --cache-root '<cache>' --plan '<plan.json>' --evidence-manifest '<evidence.json>' --archive-dir '<fresh-external-archive>'
-python3 scripts/cargo_cache.py retire --owner '<owner>' --cache-root '<cache>' --archive-dir '<verified-external-archive>'
+python3 hack/cargo_cache.py archive --owner '<owner>' --cache-root '<cache>' --plan '<plan.json>' --evidence-manifest '<evidence.json>' --archive-dir '<fresh-external-archive>'
+python3 hack/cargo_cache.py retire --owner '<owner>' --cache-root '<cache>' --archive-dir '<verified-external-archive>'
 ```
 
 archive 保存完整 workspace/target、owner record、evidence manifest 与所列实际文件；所有 tar member 都是完整 regular file，hardlink 也保存内容。归档必须在 cache 与所有实际编译目录之外，入口拒绝 `.build` / `target` 路径。父目录也需由调用者选定为持久证据目录，不能借用其他 owner 的构建目录。

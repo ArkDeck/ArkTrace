@@ -90,7 +90,7 @@ CHG-2026-062 授予 `tests/**` 路径权限；见本节末）。
 翻成 `false` 采 follow-up——这就是本次闭环施加的那处变更，不必再临时改源码。
 
 fixture 归 ArkDeck 而非 ArkTrace，因为只有 ArkDeck 会构建和部署它（`workspace.build-openharmony@1`
-的 profile 硬编码了它的路径与产物），ArkTrace 只 trace 一个正在跑的进程，`scripts/test_phase6.sh`
+的 profile 硬编码了它的路径与产物），ArkTrace 只 trace 一个正在跑的进程，`hack/test_phase6.sh`
 是离线证据 gate，不碰这个工程。
 
 `bundleName` 仍为 `com.example.waterflowdemo`：本机 OpenHarmony 签名 profile 就是按该 bundle
@@ -233,7 +233,7 @@ P6-T04 的产出必须能被现有 Catalog 验证，且只允许以下组合：
 ## 10.1 实际结果（2026-08-16）
 
 闭环已跑通，判定为 **improved**。完整机器证据见
-`Fixtures/release-evidence/phase6-real-debug-loop.json`，gate 为 `scripts/test_phase6.sh`。
+`test/fixtures/release-evidence/phase6-real-debug-loop.json`，gate 为 `hack/test_phase6.sh`。
 
 | 指标 | baseline | follow-up | 相对变化 |
 |---|---:|---:|---:|

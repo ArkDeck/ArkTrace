@@ -11,7 +11,7 @@ evidence; its macOS migration acceptance remains open.
 ## Target and signing
 
 - macOS 26 or later, Apple silicon (`arm64`) — current baseline. Historical
-  signed candidates in `Fixtures/release-evidence/` were produced against the
+  signed candidates in `test/fixtures/release-evidence/` were produced against the
   earlier macOS 14 baseline and are kept as recorded evidence, not as proof
   that the macOS 26 baseline has shipped; the next signed candidate must be
   built, notarized and verified against 26.0;
@@ -22,7 +22,7 @@ evidence; its macOS migration acceptance remains open.
   uses Developer ID Application + hardened runtime; Apple notarization returned
   `Accepted`, and the stapled final ZIP passed Gatekeeper and extracted signature/
   ticket verification. Exact identity, artifact SHA and submission ID are in
-  `Fixtures/release-evidence/phase3-notarization.json`.
+  `test/fixtures/release-evidence/phase3-notarization.json`.
 
 ## Sandbox and file grants
 
@@ -66,7 +66,7 @@ while preparing. Quit closes controller admission, joins current and retired
 operations, flushes view state, closes sessions and awaits native shutdown before
 replying to macOS. A preparation or cleanup failure stays visible and retryable.
 
-`scripts/run-xcodebuild.sh` prepares a production Rust SDK (exact Rust 1.99.0,
+`hack/run-xcodebuild.sh` prepares a production Rust SDK (exact Rust 1.99.0,
 edition 2024, Xcode 27) and fixed resources after syncing its stable source
 mirror. Fixture SDKs cannot be used for the App. The bundle contains:
 
@@ -77,8 +77,8 @@ mirror. Fixture SDKs cannot be used for the App. The bundle contains:
 
 The parser's reproducible repository inputs remain:
 
-- `ThirdParty/TraceStreamer/macx/trace_streamer`;
-- `ThirdParty/TraceStreamer/macx/manifest.json`.
+- `third_party/TraceStreamer/macx/trace_streamer`;
+- `third_party/TraceStreamer/macx/manifest.json`.
 
 Production resolution checks only that bundle location. It never searches
 `PATH`, `DYLD_*`, environment variables, Homebrew, or a user-writable global
@@ -117,7 +117,7 @@ the App is notarized and stapled.
 Ad-hoc Debug/Release compile smoke tests compare all four resources with the
 verified staged inputs. Process liveness in a compile-only bundle does not prove
 native startup or GUI readiness.
-Run `sh scripts/test_native_app_build.sh` for that current compile gate. The
+Run `sh hack/test_native_app_build.sh` for that current compile gate. The
 historical `test_phase3_batch1.sh` also runs its inherited Phase 2 checks before
 calling the same App gate.
 
@@ -143,9 +143,9 @@ expands the same Xcode build settings. Tests and the app gate fail closed on dri
 
 ## External release evidence
 
-`scripts/build_phase3_distribution_candidate.sh` creates the exact signed App
-for manual review. `scripts/package_phase3.sh` consumes that same App and a
-tracked evidence manifest under `Fixtures/release-evidence/`; it does not rebuild
+`hack/build_phase3_distribution_candidate.sh` creates the exact signed App
+for manual review. `hack/package_phase3.sh` consumes that same App and a
+tracked evidence manifest under `test/fixtures/release-evidence/`; it does not rebuild
 or silently substitute a candidate. The six required artifacts and their schema
 are documented in that directory. The manifest and all six artifacts must be
 tracked, byte-identical to `HEAD`, hash-bound, and tied to the exact candidate;
@@ -159,7 +159,7 @@ live packaging path still requires the Developer ID identity/team/notary profile
 For an already notarized exact candidate, the complete gate alternatively accepts
 only the retained physical ZIP and tracked notarization evidence together, then
 reruns receipt/CDHash, signature, staple, Gatekeeper, resource and candidate-tree
-closure through `scripts/verify_phase3_notarized_artifact.sh`; one-sided, dirty,
+closure through `hack/verify_phase3_notarized_artifact.sh`; one-sided, dirty,
 self-attested, unstapled, sparse, symlinked or byte-drifted inputs fail closed.
 All distribution output roots must be physical owner-marked descendants of the
 repository `.build` directory or the physical system temporary root. External

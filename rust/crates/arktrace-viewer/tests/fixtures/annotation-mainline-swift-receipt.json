@@ -203,8 +203,8 @@
     },
     {
       "path": "Sources/ArkTraceParser/TraceStreamerManifest.swift",
-      "byteCount": 11624,
-      "sha256": "5dd5b227954141de5e92a49c1ab632114f780a364d5476479debf0c1b6e70866"
+      "byteCount": 11621,
+      "sha256": "f5f4f9a5ca29ec2c8cdd1e7223b86b52d6957b0491259f55d6a8f00cf690c898"
     },
     {
       "path": "Sources/ArkTraceParser/TraceStreamerProcessParser.swift",
@@ -228,8 +228,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
-      "byteCount": 29099,
-      "sha256": "2a6e5af91dda46f2de14df5346776a8e5c3d08b30eb350733df07f3492caca5b"
+      "byteCount": 29086,
+      "sha256": "10d43f4808a4f02178618cba8cf7c660a668bc463cf2c9b688714b23a59f64cc"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
@@ -333,8 +333,8 @@
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/annotation_swift.py",
-      "byteCount": 6560,
-      "sha256": "1fe9cb8173cf474a30c0d3368ef26f4fa0bf9b63a869ec6903ad5d2127a011b5"
+      "byteCount": 6551,
+      "sha256": "9875c350fdabcc8cd34c306f969164a0444353349edb2185005342c6102b8480"
     },
     {
       "path": "rust/crates/arktrace-viewer/tests/fixtures/annotation-inputs.json",

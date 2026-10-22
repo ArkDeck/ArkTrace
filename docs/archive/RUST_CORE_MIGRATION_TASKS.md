@@ -143,8 +143,8 @@ flowchart LR
 - 平台/输入：macOS 当前 Swift 与可用真实 fixture；Windows 只记录未知项；无设备执行。
 - 需求：AT-SYS-002/006、AT-TIME-*、AT-ID-*、AT-MODEL-002、AT-QUERY-001/002、AT-CLI-*、
   AT-JSON-*、AT-ERR-*、AT-PERF-*；清单范围覆盖 AT-APP-*、AT-RENDER-*、AT-AD-*。
-- 路径：拟新增 `contracts/`、`rust/tests/fixtures/`、`docs/migration-runs/`；现有 CLI/Core/
-  Store/Rendering tests、`scripts/api-baseline/`；只为 recorder 增加最小 test seam；
+- 路径：拟新增 `api/`、`rust/tests/fixtures/`、`docs/migration-runs/`；现有 CLI/Core/
+  Store/Rendering tests、`hack/api-baseline/`；只为 recorder 增加最小 test seam；
   交付 6 修改 `Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift` 及其测试。
 
 交付：
@@ -184,8 +184,8 @@ flowchart LR
   见 [双平台 CI 记录](../migration-runs/AT-RUST-002-2026-10-03-native-ci.md)。
 - 平台/输入：macOS arm64、Windows 11 x64 native runner；无设备。
 - 需求：设计 §4/13；AT-SYS-001/003/006。
-- 路径：拟新增 `rust/`、`contracts/` 生成入口、`windows/` 最小 binding 项目；
-  `.github/workflows/`、`scripts/ci_plan.sh` 及 planner tests。
+- 路径：拟新增 `rust/`、`api/` 生成入口、`windows/` 最小 binding 项目；
+  `.github/workflows/`、`hack/ci_plan.sh` 及 planner tests。
 
 交付：
 
@@ -204,7 +204,7 @@ flowchart LR
 
 - 两端真实 runner build/test，带 native OS 断言；0-test Windows harness 在 macOS 不算 PASS。
 - 修改共享契约/平台代码会选两端车道；仅文档不会意外触发全量构建；planner 自测通过。
-  `rust/`、`contracts/`、`windows/`、`bindings/` 等新路径有明确规则，不再落入“未知 → 全选”。
+  `rust/`、`api/`、`windows/`、`bindings/` 等新路径有明确规则，不再落入“未知 → 全选”。
 - Windows 产物在未装 VC++ 运行库的主机上可启动，或缺依赖时给出可定位错误。
 - CLI/engine 的依赖闭包不含 GUI/Capture；无相邻 ArkDeck checkout path dependency。
 - toolchain 和 dependency 缺失的错误可定位，不自动使用任意系统版本。
@@ -212,14 +212,14 @@ flowchart LR
 ## 5. AT-RUST-003 — Windows TraceStreamer 可复现构建与 pin
 
 - 状态：in-progress；开工/完成依赖：无，直接核对当前第三方源码/配方。
-- 进展（2026-10-14）：`scripts/build_trace_streamer_windows.sh` 在 Windows 11 x64 原生主机两次
+- 进展（2026-10-14）：`hack/build_trace_streamer_windows.sh` 在 Windows 11 x64 原生主机两次
   clean build 产出逐字节相同的 PE x64 parser（`d0e5a197…`，仅导入系统 DLL）；两份 evidence
   fixture 在四类路径下的导出 DB 与 macOS 锁定值逐字节相同。Windows 静态 runtime 许可清单
   已入独立的 `windows-license-inventory.json`。干净主机、large 与签名/分发未完成；剩余项见 [TRACE_STREAMER.md §4a](../design/TRACE_STREAMER.md#4a-windows-x64-锁定构建at-rust-003)。
 - 平台/输入：Windows 11 x64 构建主机、上游源码、真实 Trace；无设备操作。
 - 需求：AT-SYS-005、AT-PARSE-002/003/004/010、AT-DB-*、AT-SEC-002/005、AT-CLI-011（许可清单）；
   AT-PARSE-001/007 的调用与成功判定由 006 接入。
-- 路径：`ThirdParty/TraceStreamer/`、拟新增 Windows build/verify 脚本；
+- 路径：`third_party/TraceStreamer/`、拟新增 Windows build/verify 脚本；
   `docs/design/TRACE_STREAMER.md`、`THIRD_PARTY_NOTICES.md`、许可/fixture 检查。
 
 交付：
@@ -265,7 +265,7 @@ flowchart LR
 - 2026-10-14 Windows 文件端口：`arktrace-platform` 新增 `windows` 模块（`windows-sys 0.61.2`），
   以相同公开类型实现 held file/directory、volume/file ID 身份（ReFS 128 位 id 拒绝）、owner-only
   DACL 私有根、reparse 拒绝、sealed 文件/目录同卷无覆盖发布、SQLite FILESTAT handle 绑定、
-  `LockFileEx` 字节 `u64::MAX-1` 的 shared/exclusive lease（与 `contracts/` 向量及 ArkDeck purger
+  `LockFileEx` 字节 `u64::MAX-1` 的 shared/exclusive lease（与 `api/` 向量及 ArkDeck purger
   一致）、known-folder 工作区与 owner v2/3/4 ledger；sidecar 与双名原子交换在 Windows 拒绝
   （无 `RENAME_SWAP`）。28 个 Windows 原生测试通过，见
   [Windows 文件端口记录](../migration-runs/AT-RUST-004-2026-10-14-windows-host-files.md)。
@@ -284,7 +284,7 @@ flowchart LR
 4. cache 和 source 的不同链接规则：显式原始输入可解析一次，内部/工具路径不可逃逸；Windows 区分
    symlink/junction 与云文件占位符等非链接 reparse tag，冻结显式输入对后者的处理与错误码。
 5. 锁协议作为跨产品契约：macOS `flock` 文件布局与 Windows `LockFileEx` 锁定字节（现与 ArkDeck purger
-   约定为 `u64::MAX-1`）写入 `contracts/` 向量，供 008 与 017/018 对等测试。
+   约定为 `u64::MAX-1`）写入 `api/` 向量，供 008 与 017/018 对等测试。
 6. source 快照策略：沿用整文件复制，或证明“拒绝写/删除共享的 handle + 原位解析”等价后再替换。
 
 验收：
@@ -973,7 +973,7 @@ repository/App 接线与完整 macOS 验收仍待办，见
 - 平台/输入：两端构建/开发证书；生产签名/notary/publisher 是 release 输入。
 - 需求：AT-SEC-*、AT-CLI-001/011、AT-PARSE-002、SPECIFICATION §23.5、现行 CLI/App distribution 边界、
   设计 §10。
-- 路径：`scripts/` 发行/验证入口、`contracts/distribution/`、SDK artifact metadata、
+- 路径：`hack/` 发行/验证入口、`api/distribution/`、SDK artifact metadata、
   `docs/guides/CLI_DISTRIBUTION.md`、`docs/guides/APP_DISTRIBUTION.md`、license inventory。
 
 交付：
@@ -1074,7 +1074,7 @@ repository/App 接线与完整 macOS 验收仍待办，见
 - 需求：AT-PERF-*（含 AT-PERF-010 输出字段）、AT-SEC-*、AT-SYS-004、SPECIFICATION §21 与
   AC-AT-001～017、设计 §13；每能力的主要失败路径。
 - 路径：`rust/tests/`、`rust/benches/` 或统一 benchmark runner、native UI tests、
-  `scripts/` 与 CI planner、`docs/migration-runs/`。
+  `hack/` 与 CI planner、`docs/migration-runs/`。
 
 交付：
 

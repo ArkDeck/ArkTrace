@@ -24,7 +24,7 @@ def main():
   dest=source/'Sources'/name
   if dest.exists():shutil.rmtree(dest)
   shutil.copytree(ROOT/'Sources'/name,dest)
- shutil.copytree(ROOT/'scripts',source/'scripts',dirs_exist_ok=True)
+ shutil.copytree(ROOT/'hack',source/'hack',dirs_exist_ok=True)
  harness=CRATE/'oracle/ScopedSliceOracle.swift';dest=source/'Sources/ScopedSliceOracle';dest.mkdir(parents=True,exist_ok=True);shutil.copyfile(harness,dest/harness.name)
  (source/'Package.swift').write_text('''// swift-tools-version: 6.3
 import PackageDescription
@@ -39,11 +39,11 @@ let package = Package(name: "ArkTrace", platforms: [.macOS(.v26)], targets: [
  env=os.environ.copy();env['ARKTRACE_SWIFTPM_CACHE_ROOT']=str(CACHE)
  log=CACHE/f'{STEM}-build.log'
  with log.open('w') as f:
-  run=subprocess.run(['sh','scripts/run-swiftpm.sh','build','--disable-sandbox','--config-path',str(CACHE/'configuration'),'--security-path',str(CACHE/'security'),'--product','ScopedSliceOracle'],cwd=source,env=env,stdout=f,stderr=subprocess.STDOUT)
+  run=subprocess.run(['sh','hack/run-swiftpm.sh','build','--disable-sandbox','--config-path',str(CACHE/'configuration'),'--security-path',str(CACHE/'security'),'--product','ScopedSliceOracle'],cwd=source,env=env,stdout=f,stderr=subprocess.STDOUT)
  if run.returncode: print(log.read_text()[-10000:]);run.check_returncode()
  assert 'warning:' not in log.read_text()
  executable=CACHE/'build/out/Products/Debug/ScopedSliceOracle'
- inputs=json.loads(INPUT.read_text());manifest=json.loads((ROOT/'ThirdParty/TraceStreamer/macx/manifest.json').read_text())
+ inputs=json.loads(INPUT.read_text());manifest=json.loads((ROOT/'third_party/TraceStreamer/macx/manifest.json').read_text())
  parser={k:manifest[k] for k in ['name','reportedVersion','binarySHA256','upstreamRepository','upstreamRevision','architecture','adapterVersion','buildRecipeVersion']}
  with tempfile.TemporaryDirectory(prefix='arktrace-scoped-slices-',dir='/private/tmp') as tmp:
   db=Path(tmp)/'controlled.sqlite';conn=sqlite3.connect(db);conn.executescript(inputs['sql']);conn.commit();conn.close();db.chmod(0o400)

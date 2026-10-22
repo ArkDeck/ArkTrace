@@ -15,17 +15,17 @@ xcuserdata/
 # Profiling / scratch
 *.profraw
 
-# Pinned TraceStreamer binary is built locally via scripts/build_trace_streamer.sh;
+# Pinned TraceStreamer binary is built locally via hack/build_trace_streamer.sh;
 # only the provenance manifest is committed.
-ThirdParty/TraceStreamer/macx/trace_streamer
-# Windows: scripts/build_trace_streamer_windows.sh; manifest.json is committed.
-ThirdParty/TraceStreamer/windows-x86_64/trace_streamer.exe
-ThirdParty/TraceStreamer/windows-x86_64/.*.partial
+third_party/TraceStreamer/macx/trace_streamer
+# Windows: hack/build_trace_streamer_windows.sh; manifest.json is committed.
+third_party/TraceStreamer/windows-x86_64/trace_streamer.exe
+third_party/TraceStreamer/windows-x86_64/.*.partial
 
 # API baseline consumer build products
-scripts/api-baseline/.build/
+hack/api-baseline/.build/
 
-# Python bytecode from the scripts/ verifiers
+# Python bytecode from the hack/ verifiers
 __pycache__/
 *.pyc
 

@@ -31,7 +31,7 @@ def main():
     if not xcode.startswith("Xcode 27."):
         raise SystemExit("Xcode 27 required")
     SOURCE.mkdir(parents=True, exist_ok=True)
-    for directory in ("Sources/ArkTraceCore", "Sources/ArkTraceAnalysis", "Tests/ArkTraceAnalysisTests", "scripts"):
+    for directory in ("Sources/ArkTraceCore", "Sources/ArkTraceAnalysis", "Tests/ArkTraceAnalysisTests", "hack"):
         shutil.copytree(ROOT / directory, SOURCE / directory, dirs_exist_ok=True)
     (SOURCE / "Package.swift").write_text('''// swift-tools-version: 6.3
 import PackageDescription
@@ -50,7 +50,7 @@ let package = Package(name: "ArkTrace", platforms: [.macOS(.v26)], targets: [
         ARKTRACE_ANALYSIS_ORACLE_INPUT=str(INPUT),
         ARKTRACE_ANALYSIS_ORACLE_OUTPUT=str(OUTPUT))
     with (CACHE / "oracle.log").open("w") as log:
-        result = subprocess.run(["sh", "scripts/run-swiftpm.sh", "test", "--disable-sandbox", "--config-path", str(CACHE / "configuration"), "--security-path", str(CACHE / "security"), "--filter", "TraceAgentBatchTests.testParallelAnalysisOracle"],
+        result = subprocess.run(["sh", "hack/run-swiftpm.sh", "test", "--disable-sandbox", "--config-path", str(CACHE / "configuration"), "--security-path", str(CACHE / "security"), "--filter", "TraceAgentBatchTests.testParallelAnalysisOracle"],
             cwd=SOURCE, env=environment, stdout=log, stderr=subprocess.STDOUT)
     if result.returncode:
         print((CACHE / "oracle.log").read_text()[-10000:])
@@ -70,7 +70,7 @@ let package = Package(name: "ArkTrace", platforms: [.macOS(.v26)], targets: [
     if "--regressions" in sys.argv:
         selected = "TraceAgentBatchTests.test(DeterministicAnalysisCoversClippingRankingStatesLatencyAndHotBuckets|SchedulingPercentileNearestRankAndUnsupportedAreStable|SchedulingRequiresObservedRunnableEndAndPreservesClosedProof|HotBucketsUseExactNonDivisibleBoundariesAndCountEachSwitchOnce|AnalysisTruncatedSourcesDoNotClaimExactMatchedCounts)|TraceViewerAnalysisTests.test(RangeAndDeterministicAnalysisAgreeOnThreadStateDistribution|ThreadStateDistributionTruncationIsReportedNotSilent|RangeAnalysisIsBoundedDeterministicAndCancellationAware|TopThreadsSplitTimePerCPUAndTheSplitSumsToTheTotal)"
         with (CACHE / "swift-regressions.log").open("w") as log:
-            result = subprocess.run(["sh", "scripts/run-swiftpm.sh", "test", "--disable-sandbox", "--config-path", str(CACHE / "configuration"), "--security-path", str(CACHE / "security"), "--filter", selected], cwd=SOURCE, env=environment, stdout=log, stderr=subprocess.STDOUT)
+            result = subprocess.run(["sh", "hack/run-swiftpm.sh", "test", "--disable-sandbox", "--config-path", str(CACHE / "configuration"), "--security-path", str(CACHE / "security"), "--filter", selected], cwd=SOURCE, env=environment, stdout=log, stderr=subprocess.STDOUT)
         print((CACHE / "swift-regressions.log").read_text()[-7000:])
         return result.returncode
     return 0

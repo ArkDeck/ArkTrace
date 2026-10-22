@@ -65,7 +65,7 @@ let nativeTargets: [Target] = if let nativeSDKPath {
         // Package-scoped Core DTOs are intentionally not promoted for tests.
         // This development-only consumer exercises the actual shared adapter.
         .executableTarget(name: "ArkTraceRustCoreConformance", dependencies: ["ArkTraceCore", "ArkTraceRustRuntime", "ArkTraceAppSupport"],
-            path: "scripts/swift-sdk-core", cSettings: nativeSDKCSettings,
+            path: "hack/swift-sdk-core", cSettings: nativeSDKCSettings,
             swiftSettings: firstPartySwiftSettings + nativeSDKSwiftSettings + [.unsafeFlags(["-parse-as-library"])])
     ] : [])
 } else { [] }
@@ -154,11 +154,11 @@ let package = Package(
         .target(
             name: "ArkTraceCLIResourceFixtures",
             resources: [
-                .copy("../../Fixtures/traces/zlib.htrace"),
+                .copy("../../test/fixtures/traces/zlib.htrace"),
                 .copy("../../LICENSE"),
                 .copy("../../THIRD_PARTY_NOTICES.md"),
-                .copy("../../ThirdParty/TraceStreamer/license-inventory.json"),
-                .copy("../../ThirdParty/TraceStreamer/LICENSES"),
+                .copy("../../third_party/TraceStreamer/license-inventory.json"),
+                .copy("../../third_party/TraceStreamer/LICENSES"),
             ]
         ),
         .executableTarget(

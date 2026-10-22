@@ -9,7 +9,7 @@ def main():
  source=CACHE/'oracle-source';source.mkdir(parents=True,exist_ok=True)
  xcode=subprocess.check_output(['xcodebuild','-version'],text=True);swift=subprocess.check_output(['swift','--version'],text=True)
  if xcode.splitlines()[0]!='Xcode 27.0' or 'Apple Swift version 6.4 'not in swift:raise SystemExit('Xcode27.0/Swift6.4 required')
- for directory in ['Sources/ArkTraceCore','Sources/ArkTraceRendering','Tests/ArkTraceRenderingTests','scripts']:shutil.copytree(ROOT/directory,source/directory,dirs_exist_ok=True)
+ for directory in ['Sources/ArkTraceCore','Sources/ArkTraceRendering','Tests/ArkTraceRenderingTests','hack']:shutil.copytree(ROOT/directory,source/directory,dirs_exist_ok=True)
  (source/'Package.swift').write_text('''// swift-tools-version: 6.3
 import PackageDescription
 let package=Package(name:"ArkTrace",platforms:[.macOS(.v26)],targets:[
@@ -30,7 +30,7 @@ let package=Package(name:"ArkTrace",platforms:[.macOS(.v26)],targets:[
  selected='TimelineRenderingTests.testActualPresentationOracle'
  if '--regressions'in sys.argv:selected='TimelinePaletteTests|TimelineFrameLaneTests|TimelineRenderingTests.test(Density.*|.*CpuSliceLabel.*|.*CPU.*Label.*|.*Color.*|.*Foreground.*)'
  log=CACHE/('presentation-swift-regressions.log' if '--regressions'in sys.argv else 'presentation-swift-oracle.log')
- with log.open('w')as f:r=subprocess.run(['sh','scripts/run-swiftpm.sh','test','--disable-sandbox','--config-path',str(CACHE/'configuration'),'--security-path',str(CACHE/'security'),'--filter',selected],cwd=source,env=env,stdout=f,stderr=subprocess.STDOUT)
+ with log.open('w')as f:r=subprocess.run(['sh','hack/run-swiftpm.sh','test','--disable-sandbox','--config-path',str(CACHE/'configuration'),'--security-path',str(CACHE/'security'),'--filter',selected],cwd=source,env=env,stdout=f,stderr=subprocess.STDOUT)
  print('Swift:',r.returncode,log)
  if r.returncode:print(log.read_text()[-8000:]);return r.returncode
  if '--regressions'in sys.argv:print(log.read_text()[-1600:]);return 0

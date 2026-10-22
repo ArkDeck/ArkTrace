@@ -23,7 +23,7 @@ def main():
             shutil.rmtree(target)
         shutil.copytree(ROOT / 'Sources' / name, target)
         pins.extend(sorted((ROOT / 'Sources' / name).rglob('*.swift')))
-    shutil.copytree(ROOT / 'scripts', source / 'scripts', dirs_exist_ok=True)
+    shutil.copytree(ROOT / 'hack', source / 'hack', dirs_exist_ok=True)
     target = source / 'Sources/BatchOracle'
     target.mkdir(parents=True, exist_ok=True)
     harness = Path(__file__).with_name('BatchOracle.swift')
@@ -39,13 +39,13 @@ let package = Package(name: "ArkTrace", platforms: [.macOS(.v26)], targets: [
     subprocess.run(['/usr/bin/git', 'init', '--quiet'], cwd=source, check=True)
     environment = dict(os.environ, ARKTRACE_SWIFTPM_CACHE_ROOT=str(CACHE))
     with (CACHE / 'oracle-build.log').open('w') as log:
-        subprocess.run(['sh', 'scripts/run-swiftpm.sh', 'build', '--disable-sandbox',
+        subprocess.run(['sh', 'hack/run-swiftpm.sh', 'build', '--disable-sandbox',
             '--config-path', str(CACHE / 'configuration'), '--security-path', str(CACHE / 'security'),
             '--product', 'BatchOracle'], cwd=source, env=environment, stdout=log,
             stderr=subprocess.STDOUT, check=True)
     assert 'warning:' not in (CACHE / 'oracle-build.log').read_text(encoding='utf-8')
     binary = CACHE / 'build/out/Products/Debug/BatchOracle'
-    pins += [harness, Path(__file__), ROOT / 'scripts/run-swiftpm.sh']
+    pins += [harness, Path(__file__), ROOT / 'hack/run-swiftpm.sh']
     record = {'oracle': 'actual Swift SQLiteTraceRepository prepared concurrent eventBatch',
         'xcode': xcode, 'swift': subprocess.check_output(['/usr/bin/swift', '--version'], text=True).strip(),
         'executablePath': str(binary), 'executableSHA256': hashlib.sha256(binary.read_bytes()).hexdigest(),

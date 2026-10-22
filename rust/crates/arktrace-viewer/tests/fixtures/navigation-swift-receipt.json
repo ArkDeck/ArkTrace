@@ -3,7 +3,7 @@
   "canonical": "Current Swift TraceDocumentController.loadCatalog + original action methods + TimelineNSView private focus/anchor methods",
   "command": [
     "sh",
-    "scripts/run-swiftpm.sh",
+    "hack/run-swiftpm.sh",
     "test",
     "--disable-sandbox",
     "--config-path",

@@ -21,12 +21,12 @@
 |---|---|
 | 平台、模块与依赖 | [Package.swift](Package.swift)、`Sources/`、[SPECIFICATION.md](docs/design/SPECIFICATION.md) §2–4 |
 | Parser、SQLite、cache | `Sources/ArkTraceCore/`、`Sources/ArkTraceParser/`、`Sources/ArkTraceStore/`、`Sources/ArkTraceRuntime/`；[TRACE_STREAMER.md](docs/design/TRACE_STREAMER.md) |
-| 包外消费的离线检查与 cache 维护 | `Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift`、`Sources/ArkTraceRuntime/TraceCache.swift`；`scripts/api-baseline/` |
+| 包外消费的离线检查与 cache 维护 | `Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift`、`Sources/ArkTraceRuntime/TraceCache.swift`；`hack/api-baseline/` |
 | CLI、查询、分析 | `Sources/ArkTraceCLI/`、`Sources/arktrace/`、`Sources/ArkTraceAnalysis/`；[CLI.md](docs/guides/CLI.md) |
 | Viewer、交互与本地化 | `Apps/ArkTraceApp/`、`Sources/ArkTraceAppSupport/`、`Sources/ArkTraceRendering/`；DESIGN §13–14 |
 | GUI 设备采集 | `Sources/ArkTraceCapture/`、`Apps/ArkTraceApp/Capture/`；[CAPTURE.md](docs/design/CAPTURE.md) |
 | ArkDeck 消费或分发 | [ARKDECK_INTEGRATION.md](docs/guides/ARKDECK_INTEGRATION.md)、[CLI_DISTRIBUTION.md](docs/guides/CLI_DISTRIBUTION.md)、[APP_DISTRIBUTION.md](docs/guides/APP_DISTRIBUTION.md) |
-| 构建与 CI | [ci.yml](.github/workflows/ci.yml)、[ci_plan.sh](scripts/ci_plan.sh)、对应 `scripts/` 入口 |
+| 构建与 CI | [ci.yml](.github/workflows/ci.yml)、[ci_plan.sh](hack/ci_plan.sh)、对应 `hack/` 入口 |
 
 `docs/archive/TASKS.md`、`PHASE_*_TASKS.md`、历史验证报告中的排程、旧 pin 和验收状态属于当时的记录。
 按需追溯相关证据；新任务不必重走阶段入口、请求已完成的设计裁决或改写历史 Completed 状态。
@@ -40,7 +40,7 @@ ArkDeck 是独立仓库，其治理流程不自动适用于 ArkTrace；跨仓库
 和 ArkDeck 交叉的行为沿用 ArkDeck 的 spec-driven 过程（Living Spec 与 change package，入口是 ArkDeck 仓库的 `openspec/README.md`）：
 
 1. 先写 proposal 和 spec delta，写清可观察行为、失败语义和验收场景，再改实现。
-2. 机器边界放在 `contracts/`。`arkdeck-contract.json`、FFI、index definitions 由现有 verifier 对照 Swift 与 Rust 源码常量检查。
+2. 机器边界放在 `api/`。`arkdeck-contract.json`、FFI、index definitions 由现有 verifier 对照 Swift 与 Rust 源码常量检查。
 3. ArkDeck 的 profile、硬编码版本和消费代码留在 ArkDeck 的 change package 里修改。ArkTrace 不代改下游仓库。
 4. 规格接受、实现完成、验收证据是三件不同的事。历史 Phase 报告不能代替当前 diff 的检查。
 
@@ -60,11 +60,11 @@ ArkDeck 是独立仓库，其治理流程不自动适用于 ArkTrace；跨仓库
 日常迭代使用稳定缓存入口（在仓库根目录执行）：
 
 ```sh
-sh scripts/run-swiftpm.sh build
-sh scripts/run-swiftpm.sh test --filter '<相关测试套件>'
-sh scripts/run-xcodebuild.sh
-python3 scripts/run-cargo.py check -p '<相关crate>'
-python3 scripts/run-cargo.py test -p '<相关crate>'
+sh hack/run-swiftpm.sh build
+sh hack/run-swiftpm.sh test --filter '<相关测试套件>'
+sh hack/run-xcodebuild.sh
+python3 hack/run-cargo.py check -p '<相关crate>'
+python3 hack/run-cargo.py test -p '<相关crate>'
 ```
 
 按改动选择命令，不要求每次全部运行。runner 管理稳定 source mirror 与缓存；不要给 SwiftPM runner 传它禁止的 `--package-path`、`--scratch-path` 或 `--cache-path`。
@@ -78,13 +78,13 @@ Windows 产品验证必须在 Windows x64 原生 runner 执行；macOS 交叉编
 |---|---|
 | 纯文档、Agent 指令 | 检查 diff、路径、链接、指令冲突；通常不编译 Swift |
 | 行为修复 | 运行相关既有测试；补能捕获该故障的回归测试，避免只复述实现的断言 |
-| 公开 Swift API 或依赖边 | 相关测试 + `sh scripts/test_api_baseline.sh`；影响 App 时再构建 App |
+| 公开 Swift API 或依赖边 | 相关测试 + `sh hack/test_api_baseline.sh`；影响 App 时再构建 App |
 | UI、输入与可访问性 | 相关 AppSupport/Rendering 测试 + App 构建；交互或呈现变化补对应实际检查，说明未验证项 |
 | README 快捷键表 | 以 `TraceShortcutCatalog` 为源，同步两种语言，运行 `ShortcutCatalogTests` |
 | 配色、license、parser lock、脚本或 CI | 使用对应 verifier/contract tests；检查 CI planner 是否覆盖完整 diff |
 | 发布、签名、性能或真实设备验收 | 读取对应分发/Phase 文档，执行其要求的 gate 与真实证据验证 |
 
-最终 CI 车道按完整 diff 由 `scripts/ci_plan.sh` 选择；未知路径或无法确定 diff 时会选择全部车道。
+最终 CI 车道按完整 diff 由 `hack/ci_plan.sh` 选择；未知路径或无法确定 diff 时会选择全部车道。
 过滤测试用于开发反馈，不替代所选 CI 车道；提交前核对 `.github/workflows/ci.yml` 的适用检查（包括 warning 和 skip 审计）。
 TraceStreamer binary 不随 Git 提交。需要真实解析时按 TRACE_STREAMER 构建并校验；不要把整个测试类的失败一概归为缺 parser，CI 仅允许 workflow 明列的排除或 skip。
 正式验收缺少必需 binary、fixture、设备或签名证据时，该项未通过；普通任务继续完成可运行检查并报告缺口。单测、模拟结果和离线历史 evidence 校验不能冒充新一轮真机、性能或发布通过。

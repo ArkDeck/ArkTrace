@@ -11,7 +11,7 @@
 本调查比较：
 
 - 两份本地 DAYU 200 真实采集的原始 bytes；
-- ArkTrace `scripts/verify_htrace_integrity.py`；
+- ArkTrace `hack/verify_htrace_integrity.py`；
 - pinned TraceStreamer `447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6` 的
   `ProfilerTraceFileHeader` 与 `PbreaderParser`；
 - ArkTrace source closure 锁定的 HiProfiler
@@ -29,7 +29,7 @@
   `device/services/plugin_service/src/plugin_service.cpp`；
 - TraceStreamer：`trace_streamer/src/base/pbreader_file_header.h`、
   `trace_streamer/src/parser/pbreader_parser/pbreader_parser.cpp`；
-- revision/仓库 URL 由 `ThirdParty/TraceStreamer/source-lock.json` 锁定；本次核验的
+- revision/仓库 URL 由 `third_party/TraceStreamer/source-lock.json` 锁定；本次核验的
   HiProfiler checkout HEAD 与 lock 均为
   `73d26bb5acfcafb2b1f4f94ead5640241d1e5f73`。
 
@@ -238,7 +238,7 @@ embedded digest 负例先以 exit 125 fail closed，修正版本的正/负 contr
 保持 `878a8837e0b7eb9f6c26735271096e80bf296f7e57765ae21752432225ad8607`，shim 只对已披露的
 checkpoint Final 做 context snapshot。所有部署、预检、600 秒命令、workload、milestone、
 设备/主机 hash、parser import 和恢复事件按 host UTC 写入
-`Fixtures/release-evidence/phase3-large/acquisition-events.tsv`。
+`test/fixtures/release-evidence/phase3-large/acquisition-events.tsv`。
 
 完成后恢复原始 binary、owner/mode/SELinux label，移除 wrapper/shim 并重启；最终 root mount
 为只读，原始 daemon SHA 再次匹配、临时 system 文件不存在、进程映射无 shim。该操作记录
@@ -248,7 +248,7 @@ checkpoint Final 做 context snapshot。所有部署、预检、600 秒命令、
 
 Gate 6/7 的关闭条件现已由 exact、可机器重验的证据满足：
 
-- `Fixtures/phase3-performance-fixtures.json` 锁定 provenance SHA-256
+- `test/fixtures/phase3-performance-fixtures.json` 锁定 provenance SHA-256
   `bffd3b91df0509da3c5d74603e934f4ebbc3647e44f6ea2666435c1c42f50184` 与 exact trace hash/size；
 - trace 保存在普通 Git 外的 content-addressed Release asset
   `arktrace-dayu200-20260815T081830Z-600s.htrace`，release tag
@@ -269,16 +269,16 @@ Gate 6/7 的关闭条件现已由 exact、可机器重验的证据满足：
 - 同一 fixture 的 20-sample benchmark 满足 cache p95 ≤1s、viewport p95 ≤500ms、context p95
   ≤2s、analysis p95 ≤5s、frame p95 ≤16.67ms 与 RSS ≤1.5GiB；24 个 applicable/persistent
   indices 精确闭合且 `usesAutomaticIndex=false`。exact 事实源为
-  `Fixtures/release-evidence/phase3-large-performance.json`。
+  `test/fixtures/release-evidence/phase3-large-performance.json`。
 
 因此 Gate 6、Gate 7 已 **Closed**。该结论不关闭 Gate 10，也不使原 480/600 秒失败文件有效；
 缺失外部 artifact、签名、许可、provenance 或任一 exact identity 时门禁仍 fail closed。
 
 ## 7. 本次验证结果
 
-- `sh scripts/test_htrace_integrity_verifier.sh`：PASS；
-- `sh scripts/test_phase3_benchmark_contract.sh`：PASS，caller self-attestation 继续被拒绝；
-- `sh scripts/test_phase3_distribution_contract.sh` 与 `sh scripts/verify_trace_streamer_lock.sh`：PASS；
+- `sh hack/test_htrace_integrity_verifier.sh`：PASS；
+- `sh hack/test_phase3_benchmark_contract.sh`：PASS，caller self-attestation 继续被拒绝；
+- `sh hack/test_phase3_distribution_contract.sh` 与 `sh hack/verify_trace_streamer_lock.sh`：PASS；
 - 无 `ARKTRACE_LARGE_TRACE`/provenance、外部 bytes 漂移、caller self-attestation、替换 trust root
   或签名漂移时：预期 FAIL；
 - 修正 count 语义后分别校验两份真实 trace：均预期 FAIL，稳定错误为

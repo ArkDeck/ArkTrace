@@ -17,8 +17,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
-      "sha256": "2a6e5af91dda46f2de14df5346776a8e5c3d08b30eb350733df07f3492caca5b",
-      "byteCount": 29099
+      "sha256": "10d43f4808a4f02178618cba8cf7c660a668bc463cf2c9b688714b23a59f64cc",
+      "byteCount": 29086
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
@@ -167,8 +167,8 @@
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/run_swift_oracle.py",
-      "sha256": "94522fed80590263242d6a81c593ac27bee86a27a410a0a6c188b790e5e630a6",
-      "byteCount": 7717
+      "sha256": "1571b087b5ea684689dbfd711226977070ba739ae37bd44f845040981c4d8281",
+      "byteCount": 7708
     }
   ],
   "oracleOnlyTransformations": {

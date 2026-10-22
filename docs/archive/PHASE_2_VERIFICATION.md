@@ -2,7 +2,7 @@
 
 > 日期：2026-08-13
 > 状态：Passed — P2-T06/T07 统一独立 review clean
-> 总验收入口：`scripts/test_phase2.sh`
+> 总验收入口：`hack/test_phase2.sh`
 
 ## 1. 验收范围
 
@@ -59,9 +59,9 @@ metadata measurement 位于成功 open 后。最终 clean gate 实测：
 
 ## 4. Gate behavior
 
-`scripts/test_phase2.sh`：
+`hack/test_phase2.sh`：
 
-1. 先执行 `scripts/test_phase1.sh`，保留 locked binary/manifest/fixture/license/hash/fingerprint
+1. 先执行 `hack/test_phase1.sh`，保留 locked binary/manifest/fixture/license/hash/fingerprint
    与零 skip 约束；
 2. 执行完整 Release XCTest，Phase 2 benchmark test 写出 ≤4 KiB sorted-key machine evidence；
 3. 用实际 Release `arktrace` 验证 malformed argument、wrong parser、timeout、output overflow、

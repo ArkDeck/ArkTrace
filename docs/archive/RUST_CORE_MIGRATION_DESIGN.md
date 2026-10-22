@@ -67,14 +67,14 @@ capture/inspect/export 对等、Viewer 后置，因此 Windows Viewer 不是 Ark
 Assets）保留为 macOS 原生 UI；`Tests/` 的 44 个文件 / 29,633 行是 001 提取行为向量的主要来源。
 
 依赖事实源为 [Package.swift](../../Package.swift)。对外 API 已有独立包的
-[编译基线](../../scripts/api-baseline/Sources/ArkTraceAPIBaseline/APIBaseline.swift)，
+[编译基线](../../hack/api-baseline/Sources/ArkTraceAPIBaseline/APIBaseline.swift)，
 不能因为符号在本仓“看似无人使用”就删除。
 
 ### 2.2 本次迁移必须解决的实际缺口
 
 | 缺口 | 已核对事实 | 迁移处理 |
 |---|---|---|
-| Windows parser | 仅有 [macx manifest](../../ThirdParty/TraceStreamer/macx/manifest.json)，arm64、上游 `447a0a49…`、4.3.7；无仓内 Windows 可审查发行包 | 早期完成 Windows x64 构建与语义比对，不能等 UI 做完 |
+| Windows parser | 仅有 [macx manifest](../../third_party/TraceStreamer/macx/manifest.json)，arm64、上游 `447a0a49…`、4.3.7；无仓内 Windows 可审查发行包 | 早期完成 Windows x64 构建与语义比对，不能等 UI 做完 |
 | Apple 平台绑定 | Darwin、MachO、CryptoKit、OSLog、CoreGraphics；CLI doctor/identity 与签名布局也受平台约束 | 明确 port，不靠扩大 `cfg` 或禁用校验完成移植 |
 | ArkDeck loader | Rust loader/trust/doctor 只在 macOS 编译：校验 product `0.1.0`/build `1`、arm64、bundle id、JSON contract 1.0、`ArkTraceCLI.app` 布局、Developer ID + 公证 + staple、CDHash，tree digest 含 POSIX mode；Windows daemon 一旦设置 `ARKDECK_ARKTRACE_DESCRIPTOR` 即拒绝启动，且 Windows 没有 `runtime service install/update` | Windows 发行契约、loader 与 descriptor 选择方式都是 ArkDeck 侧独立交付；macOS 新版本号同样要 loader 放行 |
 | ArkDeck inspect | Rust `HostServices::trace_inspection` 只有默认实现，对所有请求答 `operationUnavailable`；2026-09-25 裁定：G5 内保持拒绝 (c)，之后走 (b) 由已加载的 reviewed CLI 回答，(a) 在 ArkDeck 内重写解析被否决 | 017/018 经 CLI `inspect --json` 接入，含 handler、`resourceNotFound` 帧、schema 扩展、成功与拒绝路径 |
@@ -97,7 +97,7 @@ Assets）保留为 macOS 原生 UI；`Tests/` 的 44 个文件 / 29,633 行是 0
 | 共享语义 | 一个 Rust 权威 Runtime，Swift/C# 不各写语义 | 一组 Rust 引擎 crate，App/CLI/SDK 共用 |
 | 进程拓扑 | P3：authority 在 daemon，原生 UI 经 XPC/Named Pipe 访问；进程内 cdylib（P2）因 authority 不能进客户端、abort 会变成 UI 崩溃而被否决 | GUI 进程内链接 Rust 库，parser 仍是子进程，ArkDeck daemon 经签名 CLI 子进程消费。引擎没有设备 authority 或 durable journal；ArkDeck App 今天已在进程内承载 ArkTrace 引擎（其 §D.1/§E.2“ArkDeckTraceAdapter + ArkTrace 保留”） |
 | panic | workspace release `panic=abort` + 重启恢复；FFI kernel 用 `unwind` + `catch_unwind` | FFI 库 `panic=unwind` 并在边界捕获（§7.2），CLI 单独选择并测试 |
-| 契约与对等 | `spec/` 为唯一事实源；T0 字节 / T1 语义 / T2 不比对，`message` 属 T2 | `contracts/` 与 §5.3 同名三级 |
+| 契约与对等 | `spec/` 为唯一事实源；T0 字节 / T1 语义 / T2 不比对，`message` 属 T2 | `api/` 与 §5.3 同名三级 |
 | 迁移 | Swift oracle + 差分、隔离开发根、单次 cutover、保留回滚窗口 | 隔离 cache 根，§12 的切换与回滚 |
 | Windows 栈 | WinUI 3 + Windows App SDK 2.5.1、self-contained x64；MSIX + xcopy；Azure Artifact Signing | 作为候选栈，014/016 在本仓实测后锁定，降低日后嵌入 ArkDeck 的成本 |
 
@@ -167,7 +167,7 @@ flowchart TB
 | `arktrace-capture` | GUI-only capture 请求、预设、HDC 调用与收取状态机 | platform；自身的 Capture 类型，不依赖离线 engine |
 | `arktrace-capture-ffi` | 单独的 Capture ABI 与生成绑定 | capture；不进入离线 SDK/CLI 依赖闭包 |
 
-测试 harness、benchmark、oracle comparator 先作为 `rust/tests/`、`rust/scripts/` 和
+测试 harness、benchmark、oracle comparator 先作为 `rust/tests/`、`rust/hack/` 和
 目标 crate 的测试存在，不为纯工具新增无调用者的服务层。
 `arktrace-viewer` 与 `arktrace-analysis` 不执行 SQL、不启动进程；Engine 提供 Store 实现。
 “共享 Core”指整组 Rust 引擎模块，不意味着把 IO 放入 `arktrace-contract`。
@@ -211,7 +211,7 @@ self-contained x64 仅作可复用的候选组合，AT-RUST-002/014 须在本项
 
 ### 5.2 单一事实源
 
-拟新增 `contracts/`，只存消费者真正需要的 JSON schema、枚举、操作清单、ABI 描述和向量。
+拟新增 `api/`，只存消费者真正需要的 JSON schema、枚举、操作清单、ABI 描述和向量。
 AT-RUST-001 从当前实现、规范、测试提取，不先设计一套无调用者的通用 DSL。
 生成 Rust/Swift/C# 的边界类型与绑定；公式和状态转换在 Rust 实现，并以测试约束。
 继续保留现有 `Tests/ArkTraceCLITests/Fixtures/MachineJSON/` 作为来源，迁入时记录
@@ -801,8 +801,8 @@ hardlink、外部替换、readonly/disk-full、cache hit 后变化、同 key 多
 进程退出、取消每阶段、管道不关闭、ABI 过期 handle、重复 release、多个窗口关一个、
 旧 viewport 结果迟到、Int64 最大边界、缺表/加表/坏关联、预算最小 error、日志路径泄漏。
 
-现有真实 small 为 `Fixtures/traces/{zlib.htrace,hiprofiler_data_ability.htrace,trace_small_10.systrace}`。
-medium 为 [固定 fixture 清单](../../Fixtures/phase3-performance-fixtures.json) 的
+现有真实 small 为 `test/fixtures/traces/{zlib.htrace,hiprofiler_data_ability.htrace,trace_small_10.systrace}`。
+medium 为 [固定 fixture 清单](../../test/fixtures/phase3-performance-fixtures.json) 的
 `pbreader.htrace`（265,032,803 bytes）；large 沿用同一清单的策略：独立采集、可再分发、
 >500 MiB 且 ≤2 GiB 的单个 type-0 protobuf segment，经 `ARKTRACE_LARGE_TRACE` 提供并有 reviewed
 provenance 与许可。没有对应文件就报告未测，不能靠 padding、拼接或复制事件拼大文件。
@@ -843,11 +843,11 @@ FFI acquire/release、native 转换/复制、draw、Rust 引擎、parser child �
 
 ### 13.3 CI 与本地反馈
 
-002 扩展现有 [ci_plan.sh](../../scripts/ci_plan.sh)：Rust pure、macOS native、Windows native、
+002 扩展现有 [ci_plan.sh](../../hack/ci_plan.sh)：Rust pure、macOS native、Windows native、
 Swift binding/App、C# binding/App、contract/distribution、定时性能。未知 diff 选择全部相关
 车道，纯文档不强制编译。编译成功的 Windows `cfg` 测试必须真的在 Windows 跑；
 Unix 上 0 tests 不是通过 Windows 验证。现有 planner 只有 swiftpm/app/contracts 三车道，
-`rust/`、`contracts/`、`windows/`、`bindings/` 等新顶层路径的非文档文件会落入“未知 → 全选”，
+`rust/`、`api/`、`windows/`、`bindings/` 等新顶层路径的非文档文件会落入“未知 → 全选”，
 002 须补对应规则与 planner 自测。Cargo 沿用 `run-swiftpm.sh` 的做法：target 与依赖缓存放在仓库外
 的稳定缓存根并允许受限环境覆盖，不在 checkout 内堆积构建产物；AGENTS.md 随 002 补 Rust/Windows
 的最小构建与验证入口。

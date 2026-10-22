@@ -38,18 +38,18 @@ trace_streamer <trace-file> -e <output.db> [-nm]
 在 Apple silicon（arm64，macOS 26.6，Apple clang 21）实测打通。可重现入口：
 
 ```bash
-scripts/build_trace_streamer.sh
-# 产物：ThirdParty/TraceStreamer/macx/trace_streamer + manifest.json
+hack/build_trace_streamer.sh
+# 产物：third_party/TraceStreamer/macx/trace_streamer + manifest.json
 ```
 
 构建事实：
 
-1. `ThirdParty/TraceStreamer/source-lock.json` 固定 canonical upstream、13 个 source dependency 的 exact revision，以及 GN/Ninja URL、SHA-256、byte count；构建不再接受浮动 tip；
+1. `third_party/TraceStreamer/source-lock.json` 固定 canonical upstream、13 个 source dependency 的 exact revision，以及 GN/Ninja URL、SHA-256、byte count；构建不再接受浮动 tip；
 2. 两个本地补丁都独立、可审计且 fail-closed 应用：`faultloggerd-apple-clang.patch` 把 Apple clang 拒绝的 pointer → `Elf32_Addr` 截断改为经 `uintptr_t` 的显式转换；`proto-reader-sparse-validity.patch` 用紧凑存在位图替代每条 protobuf 消息对稀疏 `DataArea[max_field_id + 1]` 的全量清零，保持字段访问和重复字段语义不变；
 3. **插件裁剪**：`./build.sh -e hilog,hisysevent,arkts,bytrace,rawtrace,htrace,ffrt,memory,hidump,cpudata,network,diskio,process,xpower`——禁用 hiperf/ebpf/native_hook（ArkTrace 不消费 perf/malloc 栈数据，它们是脆弱 native unwinder 的唯一使用方）；
 4. `gsed` 实际未被 CLI 构建路径使用（脚本只赋值未引用），无需安装；
 5. GN/Ninja 的锁定 darwin-x86 archive 经 Rosetta 2 运行；下载后先校验 exact size/SHA，再解包；产出的 trace_streamer 本体仍为原生 arm64；
-6. 构建脚本、共享 shell safety helper、source lock 与两个 local patch 各自 SHA-256 经稳定 recipe 编码生成 `buildRecipeVersion`；当前 recipe 与 unsigned binary SHA-256 以 `ThirdParty/TraceStreamer/macx/manifest.json` 为准；Developer ID 分发会在内层签名后记录新的 helper SHA，详见 `APP_DISTRIBUTION.md`；
+6. 构建脚本、共享 shell safety helper、source lock 与两个 local patch 各自 SHA-256 经稳定 recipe 编码生成 `buildRecipeVersion`；当前 recipe 与 unsigned binary SHA-256 以 `third_party/TraceStreamer/macx/manifest.json` 为准；Developer ID 分发会在内层签名后记录新的 helper SHA，详见 `APP_DISTRIBUTION.md`；
 7. `mac_depend.sh` **不得执行**：现代 macOS 的 `/usr/lib/*.dylib` 已并入 dyld shared cache，该脚本 `find /usr` 找不到 libc++ 文件，却仍会把二进制的 libc++ 依赖改写为相对路径 `./lib/libc++.1.dylib`，直接损坏二进制。上游仓库中它恰好缺执行位而失败——`build.sh` 因此以非零退出，但二进制此时已完整链接。构建脚本以"新鲜二进制存在 + `--version` 可运行 + 未被改写依赖"为真实成功判据，并显式校验。
 
 ### CI approved binary asset
@@ -70,9 +70,9 @@ Phase 1 的 production adapter 还会在每次 identity/parse 前把 binary 与 
 正式复验入口：
 
 ```bash
-scripts/test_phase1.sh
-scripts/verify_trace_streamer_lock.sh
-scripts/test_trace_streamer_reproducibility.sh
+hack/test_phase1.sh
+hack/verify_trace_streamer_lock.sh
+hack/test_trace_streamer_reproducibility.sh
 ```
 
 该 gate 不接受 binary/manifest/fixture/license 缺失或漂移，也不允许 integration skip；它在 private partial DB 上完成 quick_check、schema/range/relationship validation、versioned index migration 与 fsync 后，才以 DB rename 作为 Ready marker。详细结果见 [PHASE_1_VERIFICATION.md](../archive/PHASE_1_VERIFICATION.md)。
@@ -83,8 +83,8 @@ scripts/test_trace_streamer_reproducibility.sh
 同一 13 个 `source-lock.json` exact revision 和同一插件集合。入口在 MSYS2 `MSYS` shell 中运行：
 
 ```bash
-ARKTRACE_TS_PYTHON=/c/<path>/python.exe scripts/build_trace_streamer_windows.sh
-# 产物：ThirdParty/TraceStreamer/windows-x86_64/trace_streamer.exe + manifest.json
+ARKTRACE_TS_PYTHON=/c/<path>/python.exe hack/build_trace_streamer_windows.sh
+# 产物：third_party/TraceStreamer/windows-x86_64/trace_streamer.exe + manifest.json
 ```
 
 构建事实：
@@ -103,7 +103,7 @@ ARKTRACE_TS_PYTHON=/c/<path>/python.exe scripts/build_trace_streamer_windows.sh
    `proto-reader-sparse-validity.patch`；`faultloggerd-apple-clang.patch` 仅为 Apple clang
    所需，GCC 不需要。新增 `windows-reproducible-utf8-link.patch` 只改 Windows link 命令：
    `-Wl,--no-insert-timestamp` 去掉 PE 链接时间戳，并链接
-   `ThirdParty/TraceStreamer/windows/trace_streamer.manifest` 编译出的资源；
+   `third_party/TraceStreamer/windows/trace_streamer.manifest` 编译出的资源；
 4. 该 application manifest 声明 `activeCodePage=UTF-8`（并 `longPathAware`）。未加时上游
    以 ANSI 代码页读取 `argv`，任何非 ASCII 输入/输出路径（中文、Latin-1、emoji）都以
    exit 1 失败且不产出 DB；加入后四类路径全部成功；
@@ -123,7 +123,7 @@ ARKTRACE_TS_PYTHON=/c/<path>/python.exe scripts/build_trace_streamer_windows.sh
 | imports | `ADVAPI32.dll`、`KERNEL32.dll`、`msvcrt.dll` |
 | `--version` | `version 4.3.7` |
 
-两份 manifest 只有 `builtAt` 不同；`ThirdParty/TraceStreamer/windows-x86_64/manifest.json`
+两份 manifest 只有 `builtAt` 不同；`third_party/TraceStreamer/windows-x86_64/manifest.json`
 为第一次构建的记录。此前工作阶段 4 并发的两次构建因主机内存不足在编译阶段被中止，
 建议 `ARKTRACE_TS_JOBS` 不超过 4 且两次串行执行。
 
@@ -131,7 +131,7 @@ ARKTRACE_TS_PYTHON=/c/<path>/python.exe scripts/build_trace_streamer_windows.sh
 （源快照复制到普通、含空格、中文、Latin-1+emoji 四类目录各跑一次，共 8 次）：
 
 - `trace_small_10.systrace`、`zlib.htrace` 导出 DB 的 SHA-256 在 8 次运行中都与
-  `Fixtures/databases/trace_streamer_4.3.7.schema-evidence.json`（macOS arm64 parser 锁定值）
+  `test/fixtures/databases/trace_streamer_4.3.7.schema-evidence.json`（macOS arm64 parser 锁定值）
   **逐字节相同**，因此 schema fingerprint（`cb34d8b6…`，91 表）、`quick_check`、trace range、
   六表 row count 与 macOS 一致，且无 `meta` 表、无绝对路径；
 - 探索构建另解析 `hiprofiler_data_ability.htrace` 成功（91 表，process/thread 各 251），
@@ -150,7 +150,7 @@ ARKTRACE_TS_PYTHON=/c/<path>/python.exe scripts/build_trace_streamer_windows.sh
 runtime 三项；文本位于 `LICENSES-windows/`（6 份，其中 4 份从锁定 7z 逐字节复制，CRLF，
 `.gitattributes` 设 `-text`）。共享的 `license-inventory.json`、`LICENSES/` 与
 `THIRD_PARTY_NOTICES.md` 不变——macOS App/CLI 按字节 pin 并原样打包它们，Windows 条目不进入
-macOS 分发。Windows 分发（016）需同时附带共享清单与本清单的文本。`scripts/verify_licenses.sh`
+macOS 分发。Windows 分发（016）需同时附带共享清单与本清单的文本。`hack/verify_licenses.sh`
 两者都校验，字节计数改用可移植的 `wc -c`。
 
 尚未完成（AT-RUST-003 验收剩余项）：

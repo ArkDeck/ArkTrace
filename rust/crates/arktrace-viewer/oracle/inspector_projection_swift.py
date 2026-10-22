@@ -9,7 +9,7 @@ def main():
  source=CACHE/'oracle-source';source.mkdir(parents=True,exist_ok=True)
  xcode=subprocess.check_output(['xcodebuild','-version'],text=True,encoding='utf-8');swift=subprocess.check_output(['swift','--version'],text=True,encoding='utf-8')
  if xcode.splitlines()[0]!='Xcode 27.0'or 'Apple Swift version 6.4 'not in swift:raise SystemExit('Xcode27.0/Swift6.4 required')
- for directory in ['Sources/ArkTraceCore','Sources/ArkTraceRendering','Tests/ArkTraceRenderingTests','scripts']:shutil.copytree(ROOT/directory,source/directory,dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__'))
+ for directory in ['Sources/ArkTraceCore','Sources/ArkTraceRendering','Tests/ArkTraceRenderingTests','hack']:shutil.copytree(ROOT/directory,source/directory,dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__'))
  tests=['Tests/ArkTraceCoreTests/TraceEventModelContractTests.swift','Tests/ArkTraceCoreTests/TraceTimeTests.swift']
  for relative in tests:p=source/relative;p.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/relative,p)
  package=source/'Package.swift';package.write_text('''// swift-tools-version: 6.3
@@ -28,7 +28,7 @@ let package=Package(name:"ArkTrace",platforms:[.macOS(.v26)],targets:[
  regressions='--regressions'in sys.argv
  selected='TraceEventModelContractTests|TraceTimeTests|TimelineFrameLaneTests|TimelineRenderingTests.testCounterDetailUsesPositiveAndOpenEndedDurations|TimelineRenderingTests.testInstantDetailRetainsDomainRangeButDrawsAtLeastOnePhysicalPixel|TimelineRenderingTests.testGeometryAndHitTestingUseSameFrameAndDensityCarriesNoEventKey'if regressions else'InspectorProjectionOracleTests.testActualLoaderInspectorFacts'
  log=CACHE/('inspector-projection-swift-regressions.log'if regressions else'inspector-projection-swift-oracle.log')
- with log.open('w',encoding='utf-8')as f:code=subprocess.run(['sh','scripts/run-swiftpm.sh','test','--disable-sandbox','--config-path',str(CACHE/'configuration'),'--security-path',str(CACHE/'security'),'--filter',selected],cwd=source,env=env,stdout=f,stderr=subprocess.STDOUT).returncode
+ with log.open('w',encoding='utf-8')as f:code=subprocess.run(['sh','hack/run-swiftpm.sh','test','--disable-sandbox','--config-path',str(CACHE/'configuration'),'--security-path',str(CACHE/'security'),'--filter',selected],cwd=source,env=env,stdout=f,stderr=subprocess.STDOUT).returncode
  print('Swift exit:',code,'log:',log)
  if code:print(log.read_text(encoding='utf-8')[-8000:]);return code
  if regressions:print(log.read_text(encoding='utf-8')[-1600:]);return 0

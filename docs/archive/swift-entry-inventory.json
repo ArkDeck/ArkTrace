@@ -1,7 +1,7 @@
 {
   "version": 1,
   "sourceRevision": "a0dea7b99237dd5ecba9755c5aa9300631009272",
-  "kind": "Lexical entry inventory; scripts/api-baseline is the authoritative compile gate, not this extraction",
+  "kind": "Lexical entry inventory; hack/api-baseline is the authoritative compile gate, not this extraction",
   "modules": [
     {
       "module": "ArkTraceCore",
@@ -6764,8 +6764,8 @@
     }
   ],
   "commandSource": "docs/CLI.md",
-  "machineFixtureIndex": "contracts/machine-fixtures-index.json",
-  "apiCompileBaseline": "scripts/api-baseline/Sources/ArkTraceAPIBaseline/APIBaseline.swift",
+  "machineFixtureIndex": "api/machine-fixtures-index.json",
+  "apiCompileBaseline": "hack/api-baseline/Sources/ArkTraceAPIBaseline/APIBaseline.swift",
   "acceptanceTasks": [
     "AT-RUST-007",
     "AT-RUST-009",

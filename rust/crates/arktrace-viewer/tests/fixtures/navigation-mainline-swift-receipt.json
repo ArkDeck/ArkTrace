@@ -5,7 +5,7 @@
   "copiedAlgorithms": false,
   "command": [
     "sh",
-    "scripts/run-swiftpm.sh",
+    "hack/run-swiftpm.sh",
     "test",
     "--disable-sandbox",
     "--config-path",
@@ -195,8 +195,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
-      "byteCount": 29099,
-      "sha256": "2a6e5af91dda46f2de14df5346776a8e5c3d08b30eb350733df07f3492caca5b"
+      "byteCount": 29086,
+      "sha256": "10d43f4808a4f02178618cba8cf7c660a668bc463cf2c9b688714b23a59f64cc"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
@@ -266,7 +266,7 @@
     {
       "path": "rust/crates/arktrace-viewer/oracle/navigation_run_swift.py",
       "byteCount": 6540,
-      "sha256": "f62b29c3456f3ebb1f7fb516f364be693de6acb8616f203f726f2ed4abdc687b"
+      "sha256": "d79fc058dbafcc6f041d6c23fc5228a3cfe629661c263174138f31a59555b1bd"
     },
     {
       "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-inputs.json",

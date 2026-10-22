@@ -1,7 +1,7 @@
 # ArkTrace task runner.
 #
 # Recipes wrap the scripts the repository already uses. They do not fetch
-# dependencies, select a toolchain, or replace scripts/ci_plan.sh.
+# dependencies, select a toolchain, or replace hack/ci_plan.sh.
 
 set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
 
@@ -11,15 +11,15 @@ default:
 
 # Build the Swift package.
 build-swift:
-    sh scripts/run-swiftpm.sh build
+    sh hack/run-swiftpm.sh build
 
 # Build the macOS app. The Xcode runner accepts no extra arguments.
 build-app:
-    sh scripts/run-xcodebuild.sh
+    sh hack/run-xcodebuild.sh
 
 # Build the Rust workspace with the pinned toolchain.
 build-rust:
-    python3 scripts/run-cargo.py build
+    python3 hack/run-cargo.py build
 
 # Build the Swift package and the Rust workspace.
 build: build-swift build-rust
@@ -29,14 +29,14 @@ test-swift filter="":
     #!/usr/bin/env bash
     set -euo pipefail
     if [[ -n "{{filter}}" ]]; then
-        sh scripts/run-swiftpm.sh test --filter "{{filter}}"
+        sh hack/run-swiftpm.sh test --filter "{{filter}}"
     else
-        sh scripts/run-swiftpm.sh test
+        sh hack/run-swiftpm.sh test
     fi
 
 # Test one Rust crate. Defaults to the CLI crate.
 test-rust crate="arktrace-cli":
-    python3 scripts/run-cargo.py test -p {{crate}}
+    python3 hack/run-cargo.py test -p {{crate}}
 
 # Run the default Swift and Rust test entry points.
 test: test-swift test-rust
@@ -46,28 +46,28 @@ check-rust crate="":
     #!/usr/bin/env bash
     set -euo pipefail
     if [[ -n "{{crate}}" ]]; then
-        python3 scripts/run-cargo.py check -p "{{crate}}"
+        python3 hack/run-cargo.py check -p "{{crate}}"
     else
-        python3 scripts/run-cargo.py check
+        python3 hack/run-cargo.py check
     fi
 
 # Check rustfmt on the pinned workspace.
 fmt:
-    python3 scripts/run-cargo.py fmt --all -- --check
+    python3 hack/run-cargo.py fmt --all -- --check
 
 # Format-check Rust, clippy one crate, and verify workspace edges.
 lint crate="arktrace-contract":
-    python3 scripts/run-cargo.py fmt --all -- --check
-    python3 scripts/run-cargo.py clippy -p {{crate}} --all-targets -- -D warnings
-    python3 scripts/verify_rust_workspace.py
+    python3 hack/run-cargo.py fmt --all -- --check
+    python3 hack/run-cargo.py clippy -p {{crate}} --all-targets -- -D warnings
+    python3 hack/verify_rust_workspace.py
 
 # Print the CI lane plan for commits since origin/main. This does not run the lanes.
 ci-plan:
     #!/usr/bin/env bash
     set -euo pipefail
     base=$(git merge-base origin/main HEAD)
-    git diff --name-only "$base" HEAD | sh scripts/ci_plan.sh
+    git diff --name-only "$base" HEAD | sh hack/ci_plan.sh
 
 # Run the planner's hermetic self-test.
 planner-test:
-    sh scripts/test_ci_plan.sh
+    sh hack/test_ci_plan.sh

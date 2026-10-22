@@ -18,8 +18,8 @@
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/run_scoped_slice_oracle.py",
-      "sha256": "dc5f6f4b68c2af87e06ebd09ac5735683c41350675b313d332923d8fbcabefae",
-      "byteCount": 5472
+      "sha256": "878dc7fa997759ff06ed5cb6c63183d769879ee3a9739c63f071a457f1246012",
+      "byteCount": 5464
     },
     {
       "path": "rust/crates/arktrace-viewer/tests/fixtures/scoped-slices-inputs.json",
@@ -163,8 +163,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
-      "sha256": "2a6e5af91dda46f2de14df5346776a8e5c3d08b30eb350733df07f3492caca5b",
-      "byteCount": 29099
+      "sha256": "10d43f4808a4f02178618cba8cf7c660a668bc463cf2c9b688714b23a59f64cc",
+      "byteCount": 29086
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",

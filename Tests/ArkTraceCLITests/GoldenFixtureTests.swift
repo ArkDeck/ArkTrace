@@ -31,7 +31,7 @@ final class GoldenFixtureTests: XCTestCase {
             if ProcessInfo.processInfo.environment["ARKTRACE_UPDATE_MACHINE_GOLDENS"] == "1" {
                 let sourceDirectory = URL(filePath: #filePath)
                     .deletingLastPathComponent()
-                    .appending(path: "Fixtures/MachineJSON", directoryHint: .isDirectory)
+                    .appending(path: "test/fixtures/MachineJSON", directoryHint: .isDirectory)
                 try actual.write(
                     to: sourceDirectory.appending(path: "\(fixture.name).json"),
                     options: .atomic
@@ -40,7 +40,7 @@ final class GoldenFixtureTests: XCTestCase {
             guard let resourceURL = Bundle.module.url(
                 forResource: fixture.name,
                 withExtension: "json",
-                subdirectory: "Fixtures/MachineJSON"
+                subdirectory: "test/fixtures/MachineJSON"
             ) else {
                 XCTFail("Missing committed golden \(fixture.name).json:\n\(String(decoding: actual, as: UTF8.self))")
                 continue

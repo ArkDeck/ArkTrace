@@ -24,7 +24,7 @@ ArkTrace captures traces from an explicitly selected OpenHarmony device or opens
 - **Local and private.** Everything runs on your Mac. Parsed traces live in a content-addressed local cache; `--no-cache` switches to a session-owned ephemeral database.
 - **Reproducible parser.** The bundled TraceStreamer is pinned to an exact upstream revision with a byte-reproducible build recipe and a fully tracked license inventory.
 - **Evidence-driven releases.** Every phase ships behind fail-closed verification gates, closed with real-device (DAYU 200) evidence rather than claims.
-- **Reads a trace the way SmartPerf Host does.** Which slice gets which colour, call-depth nesting, jank tagging and the navigation keys follow the pinned upstream, so two slices that share a colour there share one here — and each of those claims is an assertion in `scripts/test_phase7.sh`, not a promise. The colours themselves are ArkTrace's own, measured by `scripts/verify_palette.py` in CI.
+- **Reads a trace the way SmartPerf Host does.** Which slice gets which colour, call-depth nesting, jank tagging and the navigation keys follow the pinned upstream, so two slices that share a colour there share one here — and each of those claims is an assertion in `hack/test_phase7.sh`, not a promise. The colours themselves are ArkTrace's own, measured by `hack/verify_palette.py` in CI.
 
 ## Requirements
 
@@ -42,10 +42,10 @@ ArkTrace captures traces from an explicitly selected OpenHarmony device or opens
 The TraceStreamer binary is a locally built artifact excluded from Git — cloning alone is not enough:
 
 ```bash
-scripts/build_trace_streamer.sh
+hack/build_trace_streamer.sh
 ```
 
-This produces `ThirdParty/TraceStreamer/macx/trace_streamer` and its identity manifest. Pinned revision and build recipe: [docs/design/TRACE_STREAMER.md](docs/design/TRACE_STREAMER.md).
+This produces `third_party/TraceStreamer/macx/trace_streamer` and its identity manifest. Pinned revision and build recipe: [docs/design/TRACE_STREAMER.md](docs/design/TRACE_STREAMER.md).
 
 ### 2. Build and test
 
@@ -59,9 +59,9 @@ cache runners. They reuse one content-verified source mirror and shared build,
 dependency and module caches; unchanged source is not recompiled:
 
 ```bash
-sh scripts/run-swiftpm.sh build
-sh scripts/run-swiftpm.sh test
-sh scripts/run-xcodebuild.sh
+sh hack/run-swiftpm.sh build
+sh hack/run-swiftpm.sh test
+sh hack/run-xcodebuild.sh
 ```
 
 ### 3. Query a trace from the CLI
@@ -69,13 +69,13 @@ sh scripts/run-xcodebuild.sh
 A small sample trace ships in the repository, so this works out of the box:
 
 ```bash
-PARSER="$PWD/ThirdParty/TraceStreamer/macx/trace_streamer"
-.build/release/arktrace --trace-streamer "$PARSER" inspect Fixtures/traces/zlib.htrace
-.build/release/arktrace --trace-streamer "$PARSER" --json summary Fixtures/traces/zlib.htrace
-.build/release/arktrace --trace-streamer "$PARSER" --json processes Fixtures/traces/zlib.htrace --limit 100
-.build/release/arktrace --trace-streamer "$PARSER" --json query Fixtures/traces/zlib.htrace --view cpu-slices --start-ns 0 --end-ns 1000000
-.build/release/arktrace --trace-streamer "$PARSER" --json context Fixtures/traces/zlib.htrace --timestamp-ns 500000 --window-ms 1
-.build/release/arktrace --trace-streamer "$PARSER" --json analyze Fixtures/traces/zlib.htrace --kind range --start-ns 0 --end-ns 1000000
+PARSER="$PWD/third_party/TraceStreamer/macx/trace_streamer"
+.build/release/arktrace --trace-streamer "$PARSER" inspect test/fixtures/traces/zlib.htrace
+.build/release/arktrace --trace-streamer "$PARSER" --json summary test/fixtures/traces/zlib.htrace
+.build/release/arktrace --trace-streamer "$PARSER" --json processes test/fixtures/traces/zlib.htrace --limit 100
+.build/release/arktrace --trace-streamer "$PARSER" --json query test/fixtures/traces/zlib.htrace --view cpu-slices --start-ns 0 --end-ns 1000000
+.build/release/arktrace --trace-streamer "$PARSER" --json context test/fixtures/traces/zlib.htrace --timestamp-ns 500000 --window-ms 1
+.build/release/arktrace --trace-streamer "$PARSER" --json analyze test/fixtures/traces/zlib.htrace --kind range --start-ns 0 --end-ns 1000000
 ```
 
 > **Note** — the bare `swift build` product is a development build: it carries no reviewed parser or license resources, so `doctor --self-test` and `licenses` fail closed, and the parser must be passed explicitly (the CLI never searches `PATH`). The full install unit is the signed, notarized `ArkTraceCLI.app` described in [docs/guides/CLI_DISTRIBUTION.md](docs/guides/CLI_DISTRIBUTION.md); production and ArkDeck execute its `Contents/MacOS/arktrace` directly, which locates the bundled parser on its own.
@@ -130,27 +130,27 @@ Hold a key to keep zooming or panning — macOS key repeat drives it. Unlike the
 
 Slices are *assigned* colours the way SmartPerf Host assigns them: a CPU slice takes its running process's identity, a named slice hashes its own name (digits stripped, so `ipc::41` and `ipc::42` match) into a twenty-slot table, and thread states go through upstream's state chain. Two slices that share a colour upstream share one here.
 
-The twenty values in those slots, and the state colours, are ArkTrace's own. They are designed around the fact that upstream's hash reaches five of the twenty slots 74% of the time, and every entry is held to measured thresholds — pairwise ΔE, 3:1 against both the light and dark canvas, 4.5:1 for its label — by `scripts/verify_palette.py`, which runs in CI. Details: [docs/design/DESIGN.md](docs/design/DESIGN.md) §13.5.
+The twenty values in those slots, and the state colours, are ArkTrace's own. They are designed around the fact that upstream's hash reaches five of the twenty slots 74% of the time, and every entry is held to measured thresholds — pairwise ΔE, 3:1 against both the light and dark canvas, 4.5:1 for its label — by `hack/verify_palette.py`, which runs in CI. Details: [docs/design/DESIGN.md](docs/design/DESIGN.md) §13.5.
 
 ## Testing and release gates
 
 `swift test` covers the regular regression suite. Releases are guarded by cumulative, fail-closed phase gates that verify real parser output, CLI contracts, benchmarks, signing/notarization and end-to-end evidence — each inherits everything before it and fails closed when required external inputs are missing:
 
 ```bash
-scripts/test_phase1.sh   # clean build, real parser + fixtures, zero skipped tests
-scripts/test_phase2.sh   # + release CLI contract, signal and benchmark gates
-scripts/test_phase3.sh   # + signed app, document types, notarization, large-trace gates
-scripts/test_phase4.sh   # + agent CLI contract, medium/large performance gates
-scripts/test_phase5.sh   # + CLI distribution and the real ArkDeck artifact chain
-scripts/test_phase6.sh   # offline audit of the real closed-loop evidence
-scripts/test_phase7.sh   # upstream-alignment regressions + viewport performance on the real medium fixture
+hack/test_phase1.sh   # clean build, real parser + fixtures, zero skipped tests
+hack/test_phase2.sh   # + release CLI contract, signal and benchmark gates
+hack/test_phase3.sh   # + signed app, document types, notarization, large-trace gates
+hack/test_phase4.sh   # + agent CLI contract, medium/large performance gates
+hack/test_phase5.sh   # + CLI distribution and the real ArkDeck artifact chain
+hack/test_phase6.sh   # offline audit of the real closed-loop evidence
+hack/test_phase7.sh   # upstream-alignment regressions + viewport performance on the real medium fixture
 ```
 
 CI builds, tests and runs the offline gates on every pull request, but hosted runners cannot build the pinned parser, so parser-integration tests skip there — the phase scripts remain the release authority.
 
 ## Status
 
-Phases 0–7 are complete and **all 10 release gates are closed**. Phase 7 (upstream alignment, 13/13) closed every actionable gap in [docs/archive/UPSTREAM_ALIGNMENT_AUDIT.md](docs/archive/UPSTREAM_ALIGNMENT_AUDIT.md) behind `scripts/test_phase7.sh`. The final gate closed a real debug loop on a DAYU 200 board — typed capture → structured analysis → agent judgement → typed re-verification — with the target app's CPU usage judged `improved` (−87.09%). Full task index: [docs/archive/TASKS.md](docs/archive/TASKS.md); final report: [docs/archive/PHASE_6_VERIFICATION.md](docs/archive/PHASE_6_VERIFICATION.md).
+Phases 0–7 are complete and **all 10 release gates are closed**. Phase 7 (upstream alignment, 13/13) closed every actionable gap in [docs/archive/UPSTREAM_ALIGNMENT_AUDIT.md](docs/archive/UPSTREAM_ALIGNMENT_AUDIT.md) behind `hack/test_phase7.sh`. The final gate closed a real debug loop on a DAYU 200 board — typed capture → structured analysis → agent judgement → typed re-verification — with the target app's CPU usage judged `improved` (−87.09%). Full task index: [docs/archive/TASKS.md](docs/archive/TASKS.md); final report: [docs/archive/PHASE_6_VERIFICATION.md](docs/archive/PHASE_6_VERIFICATION.md).
 
 The shared engine is migrating into the Rust workspace ([rust/README.md](rust/README.md)): exact Rust 1.99.0, edition 2024, macOS arm64 and Windows x64. The macOS app remains the SwiftUI product on Apple silicon and macOS 26 or later. The Windows x64 CLI is built and tested on the native Windows CI lane, including the clean-host acceptance workflow; it does not replace the macOS app.
 
@@ -179,10 +179,10 @@ ArkDeck invokes the pinned `arktrace` CLI through its typed operations `analyzer
 
 ## TraceStreamer provenance
 
-ArkTrace does not rewrite the parser; it reuses the pinned upstream TraceStreamer from [openharmony/developtools_smartperf_host @ GitCode](https://gitcode.com/openharmony/developtools_smartperf_host). `source-lock.json` locks the upstream, 13 source dependencies and the GN/Ninja artifacts; independent patches and build scripts yield a content-derived recipe identity, and `scripts/test_trace_streamer_reproducibility.sh` requires two fresh worktrees to produce byte-identical binaries.
+ArkTrace does not rewrite the parser; it reuses the pinned upstream TraceStreamer from [openharmony/developtools_smartperf_host @ GitCode](https://gitcode.com/openharmony/developtools_smartperf_host). `source-lock.json` locks the upstream, 13 source dependencies and the GN/Ninja artifacts; independent patches and build scripts yield a content-derived recipe identity, and `hack/test_trace_streamer_reproducibility.sh` requires two fresh worktrees to produce byte-identical binaries.
 
 ## License
 
 ArkTrace is released under the [MIT License](LICENSE).
 
-The bundled TraceStreamer's 14 source components, 2 build tools, license expressions and exact license bytes are tracked in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and `ThirdParty/TraceStreamer/license-inventory.json`; `scripts/verify_licenses.sh` verifies the inventory, source lock and file hashes fail-closed. In the app, **Settings → Licenses** shows the same locked set that `arktrace licenses` prints.
+The bundled TraceStreamer's 14 source components, 2 build tools, license expressions and exact license bytes are tracked in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and `third_party/TraceStreamer/license-inventory.json`; `hack/verify_licenses.sh` verifies the inventory, source lock and file hashes fail-closed. In the app, **Settings → Licenses** shows the same locked set that `arktrace licenses` prints.

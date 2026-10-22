@@ -1,6 +1,6 @@
 # Windows CLI production and installed acceptance
 
-The reviewed Windows producer is `scripts/package_windows_cli_distribution.py`.
+The reviewed Windows producer is `hack/package_windows_cli_distribution.py`.
 The manual `Windows production acceptance` workflow builds its actual
 `authenticode-publisher` package and then exercises the unchanged ZIP on a
 separate clean Windows installation. Development packages and package smoke on
@@ -71,7 +71,7 @@ overwritten or removed.
 Local guard regression (synthetic archive and signature facts, no image execution):
 
 ```powershell
-pwsh -NoProfile -File scripts/Test-WindowsProductionAcceptanceContract.ps1
+pwsh -NoProfile -File hack/Test-WindowsProductionAcceptanceContract.ps1
 ```
 
 This regression runs in the normal native Windows CI lane. It cannot establish

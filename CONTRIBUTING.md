@@ -57,25 +57,25 @@ just ci-plan        # print the path-aware lane plan; it does not run the lanes
 Equivalent commands, if `just` is not installed:
 
 ```bash
-sh scripts/run-swiftpm.sh build
-sh scripts/run-swiftpm.sh test --filter '<suite>'
-sh scripts/run-xcodebuild.sh
-python3 scripts/run-cargo.py check -p '<crate>'
-python3 scripts/run-cargo.py test -p '<crate>'
-python3 scripts/run-cargo.py fmt --all -- --check
-python3 scripts/run-cargo.py clippy -p arktrace-contract --all-targets -- -D warnings
-python3 scripts/verify_rust_workspace.py
+sh hack/run-swiftpm.sh build
+sh hack/run-swiftpm.sh test --filter '<suite>'
+sh hack/run-xcodebuild.sh
+python3 hack/run-cargo.py check -p '<crate>'
+python3 hack/run-cargo.py test -p '<crate>'
+python3 hack/run-cargo.py fmt --all -- --check
+python3 hack/run-cargo.py clippy -p arktrace-contract --all-targets -- -D warnings
+python3 hack/verify_rust_workspace.py
 ```
 
 Targeted checks before push:
 
-- Rust formatting: `python3 scripts/run-cargo.py fmt --all -- --check`
-- For each crate you changed: `python3 scripts/run-cargo.py clippy -p <crate> --all-targets -- -D warnings` and `python3 scripts/run-cargo.py test -p <crate>`
-- Rust workspace edges: `python3 scripts/verify_rust_workspace.py`
-- Swift: `sh scripts/run-swiftpm.sh test --filter <suite>`
-- App changes: `sh scripts/run-xcodebuild.sh`
-- Public Swift API or a dependency edge: `sh scripts/test_api_baseline.sh`
-- The lane plan for the diff: `just ci-plan`, or pipe changed paths into `sh scripts/ci_plan.sh`
+- Rust formatting: `python3 hack/run-cargo.py fmt --all -- --check`
+- For each crate you changed: `python3 hack/run-cargo.py clippy -p <crate> --all-targets -- -D warnings` and `python3 hack/run-cargo.py test -p <crate>`
+- Rust workspace edges: `python3 hack/verify_rust_workspace.py`
+- Swift: `sh hack/run-swiftpm.sh test --filter <suite>`
+- App changes: `sh hack/run-xcodebuild.sh`
+- Public Swift API or a dependency edge: `sh hack/test_api_baseline.sh`
+- The lane plan for the diff: `just ci-plan`, or pipe changed paths into `sh hack/ci_plan.sh`
 
 The runners keep a stable source mirror and cache. Do not pass `--package-path`,
 `--scratch-path`, or `--cache-path` to the SwiftPM runner. Do not run the full

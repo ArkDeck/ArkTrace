@@ -1,7 +1,7 @@
 # Rust host boundary (AT-RUST-012 in progress)
 
-`contracts/ffi-v2.json` is the ABI 2 source (`abiVersion` 2, snapshot format 2). Run
-`python3 scripts/generate_ffi_bindings.py` after intentional changes; `--check`
+`api/ffi-v2.json` is the ABI 2 source (`abiVersion` 2, snapshot format 2). Run
+`python3 hack/generate_ffi_bindings.py` after intentional changes; `--check`
 verifies C declarations, Rust records, C# `LibraryImport` declarations, layouts
 and the exact contract SHA256. Version 1 is not yet a published SDK artifact.
 C/C++ compile-time assertions and Rust constant assertions cover all 95 field
@@ -93,16 +93,16 @@ must return `UNSUPPORTED_HOST` until implemented.
 
 Verification:
 
-- `scripts/test_ffi_contract.py`: native production library, C layouts, 1,000
+- `hack/test_ffi_contract.py`: native production library, C layouts, 1,000
   bounded valid-allocation byte cases, Swift static C import on Xcode 27 or C#
   `LibraryImport` on Windows. The C# declaration pattern follows Microsoft's
   [P/Invoke source-generation contract](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke-source-generation).
-- `scripts/test_macos_ffi_owner.py`: actual fixed parser, newly queried three
+- `hack/test_macos_ffi_owner.py`: actual fixed parser, newly queried three
   traces, fresh independent Swift repository/loader/geometry parity, retained
   arrays/UTF-8 ownership, cancellation of stale generations, last-owner budget
   refund, cleanup, FD/raw-source checks and controlled export panic isolation.
 
-- `scripts/test_macos_view_state_abi.py`: caller-supplied frozen fixture library,
+- `hack/test_macos_view_state_abi.py`: caller-supplied frozen fixture library,
   production helper, fixed parser and actual Trace. Checks save/replace/reopen,
   exact byte cap, a payload larger than the ordinary query cap, invalid/future
   byte preservation, four-document quota/refusal under actual key-lock
@@ -112,7 +112,7 @@ Verification:
   tests; a fixture helper is not a product helper. This gate does not attest the
   Swift sidecar SDK, default App, performance or a release package.
 
-- `scripts/test_macos_view_state_sdk.py`: caller-supplied compiled package-external
+- `hack/test_macos_view_state_sdk.py`: caller-supplied compiled package-external
   Swift consumer and matching immutable SDK receipt. Uses a fixed parser and
   actual Trace for format-1 round trips, persistent filtering, exact 4 MiB
   write/read, session reopen, external key-lock cancellation/deadline/refund,
@@ -121,12 +121,12 @@ Verification:
   protocol events, binaries and failures. This is SDK acceptance; the document
   controller, default App and release remain separate gates.
 
-- `scripts/test_macos_rust_sdk.py`: package-external async Swift consumer,
+- `hack/test_macos_rust_sdk.py`: package-external async Swift consumer,
   actual parser/Swift parity, ARC owners and observable cleanup failures,
   concurrent sessions/cancellation, MainActor borrowed records, last-owner
   refund, and compiler rejection of escaping/capturing borrowed spans.
 
-- `scripts/test_macos_rust_lifecycle.py`: actual package-external SDK
+- `hack/test_macos_rust_lifecycle.py`: actual package-external SDK
   open/query/snapshot/admitted-cancel/concurrent-close pressure. Ten warmup
   cycles precede 1,000 measured cycles. Final ARC owners refund native bytes
   every cycle; actual FD/RSS/direct-child and namespace/raw-hash checkpoints
@@ -136,7 +136,7 @@ Verification:
   ```sh
   ARKTRACE_RUST_XCFRAMEWORK=/absolute/path/CArkTrace.xcframework \
   ARKTRACE_CARGO_CACHE_ROOT=/absolute/writable/cargo-cache \
-  python3 scripts/test_macos_rust_lifecycle.py
+  python3 hack/test_macos_rust_lifecycle.py
   ```
 
   The [1,000-cycle record](../docs/migration-runs/AT-RUST-012-2026-10-04-sdk-lifecycle.md)
@@ -146,8 +146,8 @@ Verification:
   executing its native lifecycle.
 
 The development `ArkTraceRustRuntime` product is opt-in. Build an immutable local
-artifact with `scripts/build_macos_rust_sdk.py`, set `ARKTRACE_RUST_XCFRAMEWORK`
-to its absolute path, then use `scripts/run-swiftpm.sh`. The runner verifies the
+artifact with `hack/build_macos_rust_sdk.py`, set `ARKTRACE_RUST_XCFRAMEWORK`
+to its absolute path, then use `hack/run-swiftpm.sh`. The runner verifies the
 entire receipt and stages a relative content-addressed binary target in its
 external package mirror. The source checkout never receives native binaries.
 Fixture artifacts require `--fixtures` and `ARKTRACE_RUST_SDK_FIXTURES=1`;

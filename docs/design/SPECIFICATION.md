@@ -1294,9 +1294,9 @@ Core/Store model 不得包含 CoreGraphics/CALayer/Metal 类型。未来 backend
 
 Detail event 的填充色必须由事件身份决定，**分配规则与被 pin 住的上游 SmartPerf Host 一致**：CPU slice 取 process（无 pid 时退回 tid）身份色，named slice 取去掉数字后的名称散列色落入 20 个 slot，thread state 走上游 `getStateColor` 的链。对齐的是**分配**——哪个事件拿哪个填充；两张表里的**色值**都是 ArkTrace 自己的（20 色表改于 2026-08-19，state 表改于 2026-08-24）。上游 hash 必须逐位一致移植，并由取自上游实现的向量锁定——**两个在上游同色的事件，在这里也必须同色**。
 
-**20 个 slot 里放什么颜色则由 ArkTrace 自己定，必须可度量，并且度量必须在 CI 里可复现**（改于 2026-08-24）。度量脚本是 `scripts/verify_palette.py`，它从 `TimelineColorPalette.swift` 直接读表、重算下列每一项、任一项退化即 fail；本节引用的所有数字都由它产出，不得只写在注释里。
+**20 个 slot 里放什么颜色则由 ArkTrace 自己定，必须可度量，并且度量必须在 CI 里可复现**（改于 2026-08-24）。度量脚本是 `hack/verify_palette.py`，它从 `TimelineColorPalette.swift` 直接读表、重算下列每一项、任一项退化即 fail；本节引用的所有数字都由它产出，不得只写在注释里。
 
-**表必须按 slot 实际命中率分层。** 上游 hash 在 `Double` 域内做乘法、之后才截回 Int32，乘积需要 55 位而 double 只有 53 位，低两位在截断前即被舍去，因此 `|hash|` 约 74% 是 4 的倍数；20 = 4×5，故 `% 20` 塌缩到 {0,4,8,12,16}。实测（`scripts/verify_palette.py` 的确定性语料：2 万个合成 slice 名 + pid 1..19999）：这五个 slot 各约 14.9%、合计 **74.3%**；{2,6,10,14,18} 各约 2.6%、合计 12.9%；十个奇数 slot 各约 1.3%、合计 12.8%。**这五项就是整条时间线的配色**，必须构成一个和谐族（Tier A：亮度带宽 ≤ 0.06、平均 chroma ≤ 0.105、label 前景色一致）；其余按命中率递减放宽。`hash("0") == 5` 是「既无 pid 又无 tid」的落点，slot 5 与 `greyColor` 必须是同一个中性色（chroma ≤ 0.02）。
+**表必须按 slot 实际命中率分层。** 上游 hash 在 `Double` 域内做乘法、之后才截回 Int32，乘积需要 55 位而 double 只有 53 位，低两位在截断前即被舍去，因此 `|hash|` 约 74% 是 4 的倍数；20 = 4×5，故 `% 20` 塌缩到 {0,4,8,12,16}。实测（`hack/verify_palette.py` 的确定性语料：2 万个合成 slice 名 + pid 1..19999）：这五个 slot 各约 14.9%、合计 **74.3%**；{2,6,10,14,18} 各约 2.6%、合计 12.9%；十个奇数 slot 各约 1.3%、合计 12.8%。**这五项就是整条时间线的配色**，必须构成一个和谐族（Tier A：亮度带宽 ≤ 0.06、平均 chroma ≤ 0.105、label 前景色一致）；其余按命中率递减放宽。`hash("0") == 5` 是「既无 pid 又无 tid」的落点，slot 5 与 `greyColor` 必须是同一个中性色（chroma ≤ 0.02）。
 
 **必须逐项满足的阈值。** 画布有**四个**而不是两个：`windowBackgroundColor`／`controlBackgroundColor`／`textBackgroundColor` 在 Aqua 下同为 `#FFFFFF`、DarkAqua 下同为 `#1E1E1E`，但 track row 用 `alternatingContentBackgroundColors` 铺奇偶行，另有 `#F4F5F5` 与 `#292929`；一条 track 落在哪一行是排序的偶然，因此每个填充必须对四个都过 3:1。其余阈值：全部 190 对的最小 ΔE ≥ 5.0；每一项对自己的 label 前景色 ≥ 4.5:1；label 前景色在表内翻转不超过 4 次；catch-all 状态色必须是两张表里彩度最高的一项，且与任何其它填充相距 ≥ ΔE 7；任一 45° 色相扇区内的有彩填充不超过 7 个。这些约束一起把每一项钉进相对亮度 Y ∈ [0.175, 0.270]，**一张表因此同时服务两种外观**，不需要按外观分表。Label 前景色仍必须按填充色灰度选择，不得固定为白色。
 
@@ -1555,7 +1555,7 @@ Indexed medium DB、可见 8 tracks、2,000-point viewport 的 detail/density qu
 
 ### AT-PERF-010 Benchmark output
 
-`scripts/benchmark.sh` 至少输出：trace size/hash、cache state、parse、index、DB size、open、query percentiles、context、analysis、peak RSS、render frame stats。没有真实 fixture 的类别标记 `not measured`。
+`hack/benchmark.sh` 至少输出：trace size/hash、cache state、parse、index、DB size、open、query percentiles、context、analysis、peak RSS、render frame stats。没有真实 fixture 的类别标记 `not measured`。
 
 ## 21. 测试与验收规格
 

@@ -239,18 +239,18 @@
     },
     {
       "path": "Package.swift",
-      "byteCount": 10778,
-      "sha256": "1b8bb2f2ac8db595f76bf060ee7cd21f8140eb0ebea04852114940c52d79b20f"
+      "byteCount": 10782,
+      "sha256": "8e4a038790925236d2443a11e4805d2d42fa4e9afcc659ceef18f1b62a4ac65e"
     },
     {
       "path": "README.md",
-      "byteCount": 16359,
-      "sha256": "c065a35ce9020c4bc6e9dc1a409d5570e3415e29b00a3a2f92a728a8cea90fcc"
+      "byteCount": 16341,
+      "sha256": "020478285e43b9f6cc642bad193b9f079fd1d7a8624fc82fa4f4d51d22b2a484"
     },
     {
       "path": "README.zh-CN.md",
-      "byteCount": 15823,
-      "sha256": "713d39664d1826299af0f74d67866674c8a4c7bd519872ee2bc50ccd8e484ff0"
+      "byteCount": 15805,
+      "sha256": "377e0d374a7d6b020b44b5bc92dd8578b08c0e962d60a492476d6539f8e8226a"
     },
     {
       "path": "Sources/ArkTraceAnalysis/TraceAgentQuery.swift",
@@ -439,8 +439,8 @@
     },
     {
       "path": "Sources/ArkTraceParser/TraceStreamerManifest.swift",
-      "byteCount": 11624,
-      "sha256": "5dd5b227954141de5e92a49c1ab632114f780a364d5476479debf0c1b6e70866"
+      "byteCount": 11621,
+      "sha256": "f5f4f9a5ca29ec2c8cdd1e7223b86b52d6957b0491259f55d6a8f00cf690c898"
     },
     {
       "path": "Sources/ArkTraceParser/TraceStreamerProcessParser.swift",
@@ -464,8 +464,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
-      "byteCount": 29099,
-      "sha256": "2a6e5af91dda46f2de14df5346776a8e5c3d08b30eb350733df07f3492caca5b"
+      "byteCount": 29086,
+      "sha256": "10d43f4808a4f02178618cba8cf7c660a668bc463cf2c9b688714b23a59f64cc"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
@@ -544,8 +544,8 @@
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/AppDistributionTests.swift",
-      "byteCount": 29664,
-      "sha256": "7ce086c78d281058b47c6de7dbc1ca126a72b233565e66e44bf16590fc1b22d9"
+      "byteCount": 29669,
+      "sha256": "307e5df087d429788ca8d1c07653af1ef308c9ba68581205d13d13f16bdcae4c"
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/AppSource.swift",
@@ -609,8 +609,8 @@
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/TraceOfflineInspectionServiceTests.swift",
-      "byteCount": 14951,
-      "sha256": "d8dd37fb6ef32e7cdfb96cca6746532fe6de1b238949cdc4e03ff8b990f2b406"
+      "byteCount": 14945,
+      "sha256": "818741ff523f3b4be95c0cbcdff34f8029e0a311cf19957b685253d9ceb86caf"
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/TraceViewStateStoreTests.swift",
@@ -644,8 +644,8 @@
     },
     {
       "path": "Tests/ArkTraceCoreTests/MigrationTimeContractTests.swift",
-      "byteCount": 1724,
-      "sha256": "2a76990963356ddbf2fdc9bca6b6a6d8378bfc5f6e7fe05eb6dbce60f0d50926"
+      "byteCount": 1718,
+      "sha256": "448c58f8367d87b56d65cd2c43ac64ab861d5f2d42644a4793dead8d3601fb6a"
     },
     {
       "path": "Tests/ArkTraceCoreTests/TraceEventModelContractTests.swift",
@@ -799,8 +799,8 @@
     },
     {
       "path": "Tests/ArkTraceRenderingTests/TimelinePaletteTests.swift",
-      "byteCount": 17740,
-      "sha256": "67241e0022c4defa7052cf484c9419af59f9c133b7afe2858de76f38cd1c3b05"
+      "byteCount": 17735,
+      "sha256": "16e0f1585643796a424385963f31ed519af1f17ca22dadf1391239a554916292"
     },
     {
       "path": "Tests/ArkTraceRenderingTests/TimelinePointerGestureTests.swift",
@@ -854,13 +854,13 @@
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/action_catalog_swift.py",
-      "byteCount": 6643,
-      "sha256": "fd5f909129c0b02926d02d2b20736e0c928c81fc7a089f95810bae30f9ea9d2b"
+      "byteCount": 6634,
+      "sha256": "785f5ebf53c8a76bb0db48963dc6a4b238ebc1d068cf44f244e286af059cd33b"
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/action_catalog_validate.py",
-      "byteCount": 1873,
-      "sha256": "43dbb1050cc402d85f116a0b8895c2c1e727f82a4c3590a26983b0ed9587d7f9"
+      "byteCount": 1859,
+      "sha256": "b01d0aea36d5bfdc78dba95f2871cebca8f67188762863b32b974a46c6414ed4"
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/inspector_projection_access.swift",
@@ -889,13 +889,13 @@
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/inspector_projection_swift.py",
-      "byteCount": 4945,
-      "sha256": "e730c1963f5b4103f34d6afb511e23b77ceb74642de0daf7f4aa7aea37ab39f7"
+      "byteCount": 4939,
+      "sha256": "c7724e7649e77e25344a9c81f11ba1875b7e9bc5f0f9d6ed4698be048b70da62"
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/inspector_projection_validate.py",
-      "byteCount": 1897,
-      "sha256": "cdf5791ed74f8ac162026a565c6d66c27bcb3fee8eba8464be86f15c0871f8f5"
+      "byteCount": 1883,
+      "sha256": "e9fadb452d9411d3f450f4ca751d088078f7818bba133fb0afddc0ab54602800"
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_controller_seam.swift",
@@ -919,13 +919,13 @@
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_report.py",
-      "byteCount": 15036,
-      "sha256": "13eaea4753892622637ed60ee7346707617b8b70af21901aa6887f27ce287c77"
+      "byteCount": 15033,
+      "sha256": "c0748dc157e3c91e88e97b821e37c804421bd7ea93a83ab7a98f5c607e14e74e"
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_run_swift.py",
       "byteCount": 4922,
-      "sha256": "133aeef5048d3eb707148351cdcdee42bb32f74cf93d3c85cbb66e3609b0fdfa"
+      "sha256": "630dda006a0cc4d1648440dd84048f300a8d8a36a3d56e7a4d9bcd5387e5af44"
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_swift_logging.patch",
@@ -934,8 +934,8 @@
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_validate.py",
-      "byteCount": 1886,
-      "sha256": "c2826081c74b5b3e438c8687a6db1713677518c6e0e3af125fcd815ab10bcbc2"
+      "byteCount": 1868,
+      "sha256": "19abe20212fd42c745ad640fb29c785dd52f9b81bd6970a9780eb0781363459e"
     },
     {
       "path": "rust/crates/arktrace-viewer/tests/fixtures/action-catalog-display-swift.json",
@@ -989,7 +989,7 @@
     {
       "command": [
         "sh",
-        "scripts/run-swiftpm.sh",
+        "hack/run-swiftpm.sh",
         "test",
         "--disable-sandbox",
         "--config-path",
@@ -1031,7 +1031,7 @@
     {
       "command": [
         "sh",
-        "scripts/run-swiftpm.sh",
+        "hack/run-swiftpm.sh",
         "test",
         "--disable-sandbox",
         "--config-path",
@@ -1073,7 +1073,7 @@
     {
       "argv": [
         "sh",
-        "scripts/run-swiftpm.sh",
+        "hack/run-swiftpm.sh",
         "test",
         "--disable-sandbox",
         "--config-path",
@@ -1101,7 +1101,7 @@
     {
       "argv": [
         "sh",
-        "scripts/run-swiftpm.sh",
+        "hack/run-swiftpm.sh",
         "test",
         "--disable-sandbox",
         "--config-path",
