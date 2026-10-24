@@ -65,7 +65,7 @@ def main():
         assert len(data) == entry["byteCount"] and hashlib.sha256(data).hexdigest() == entry["sha256"], relative
     assert {
         viewer + "presentation-inputs.json", viewer + "presentation-swift-oracle.json",
-        "tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
+        "test/swift/ArkTraceRenderingTests/TimelineRenderingTests.swift",
         "rust/crates/arktrace-viewer/oracle/presentation_harness.swift",
         "rust/crates/arktrace-viewer/oracle/presentation_renderer_access.swift",
         "rust/crates/arktrace-viewer/oracle/presentation_palette_access.swift",
@@ -175,10 +175,10 @@ def main():
         "rust/crates/arktrace-viewer/oracle/annotation_swift.py",
         "apple/Apps/ArkTraceApp/Viewer/TraceTimelinePane.swift",
         "apple/Apps/ArkTraceApp/Inspector/AnnotationInspectorView.swift",
-        "tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
-        "tests/ArkTraceAppSupportTests/TraceViewStateStoreTests.swift",
-        "tests/ArkTraceRenderingTests/TimelineAnnotationKeyTests.swift",
-        "tests/ArkTraceRenderingTests/TimelineFlagSelectionTests.swift",
+        "test/swift/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
+        "test/swift/ArkTraceAppSupportTests/TraceViewStateStoreTests.swift",
+        "test/swift/ArkTraceRenderingTests/TimelineAnnotationKeyTests.swift",
+        "test/swift/ArkTraceRenderingTests/TimelineFlagSelectionTests.swift",
     } <= annotation_seen
     annotation_inputs = json.loads((ROOT / viewer / "annotation-inputs.json").read_text(encoding="utf-8"))["cases"]
     annotation_outputs = json.loads((ROOT / viewer / "annotation-swift-oracle.json").read_text(encoding="utf-8"))["cases"]

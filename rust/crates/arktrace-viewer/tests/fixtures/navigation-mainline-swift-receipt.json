@@ -265,8 +265,8 @@
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/navigation_run_swift.py",
-      "byteCount": 6540,
-      "sha256": "9d01559bdaee2a6c21f8228defc2b5705a016d8020e3acb805b67bc6e03d6e4c"
+      "byteCount": 6550,
+      "sha256": "209bd49d2f82efe5ee010855f23ad690a282e9754c31e158f0844cf81fa8d203"
     },
     {
       "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-inputs.json",

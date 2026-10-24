@@ -302,22 +302,22 @@
       "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193"
     },
     {
-      "path": "tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
+      "path": "test/swift/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
       "byteCount": 124788,
       "sha256": "2ff26c85cf7bd9435340910aca8f85b78acdc88e8f4af5c771c595581ca9ed7d"
     },
     {
-      "path": "tests/ArkTraceAppSupportTests/TraceViewStateStoreTests.swift",
+      "path": "test/swift/ArkTraceAppSupportTests/TraceViewStateStoreTests.swift",
       "byteCount": 10982,
       "sha256": "97512364981b5fe41890d0b35e4009b948a7029c67c2ba5440466928f9def13c"
     },
     {
-      "path": "tests/ArkTraceRenderingTests/TimelineAnnotationKeyTests.swift",
+      "path": "test/swift/ArkTraceRenderingTests/TimelineAnnotationKeyTests.swift",
       "byteCount": 9931,
       "sha256": "69e3a947d72e976d21e1df0b12df32c77e5180772cf148c2f34903f9b9f5a7df"
     },
     {
-      "path": "tests/ArkTraceRenderingTests/TimelineFlagSelectionTests.swift",
+      "path": "test/swift/ArkTraceRenderingTests/TimelineFlagSelectionTests.swift",
       "byteCount": 3386,
       "sha256": "1443963da1fb39d43cfed7e621f96ede91afbd8aefb283e4955a585f2ae4d5cc"
     },
@@ -333,8 +333,8 @@
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/annotation_swift.py",
-      "byteCount": 6625,
-      "sha256": "fe9d7959c5ec9ea5eaa80f889444dc3ccd66b24d299da7ff3b8512edca91331b"
+      "byteCount": 6650,
+      "sha256": "76916f835047d1737a1d9d209aa67d5e7cf6ec34970b81957f1405a03e133df9"
     },
     {
       "path": "rust/crates/arktrace-viewer/tests/fixtures/annotation-inputs.json",

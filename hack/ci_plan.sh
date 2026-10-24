@@ -45,7 +45,7 @@ while IFS= read -r path; do
             # The planner cannot prove anything about a change to itself.
             select_all
             ;;
-        rust/*.md|rust/*/*.md|api/*.md|bindings/*.md|windows/*.md)
+        rust/*.md|rust/*/*.md|api/*.md|windows/*.md)
             ;;
         hack/test_viewer_json_roundtrip.py)
             rust_macos=true
@@ -63,6 +63,11 @@ while IFS= read -r path; do
             rust_macos=true
             rust_windows=true
             ;;
+        rust/fuzz/*)
+            # cargo-fuzz is a separate nightly workspace that no PR lane
+            # builds; keep the fail-closed plan it had as an unknown root.
+            select_all
+            ;;
         rust/*)
             rust_macos=true
             rust_windows=true
@@ -72,22 +77,24 @@ while IFS= read -r path; do
             rust_macos=true
             rust_windows=true
             ;;
-        sources/ArkTraceRustRuntime/*|tests/ArkTraceRustRuntimeTests/*|hack/swift-sdk-conformance/*|hack/swift-sdk-lifecycle/*|hack/swift-sdk-directory/*|hack/swift-sdk-summary/*|hack/swift-sdk-core/*|hack/build_macos_rust_sdk.py|hack/stage_macos_rust_sdk.py|hack/test_stage_macos_rust_sdk.py|hack/test_macos_rust_sdk.py|hack/test_macos_rust_lifecycle.py|hack/test_macos_directory_sdk.py|hack/test_macos_summary_sdk.py|hack/test_macos_core_sdk.py|hack/test_macos_event_sdk.py|hack/test_macos_density_sdk.py|hack/test_macos_batch_sdk.py|hack/test_macos_deadline_sdk.py|hack/test_macos_repository_sdk.py)
+        sources/ArkTraceRustRuntime/*|test/swift/ArkTraceRustRuntimeTests/*|hack/swift-sdk-conformance/*|hack/swift-sdk-lifecycle/*|hack/swift-sdk-directory/*|hack/swift-sdk-summary/*|hack/swift-sdk-core/*|hack/build_macos_rust_sdk.py|hack/stage_macos_rust_sdk.py|hack/test_stage_macos_rust_sdk.py|hack/test_macos_rust_sdk.py|hack/test_macos_rust_lifecycle.py|hack/test_macos_directory_sdk.py|hack/test_macos_summary_sdk.py|hack/test_macos_core_sdk.py|hack/test_macos_event_sdk.py|hack/test_macos_density_sdk.py|hack/test_macos_batch_sdk.py|hack/test_macos_deadline_sdk.py|hack/test_macos_repository_sdk.py)
             # Native Swift SDK is compiled by the macOS Rust lane using an
             # explicit immutable local artifact; default SwiftPM has no asset.
             contracts=true
             rust_macos=true
             ;;
-        api/*)
-            # Shared vectors are consumed by both language implementations.
+        api/bindings/*)
+            # C/C#/Swift bindings feed the SDK and app builds as well as the
+            # vectors below, so they must match before the api/* rule.
             swiftpm=true
+            app=true
             contracts=true
             rust_macos=true
             rust_windows=true
             ;;
-        bindings/*)
+        api/*)
+            # Shared vectors are consumed by both language implementations.
             swiftpm=true
-            app=true
             contracts=true
             rust_macos=true
             rust_windows=true
@@ -120,7 +127,7 @@ while IFS= read -r path; do
             swiftpm=true
             app=true
             ;;
-        sources/ArkTraceCLI/*|sources/ArkTraceSignalShim/*|sources/ArkTraceCLIResourceFixtures/*|sources/arktrace/*|tests/*)
+        sources/ArkTraceCLI/*|sources/ArkTraceSignalShim/*|sources/ArkTraceCLIResourceFixtures/*|sources/arktrace/*|test/swift/*)
             # Tests and command-line-only targets never feed the app binary.
             swiftpm=true
             ;;

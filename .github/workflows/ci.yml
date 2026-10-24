@@ -184,9 +184,9 @@ jobs:
             ${{ runner.temp }}/arktrace-swiftpm/dependencies
             ${{ runner.temp }}/arktrace-swiftpm/ModuleCache
             ${{ runner.temp }}/arktrace-swiftpm/source-state
-          key: spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'sources/**', 'tests/**', 'hack/run-swiftpm.sh') }}-${{ github.sha }}
+          key: spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'sources/**', 'test/swift/**', 'hack/run-swiftpm.sh') }}-${{ github.sha }}
           restore-keys: |
-            spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'sources/**', 'tests/**', 'hack/run-swiftpm.sh') }}-
+            spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'sources/**', 'test/swift/**', 'hack/run-swiftpm.sh') }}-
             spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-
 
       # The package builds warning-free today and that is worth holding. If a
@@ -261,7 +261,7 @@ jobs:
             ${{ runner.temp }}/arktrace-swiftpm/dependencies
             ${{ runner.temp }}/arktrace-swiftpm/ModuleCache
             ${{ runner.temp }}/arktrace-swiftpm/source-state
-          key: spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'sources/**', 'tests/**', 'hack/run-swiftpm.sh') }}-${{ github.sha }}
+          key: spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'sources/**', 'test/swift/**', 'hack/run-swiftpm.sh') }}-${{ github.sha }}
 
       - name: Upload logs
         if: always()

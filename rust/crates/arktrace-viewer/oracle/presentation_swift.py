@@ -9,7 +9,7 @@ def main():
  source=CACHE/'oracle-source';source.mkdir(parents=True,exist_ok=True)
  xcode=subprocess.check_output(['xcodebuild','-version'],text=True);swift=subprocess.check_output(['swift','--version'],text=True)
  if xcode.splitlines()[0]!='Xcode 27.0' or 'Apple Swift version 6.4 'not in swift:raise SystemExit('Xcode27.0/Swift6.4 required')
- for directory in ['sources/ArkTraceCore','sources/ArkTraceRendering','tests/ArkTraceRenderingTests','hack']:shutil.copytree(ROOT/directory,source/directory.replace('sources/','Sources/',1).replace('tests/','Tests/',1),dirs_exist_ok=True)
+ for directory in ['sources/ArkTraceCore','sources/ArkTraceRendering','test/swift/ArkTraceRenderingTests','hack']:shutil.copytree(ROOT/directory,source/directory.replace('sources/','Sources/',1).replace('test/swift/','Tests/',1),dirs_exist_ok=True)
  (source/'Package.swift').write_text('''// swift-tools-version: 6.3
 import PackageDescription
 let package=Package(name:"ArkTrace",platforms:[.macOS(.v26)],targets:[
@@ -36,7 +36,7 @@ let package=Package(name:"ArkTrace",platforms:[.macOS(.v26)],targets:[
  if '--regressions'in sys.argv:print(log.read_text()[-1600:]);return 0
  def digest(p,relative=True):
   data=p.read_bytes();return {'path':str(p.relative_to(ROOT))if relative else str(p),'sha256':hashlib.sha256(data).hexdigest(),'byteCount':len(data)}
- paths=list((ROOT/'sources/ArkTraceCore').rglob('*.swift'))+list((ROOT/'sources/ArkTraceRendering').glob('*.swift'))+[ROOT/'tests/ArkTraceRenderingTests/TimelineRenderingTests.swift']+[CRATE/'oracle'/n for n in ['OracleHarness.swift','DetailOracleHarness.swift','presentation_harness.swift','presentation_renderer_access.swift','presentation_palette_access.swift','presentation_swift.py']]+[inp,out]
+ paths=list((ROOT/'sources/ArkTraceCore').rglob('*.swift'))+list((ROOT/'sources/ArkTraceRendering').glob('*.swift'))+[ROOT/'test/swift/ArkTraceRenderingTests/TimelineRenderingTests.swift']+[CRATE/'oracle'/n for n in ['OracleHarness.swift','DetailOracleHarness.swift','presentation_harness.swift','presentation_renderer_access.swift','presentation_palette_access.swift','presentation_swift.py']]+[inp,out]
  result=json.loads(out.read_text());receipt={'oracle':'actual TimelinePalette, DetailPalette, DensityPalette, SnapshotLoader and NSView private drawDensityOverlay cache','xcode':xcode.strip(),'swift':swift.strip(),'counts':{k:len(result[k])for k in ['palette','genericDetails','dto']},'sourceDigests':[digest(p)for p in sorted(paths)],'cacheOnlyAugmentedSources':[digest(p,False)for p in [test,source/'Sources/ArkTraceRendering/TimelineNSView.swift',source/'Sources/ArkTraceRendering/TimelineColorPalette.swift']],'copiedAlgorithms':False}
  (CRATE/'tests/fixtures/presentation-swift-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');print(receipt['counts'])
  return 0

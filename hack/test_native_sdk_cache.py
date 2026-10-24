@@ -50,9 +50,9 @@ def main():
     for name, digest in [('old', '0' * 64), ('new', current)]:
         sdk = cache / 'synthetic-sdks' / name / 'CArkTrace.xcframework'
         slice_path = sdk / 'macos-arm64'; headers = slice_path / 'Headers'
-        header = (ROOT / 'bindings/c/arktrace_ffi.h').read_text().replace(current, digest)
+        header = (ROOT / 'api/bindings/c/arktrace_ffi.h').read_text().replace(current, digest)
         write_changed(headers / 'arktrace_ffi.h', header)
-        write_changed(headers / 'module.modulemap', (ROOT / 'bindings/c/module.modulemap').read_bytes())
+        write_changed(headers / 'module.modulemap', (ROOT / 'api/bindings/c/module.modulemap').read_bytes())
         write_changed(slice_path / 'libarktrace_ffi.a', archive.read_bytes())
         write_changed(sdk / 'Info.plist', plistlib.dumps({'AvailableLibraries': [{'LibraryIdentifier': 'macos-arm64', 'LibraryPath': 'libarktrace_ffi.a', 'HeadersPath': 'Headers', 'SupportedArchitectures': ['arm64'], 'SupportedPlatform': 'macos'}], 'CFBundlePackageType': 'XFWK', 'XCFrameworkFormatVersion': '1.0'}))
         files = [{'relativePath': p.relative_to(sdk.parent).as_posix(), 'byteCount': p.stat().st_size, 'sha256': sha(p)} for p in sorted(sdk.rglob('*')) if p.is_file()]

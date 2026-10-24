@@ -53,7 +53,7 @@ def verified_receipt(artifact, fixtures):
     folder = artifact / library["LibraryIdentifier"]
     require(hashlib.sha256((folder / library["LibraryPath"]).read_bytes()).hexdigest() == receipt["library"]["sha256"], "static library identity mismatch")
     for name in ("arktrace_ffi.h", "module.modulemap"):
-        require((folder / library["HeadersPath"] / name).read_bytes() == (ROOT / "bindings/c" / name).read_bytes(), "generated headers differ from source contract")
+        require((folder / library["HeadersPath"] / name).read_bytes() == (ROOT / "api/bindings/c" / name).read_bytes(), "generated headers differ from source contract")
     # Temporary construction paths are not part of this identity. Older local
     # receipts can carry those diagnostic fields; only relative pinned files
     # are authoritative.

@@ -126,7 +126,7 @@
       "byteCount": 2757
     },
     {
-      "path": "tests/ArkTraceAnalysisTests/TraceAgentBatchTests.swift",
+      "path": "test/swift/ArkTraceAnalysisTests/TraceAgentBatchTests.swift",
       "sha256": "46f47efd8ec745437b0c002f04a7d97fa8d6d16ea00eb18dcd82f333f94e75a3",
       "byteCount": 76338
     },

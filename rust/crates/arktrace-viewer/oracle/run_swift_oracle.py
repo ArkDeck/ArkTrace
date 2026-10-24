@@ -35,8 +35,8 @@ def main():
     if not xcode.startswith("Xcode 27."):
         raise SystemExit("Xcode 27 required")
     SOURCE.mkdir(parents=True, exist_ok=True)
-    for directory in ("sources/ArkTraceCore", "sources/ArkTraceRendering", "tests/ArkTraceRenderingTests", "hack"):
-        shutil.copytree(ROOT / directory, SOURCE / directory.replace("sources/", "Sources/", 1).replace("tests/", "Tests/", 1), dirs_exist_ok=True)
+    for directory in ("sources/ArkTraceCore", "sources/ArkTraceRendering", "test/swift/ArkTraceRenderingTests", "hack"):
+        shutil.copytree(ROOT / directory, SOURCE / directory.replace("sources/", "Sources/", 1).replace("test/swift/", "Tests/", 1), dirs_exist_ok=True)
     (SOURCE / "Package.swift").write_text('''// swift-tools-version: 6.3
 import PackageDescription
 let package = Package(name: "ArkTrace", platforms: [.macOS(.v26)], targets: [
@@ -74,7 +74,7 @@ extension TimelineNSView {
         return {"path": str(path.relative_to(ROOT)), "sha256": hashlib.sha256(data).hexdigest(), "byteCount": len(data)}
     paths = sorted((ROOT / "sources/ArkTraceRendering").glob("*.swift"))
     paths += sorted((ROOT / "sources/ArkTraceCore").rglob("*.swift"))
-    paths += [ROOT / "tests/ArkTraceRenderingTests/TimelineRenderingTests.swift", harness, INPUT, OUTPUT]
+    paths += [ROOT / "test/swift/ArkTraceRenderingTests/TimelineRenderingTests.swift", harness, INPUT, OUTPUT]
     if DETAIL:
         paths += [CRATE / "oracle/DetailOracleHarness.swift", Path(__file__)]
     receipt = {"oracle": "actual TimelineGeometry, TimelineInteraction, TimelineNSView and TimelineSnapshotLoader", "xcode": xcode.strip(),

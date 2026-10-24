@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parents[4]; CRATE=ROOT/'rust/crates/arktrace-viewe
 cache=Path(os.environ['ARKTRACE_SWIFTPM_CACHE_ROOT']).resolve()
 assert cache.is_absolute() and not cache.is_relative_to(ROOT)
 source=cache/'snapshot-event-index-oracle-source'; source.mkdir(parents=True,exist_ok=True)
-for directory in ('sources','tests','hack','third_party','test/fixtures','Apps'):
+for directory in ('sources','test/swift','hack','third_party','test/fixtures','Apps'):
  origin=ROOT/'apple/Apps' if directory=='Apps' else ROOT/directory
  shutil.copytree(origin,source/directory,dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__','trace_streamer'))
 for path in ROOT.iterdir():
@@ -45,7 +45,7 @@ patched+='\n'+seam.read_text(encoding='utf-8')
 (source/controller).write_text(patched,encoding='utf-8')
 (CRATE/'oracle/snapshot_event_index_swift_logging.patch').write_text(''.join(difflib.unified_diff(original.splitlines(True),patched.splitlines(True),fromfile=controller,tofile='cache-only/'+controller)),encoding='utf-8')
 harness=CRATE/'oracle/snapshot_event_index_harness.swift'
-shutil.copyfile(harness,source/'tests/ArkTraceAppSupportTests/SnapshotEventIndexCanonicalOracleTests.swift')
+shutil.copyfile(harness,source/'test/swift/ArkTraceAppSupportTests/SnapshotEventIndexCanonicalOracleTests.swift')
 env=os.environ.copy(); env.pop('GIT_DIR',None); env.pop('GIT_WORK_TREE',None)
 subprocess.run(['git','init','--quiet'],cwd=source,env=env,check=True)
 inputs=CRATE/'tests/fixtures/snapshot-event-index-inputs.json'; output=CRATE/'tests/fixtures/snapshot-event-index-swift-oracle.json'

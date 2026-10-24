@@ -22,7 +22,7 @@ jobs:
       - name: Install cargo-fuzz
         run: cargo install cargo-fuzz --version 0.13.2 --locked
       - name: Longer libFuzzer run
-        working-directory: fuzz
+        working-directory: rust/fuzz
         run: |
           set -euo pipefail
           for target in ffi-request ffi-config htrace-systrace; do
@@ -35,9 +35,9 @@ jobs:
         with:
           name: fuzz-nightly-crashes-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
-            fuzz/artifacts
-            fuzz/**/crash-*
-            fuzz/**/oom-*
-            fuzz/**/timeout-*
-            fuzz/**/leak-*
+            rust/fuzz/artifacts
+            rust/fuzz/**/crash-*
+            rust/fuzz/**/oom-*
+            rust/fuzz/**/timeout-*
+            rust/fuzz/**/leak-*
           if-no-files-found: ignore

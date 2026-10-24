@@ -12,8 +12,8 @@ def main():
  targets=['ArkTraceCore','ArkTraceParser','ArkTraceStore','ArkTraceRuntime','ArkTraceAnalysis','ArkTraceRendering','ArkTraceAppSupport']
  for target in targets:shutil.copytree(ROOT/'sources'/target,source/'Sources'/target,dirs_exist_ok=True)
  shutil.copytree(ROOT/'hack',source/'hack',dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__'))
- testpaths=['tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift','tests/ArkTraceAppSupportTests/TraceViewStateStoreTests.swift','tests/ArkTraceRenderingTests/TimelineAnnotationKeyTests.swift','tests/ArkTraceRenderingTests/TimelineFlagSelectionTests.swift']
- for relative in testpaths:p=source/relative.replace('sources/','Sources/',1).replace('tests/','Tests/',1);p.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/relative,p)
+ testpaths=['test/swift/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift','test/swift/ArkTraceAppSupportTests/TraceViewStateStoreTests.swift','test/swift/ArkTraceRenderingTests/TimelineAnnotationKeyTests.swift','test/swift/ArkTraceRenderingTests/TimelineFlagSelectionTests.swift']
+ for relative in testpaths:p=source/relative.replace('sources/','Sources/',1).replace('test/swift/','Tests/',1);p.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/relative,p)
  dependencies={'ArkTraceCore':[],'ArkTraceParser':['ArkTraceCore'],'ArkTraceStore':['ArkTraceCore'],'ArkTraceRuntime':['ArkTraceCore','ArkTraceParser','ArkTraceStore'],'ArkTraceAnalysis':['ArkTraceCore'],'ArkTraceRendering':['ArkTraceCore'],'ArkTraceAppSupport':['ArkTraceCore','ArkTraceParser','ArkTraceRuntime','ArkTraceAnalysis','ArkTraceRendering']}
  text='// swift-tools-version: 6.3\nimport PackageDescription\nlet package=Package(name:"ArkTrace",platforms:[.macOS(.v26)],targets:[\n'
  for target in targets:text+=f'.target(name:"{target}",dependencies:{json.dumps(dependencies[target])},swiftSettings:[.strictMemorySafety()]),\n'
