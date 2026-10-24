@@ -202,16 +202,16 @@
     },
     {
       "name": "libc",
-      "version": "0.2.189",
+      "version": "0.2.191",
       "license": "MIT OR Apache-2.0",
       "licenseTexts": [
         {
-          "path": "rust/licenses/libc-0.2.189/LICENSE-APACHE",
+          "path": "rust/licenses/libc-0.2.191/LICENSE-APACHE",
           "byteCount": 9723,
           "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
         },
         {
-          "path": "rust/licenses/libc-0.2.189/LICENSE-MIT",
+          "path": "rust/licenses/libc-0.2.191/LICENSE-MIT",
           "byteCount": 1066,
           "sha256": "123a331b5dbf04c30097fa43b8f858bc85df671fe776de498d01f3d6b7c1f69e"
         }
@@ -367,16 +367,16 @@
     },
     {
       "name": "serde_json",
-      "version": "1.0.151",
+      "version": "1.0.154",
       "license": "MIT OR Apache-2.0",
       "licenseTexts": [
         {
-          "path": "rust/licenses/serde_json-1.0.151/LICENSE-APACHE",
+          "path": "rust/licenses/serde_json-1.0.154/LICENSE-APACHE",
           "byteCount": 9723,
           "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
         },
         {
-          "path": "rust/licenses/serde_json-1.0.151/LICENSE-MIT",
+          "path": "rust/licenses/serde_json-1.0.154/LICENSE-MIT",
           "byteCount": 1023,
           "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
         }
@@ -540,18 +540,23 @@
     },
     {
       "name": "unicode-normalization",
-      "version": "0.1.25",
-      "license": "MIT OR Apache-2.0",
+      "version": "0.1.26",
+      "license": "(MIT OR Apache-2.0) AND Unicode-3.0",
       "licenseTexts": [
         {
-          "path": "rust/licenses/unicode-normalization-0.1.25/LICENSE-APACHE",
+          "path": "rust/licenses/unicode-normalization-0.1.26/LICENSE-APACHE",
           "byteCount": 10847,
           "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
         },
         {
-          "path": "rust/licenses/unicode-normalization-0.1.25/LICENSE-MIT",
+          "path": "rust/licenses/unicode-normalization-0.1.26/LICENSE-MIT",
           "byteCount": 1071,
           "sha256": "7b63ecd5f1902af1b63729947373683c32745c16a10e8e6292e2e2dcd7e90ae0"
+        },
+        {
+          "path": "rust/licenses/unicode-normalization-0.1.26/LICENSE-UNICODE",
+          "byteCount": 1995,
+          "sha256": "f7db81051789b729fea528a63ec4c938fdcb93d9d61d97dc8cc2e9df6d47f2a1"
         }
       ]
     },

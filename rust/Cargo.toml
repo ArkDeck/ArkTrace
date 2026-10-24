@@ -11,11 +11,11 @@ publish = false
 
 [workspace.dependencies]
 serde = { version = "=1.0.229", features = ["derive"] }
-serde_json = { version = "=1.0.151", features = ["float_roundtrip"] }
+serde_json = { version = "=1.0.154", features = ["float_roundtrip"] }
 sha2 = "=0.10.9"
-libc = "=0.2.189"
+libc = "=0.2.191"
 rusqlite = { version = "=0.40.2", default-features = false, features = ["bundled", "hooks", "limits"] }
-unicode-normalization = "=0.1.25"
+unicode-normalization = "=0.1.26"
 windows-sys = "=0.61.2"
 arktrace-contract = { path = "crates/arktrace-contract" }
 arktrace-platform = { path = "crates/arktrace-platform" }
