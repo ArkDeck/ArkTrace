@@ -122,8 +122,8 @@ def main():
             swift.append(f'        precondition(MemoryLayout<ArkTrace{name}>.offset(of: \\ArkTrace{name}.{n}) == {o})')
     header += declarations + ['#undef ARKTRACE_LAYOUT_ASSERT', '#ifdef __cplusplus', '}', '#endif', '#endif']
     swift += ['    }', '}']
-    outputs = {ROOT / 'bindings/c/arktrace_ffi.h': '\n'.join(header)+'\n', ROOT / 'bindings/c/module.modulemap': 'module CArkTrace {\n    header "arktrace_ffi.h"\n    export *\n}\n', ROOT / 'bindings/csharp/NativeMethods.cs': '\n'.join(cs)+'\n', ROOT / 'bindings/ffi-layouts.json': json.dumps(layouts, indent=2)+'\n', ROOT / 'rust/crates/arktrace-ffi/src/abi_records.rs': '\n'.join(rust)+'\n', ROOT / 'rust/crates/arktrace-viewer/src/wire_records.rs': '\n'.join(wire)+'\n', ROOT / 'api/ffi-v2.sha256': digest+'\n'}
-    outputs[ROOT / 'bindings/swift/GeneratedLayouts.swift'] = '\n'.join(swift)+'\n'
+    outputs = {ROOT / 'api/bindings/c/arktrace_ffi.h': '\n'.join(header)+'\n', ROOT / 'api/bindings/c/module.modulemap': 'module CArkTrace {\n    header "arktrace_ffi.h"\n    export *\n}\n', ROOT / 'api/bindings/csharp/NativeMethods.cs': '\n'.join(cs)+'\n', ROOT / 'api/bindings/ffi-layouts.json': json.dumps(layouts, indent=2)+'\n', ROOT / 'rust/crates/arktrace-ffi/src/abi_records.rs': '\n'.join(rust)+'\n', ROOT / 'rust/crates/arktrace-viewer/src/wire_records.rs': '\n'.join(wire)+'\n', ROOT / 'api/ffi-v2.sha256': digest+'\n'}
+    outputs[ROOT / 'api/bindings/swift/GeneratedLayouts.swift'] = '\n'.join(swift)+'\n'
     outputs[ROOT / 'hack/swift-sdk-conformance/GeneratedRecords.swift'] = '\n'.join(probe)+'\n'
     for p in outputs:
         if p.suffix == '.rs':

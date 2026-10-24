@@ -27,7 +27,7 @@ def main():
     if git_marker.is_file():
         if not git_marker.read_text().startswith("gitdir: "): raise SystemExit("unexpected oracle Git marker")
         git_marker.unlink()
-    for directory in ("sources", "tests", "hack", "third_party", "test/fixtures"):
+    for directory in ("sources", "test/swift", "hack", "third_party", "test/fixtures"):
         shutil.copytree(ROOT / directory, source / directory, dirs_exist_ok=True,ignore=shutil.ignore_patterns("__pycache__", "trace_streamer"))
     for path in ROOT.iterdir():
         if path.name != ".git" and path.is_file() and not path.is_symlink(): shutil.copyfile(path, source / path.name)
@@ -41,7 +41,7 @@ def main():
     (source / controller_path).write_text(patched)
     rendering_path = "sources/ArkTraceRendering/TimelineNSView.swift"
     (source / rendering_path).write_text((ROOT / rendering_path).read_text()+"\n"+(CRATE / "oracle/navigation_rendering_seam.swift").read_text())
-    test_path = source / "tests/ArkTraceAppSupportTests/NavigationCanonicalOracleTests.swift"
+    test_path = source / "test/swift/ArkTraceAppSupportTests/NavigationCanonicalOracleTests.swift"
     shutil.copyfile(CRATE / "oracle/navigation_harness.swift", test_path)
     # No other session can share this mutable source or dependency cache.
     environment = os.environ.copy()

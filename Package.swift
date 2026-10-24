@@ -59,7 +59,7 @@ let nativeTargets: [Target] = if let nativeSDKPath {
             cSettings: nativeSDKCSettings,
             swiftSettings: firstPartySwiftSettings + nativeSDKSwiftSettings + (nativeSDKFixtures ? [.define("ARKTRACE_RUST_PROCESS_FIXTURES")] : []),
             linkerSettings: [.linkedFramework("Security"), .linkedFramework("CoreFoundation")]),
-        .testTarget(name: "ArkTraceRustRuntimeTests", dependencies: ["ArkTraceRustRuntime"], path: "tests/ArkTraceRustRuntimeTests",
+        .testTarget(name: "ArkTraceRustRuntimeTests", dependencies: ["ArkTraceRustRuntime"], path: "test/swift/ArkTraceRustRuntimeTests",
             cSettings: nativeSDKCSettings, swiftSettings: firstPartySwiftSettings + nativeSDKSwiftSettings),
     ] + (nativeSDKFixtures ? [
         // Package-scoped Core DTOs are intentionally not promoted for tests.
@@ -177,18 +177,18 @@ let package = Package(
             path: "sources/arktrace",
             swiftSettings: firstPartySwiftSettings
         ),
-        .testTarget(name: "ArkTraceCoreTests", dependencies: ["ArkTraceCore"], path: "tests/ArkTraceCoreTests"),
-        .testTarget(name: "ArkTraceParserTests", dependencies: ["ArkTraceCore", "ArkTraceParser"], path: "tests/ArkTraceParserTests"),
+        .testTarget(name: "ArkTraceCoreTests", dependencies: ["ArkTraceCore"], path: "test/swift/ArkTraceCoreTests"),
+        .testTarget(name: "ArkTraceParserTests", dependencies: ["ArkTraceCore", "ArkTraceParser"], path: "test/swift/ArkTraceParserTests"),
         .testTarget(
             name: "ArkTraceStoreTests",
             dependencies: ["ArkTraceStore", "ArkTraceCLI"],
-            path: "tests/ArkTraceStoreTests"
+            path: "test/swift/ArkTraceStoreTests"
         ),
-        .testTarget(name: "ArkTraceAnalysisTests", dependencies: ["ArkTraceAnalysis"], path: "tests/ArkTraceAnalysisTests"),
+        .testTarget(name: "ArkTraceAnalysisTests", dependencies: ["ArkTraceAnalysis"], path: "test/swift/ArkTraceAnalysisTests"),
         .testTarget(
             name: "ArkTraceRenderingTests",
             dependencies: ["ArkTraceRendering"] + nativeAppSupportDependencies + (nativeSDKPath == nil ? [] : ["CArkTrace"]),
-            path: "tests/ArkTraceRenderingTests",
+            path: "test/swift/ArkTraceRenderingTests",
             cSettings: nativeSDKCSettings,
             swiftSettings: nativeSDKSwiftSettings + (nativeSDKPath == nil ? [] : [.define("ARKTRACE_NATIVE_RUNTIME")])
                 + (nativeSDKFixtures ? [.define("ARKTRACE_RUST_PROCESS_FIXTURES")] : [])
@@ -199,12 +199,12 @@ let package = Package(
                 "ArkTraceAppSupport", "ArkTraceCore", "ArkTraceParser",
                 "ArkTraceRuntime", "ArkTraceAnalysis", "ArkTraceRendering",
             ] + nativeAppSupportDependencies,
-            path: "tests/ArkTraceAppSupportTests"
+            path: "test/swift/ArkTraceAppSupportTests"
         ),
         .testTarget(
             name: "ArkTraceCaptureTests",
             dependencies: ["ArkTraceCapture"],
-            path: "tests/ArkTraceCaptureTests"
+            path: "test/swift/ArkTraceCaptureTests"
         ),
         .testTarget(
             name: "ArkTraceCLITests",
@@ -212,7 +212,7 @@ let package = Package(
                 "ArkTraceCLI", "ArkTraceCore", "ArkTraceParser", "ArkTraceStore",
                 "ArkTraceRuntime", "ArkTraceCLIResourceFixtures",
             ],
-            path: "tests/ArkTraceCLITests",
+            path: "test/swift/ArkTraceCLITests",
             resources: [.copy("Fixtures")]
         ),
         .testTarget(
@@ -221,7 +221,7 @@ let package = Package(
                 "ArkTraceCore", "ArkTraceParser", "ArkTraceStore", "ArkTraceRuntime",
                 "ArkTraceAnalysis", "ArkTraceRendering", "ArkTraceAppSupport",
             ],
-            path: "tests/ArkTraceIntegrationTests"
+            path: "test/swift/ArkTraceIntegrationTests"
         ),
     ] + nativeTargets,
     swiftLanguageModes: [.v6]

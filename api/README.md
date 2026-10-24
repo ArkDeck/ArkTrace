@@ -7,7 +7,7 @@ constants. ArkDeck still hardcodes the previous index schema and should consume
 this file in its own change. See [ArkDeck integration](../docs/guides/ARKDECK_INTEGRATION.md).
 
 The existing Swift implementation is the initial behavior oracle. Machine JSON
-1.0 fixtures remain authoritative in `tests/ArkTraceCLITests/Fixtures/MachineJSON`;
+1.0 fixtures remain authoritative in `test/swift/ArkTraceCLITests/Fixtures/MachineJSON`;
 `machine-fixtures-index.json` records their original bytes, rather than copying
 an independently editable corpus here.
 

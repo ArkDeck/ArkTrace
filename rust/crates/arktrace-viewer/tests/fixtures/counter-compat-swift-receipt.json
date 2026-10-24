@@ -10,8 +10,8 @@
   "sourceDigests": [
     {
       "path": "Package.swift",
-      "byteCount": 11789,
-      "sha256": "968725bbe414d9dc640f62a1df616510a194cb65281f9ba739af4e181634c0c4"
+      "byteCount": 11839,
+      "sha256": "762c9c416be4b35134d305ff71a9e3af3eae233e07fb30e792ffd23d726cee30"
     },
     {
       "path": "sources/ArkTraceAppSupport/AppDistribution.swift",
@@ -239,12 +239,12 @@
       "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193"
     },
     {
-      "path": "tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
+      "path": "test/swift/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
       "byteCount": 124788,
       "sha256": "2ff26c85cf7bd9435340910aca8f85b78acdc88e8f4af5c771c595581ca9ed7d"
     },
     {
-      "path": "tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
+      "path": "test/swift/ArkTraceRenderingTests/TimelineRenderingTests.swift",
       "byteCount": 109022,
       "sha256": "399a3181abe7ec717cb812e034b0c8672985bb4a2454dafd822617a16e3de663"
     },

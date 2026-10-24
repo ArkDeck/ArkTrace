@@ -21,7 +21,7 @@ def main():
     target=Path(json.loads(cargo('metadata','--format-version','1','--no-deps'))['target_directory'])/'debug'
     name='arktrace_ffi.dll' if sys.platform=='win32' else 'libarktrace_ffi.dylib' if sys.platform=='darwin' else 'libarktrace_ffi.so'
     library=target/name;abi=ABI(library)
-    layouts=json.loads((ROOT/'bindings/ffi-layouts.json').read_text())
+    layouts=json.loads((ROOT/'api/bindings/ffi-layouts.json').read_text())
     fields=0
     for r in layouts:
         typ=TYPES[r['name']];assert C.sizeof(typ)==r['size'] and C.alignment(typ)==r['alignment']
@@ -92,21 +92,21 @@ def main():
         base=Path(folder)
         if sys.platform=='darwin':
             assert subprocess.check_output(['xcodebuild','-version'],text=True).startswith('Xcode 27.')
-            subprocess.run(['xcrun','clang','-x','c','-std=c11','-Wall','-Werror','-fsyntax-only','-I',str(ROOT/'bindings/c'),'-'],input='#include "arktrace_ffi.h"\n',text=True,check=True)
+            subprocess.run(['xcrun','clang','-x','c','-std=c11','-Wall','-Werror','-fsyntax-only','-I',str(ROOT/'api/bindings/c'),'-'],input='#include "arktrace_ffi.h"\n',text=True,check=True)
             executable=base/'swift-smoke'
-            subprocess.run(['xcrun','swiftc','-swift-version','6','-parse-as-library','-warnings-as-errors','-module-cache-path',str(base/'modules'),'-target','arm64-apple-macos26.0','-I',str(ROOT/'bindings/c'),str(ROOT/'bindings/swift/Smoke.swift'),str(ROOT/'bindings/swift/GeneratedLayouts.swift'),str(target/'libarktrace_ffi.a'),'-framework','Security','-framework','CoreFoundation','-o',str(executable)],check=True)
+            subprocess.run(['xcrun','swiftc','-swift-version','6','-parse-as-library','-warnings-as-errors','-module-cache-path',str(base/'modules'),'-target','arm64-apple-macos26.0','-I',str(ROOT/'api/bindings/c'),str(ROOT/'api/bindings/swift/Smoke.swift'),str(ROOT/'api/bindings/swift/GeneratedLayouts.swift'),str(target/'libarktrace_ffi.a'),'-framework','Security','-framework','CoreFoundation','-o',str(executable)],check=True)
             consumer=json.loads(subprocess.check_output([str(executable)],text=True))
         elif sys.platform=='win32':
-            shutil.copytree(ROOT/'bindings/csharp',base/'csharp')
+            shutil.copytree(ROOT/'api/bindings/csharp',base/'csharp')
             subprocess.run(['dotnet','build',str(base/'csharp/Smoke/Smoke.csproj'),'--configuration','Release','--output',str(base/'out'),'--nologo','--verbosity','quiet'],check=True)
-            consumer=json.loads(subprocess.check_output(['dotnet',str(base/'out/Smoke.dll'),str(library),str(ROOT/'bindings/ffi-layouts.json')],text=True))
+            consumer=json.loads(subprocess.check_output(['dotnet',str(base/'out/Smoke.dll'),str(library),str(ROOT/'api/bindings/ffi-layouts.json')],text=True))
             assert consumer['records']==len(layouts) and consumer['fields']==fields
         else:raise SystemExit('native macOS/Windows required for foreign consumer; no simulated PASS')
         if retained:
             files=[]
             for source in [library, target/'libarktrace_ffi.a', ROOT/'api/ffi-v2.json',
-                           ROOT/'bindings/c/arktrace_ffi.h', ROOT/'bindings/c/module.modulemap',
-                           ROOT/'bindings/swift/Smoke.swift', ROOT/'bindings/swift/GeneratedLayouts.swift']:
+                           ROOT/'api/bindings/c/arktrace_ffi.h', ROOT/'api/bindings/c/module.modulemap',
+                           ROOT/'api/bindings/swift/Smoke.swift', ROOT/'api/bindings/swift/GeneratedLayouts.swift']:
                 if source.exists():
                     frozen=base/source.name
                     shutil.copyfile(source,frozen);frozen.chmod(0o400)

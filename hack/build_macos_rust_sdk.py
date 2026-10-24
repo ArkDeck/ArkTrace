@@ -36,14 +36,14 @@ def build(fixture=False):
     cache.mkdir(parents=True,exist_ok=True)
     destination=cache/identity['sha256'];artifact=destination/'CArkTrace.xcframework'
     digest=(ROOT/'api/ffi-v2.sha256').read_text().strip()
-    expected_headers=[pin(ROOT/'bindings/c'/n) for n in ['arktrace_ffi.h','module.modulemap']]
+    expected_headers=[pin(ROOT/'api/bindings/c'/n) for n in ['arktrace_ffi.h','module.modulemap']]
     if destination.exists():
         receipt,_=verified_receipt(artifact,fixture)
         assert receipt['library']==identity
         return artifact,receipt
     with tempfile.TemporaryDirectory(prefix='sdk-build-',dir=cache) as folder:
         base=Path(folder);headers=base/'headers';headers.mkdir()
-        for n in ['arktrace_ffi.h','module.modulemap']:shutil.copyfile(ROOT/'bindings/c'/n,headers/n)
+        for n in ['arktrace_ffi.h','module.modulemap']:shutil.copyfile(ROOT/'api/bindings/c'/n,headers/n)
         copied=base/'libarktrace_ffi.a';copied.write_bytes(library_bytes);assert pin(copied)['sha256']==identity['sha256']
         subprocess.run(['xcodebuild','-create-xcframework','-library',str(copied),'-headers',str(headers),'-output',str(base/'CArkTrace.xcframework')],check=True,stdout=sys.stderr)
         info=plistlib.loads((base/'CArkTrace.xcframework/Info.plist').read_bytes())

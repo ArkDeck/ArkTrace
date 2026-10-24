@@ -144,7 +144,7 @@
       "byteCount": 41220
     },
     {
-      "path": "tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
+      "path": "test/swift/ArkTraceRenderingTests/TimelineRenderingTests.swift",
       "sha256": "399a3181abe7ec717cb812e034b0c8672985bb4a2454dafd822617a16e3de663",
       "byteCount": 109022
     },
@@ -175,8 +175,8 @@
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/presentation_swift.py",
-      "sha256": "205c8f2c20d691ba1826b39c415b9155f034ffb5596f902c936171ea7ffbcfa9",
-      "byteCount": 4746
+      "sha256": "44fe71313ba8d58b0f23ec6efd7c55e19e05d5f432090bc847f872beca345d4d",
+      "byteCount": 4761
     },
     {
       "path": "rust/crates/arktrace-viewer/tests/fixtures/presentation-inputs.json",

@@ -14,8 +14,8 @@ def main():
  shutil.copytree(ROOT/'hack',source/'hack',dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__'))
  shutil.copytree(ROOT/'apple/Apps/ArkTraceApp',source/'apple/Apps/ArkTraceApp',dirs_exist_ok=True)
  for name in ['README.md','README.zh-CN.md']:shutil.copyfile(ROOT/name,source/name)
- testpaths=['tests/ArkTraceAppSupportTests/ShortcutCatalogTests.swift','tests/ArkTraceAppSupportTests/AppSource.swift','tests/ArkTraceRenderingTests/TimelineNavigationKeyTests.swift','tests/ArkTraceRenderingTests/TimelineAnnotationKeyTests.swift','tests/ArkTraceRenderingTests/TimelineRenderingTests.swift']
- for relative in testpaths:p=source/relative.replace('sources/','Sources/',1).replace('tests/','Tests/',1);p.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/relative,p)
+ testpaths=['test/swift/ArkTraceAppSupportTests/ShortcutCatalogTests.swift','test/swift/ArkTraceAppSupportTests/AppSource.swift','test/swift/ArkTraceRenderingTests/TimelineNavigationKeyTests.swift','test/swift/ArkTraceRenderingTests/TimelineAnnotationKeyTests.swift','test/swift/ArkTraceRenderingTests/TimelineRenderingTests.swift']
+ for relative in testpaths:p=source/relative.replace('sources/','Sources/',1).replace('test/swift/','Tests/',1);p.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/relative,p)
  dependencies={'ArkTraceCore':[],'ArkTraceParser':['ArkTraceCore'],'ArkTraceStore':['ArkTraceCore'],'ArkTraceRuntime':['ArkTraceCore','ArkTraceParser','ArkTraceStore'],'ArkTraceAnalysis':['ArkTraceCore'],'ArkTraceRendering':['ArkTraceCore'],'ArkTraceAppSupport':['ArkTraceCore','ArkTraceParser','ArkTraceRuntime','ArkTraceAnalysis','ArkTraceRendering']}
  text='// swift-tools-version: 6.3\nimport PackageDescription\nlet package=Package(name:"ArkTrace",platforms:[.macOS(.v26)],targets:[\n'
  for target in targets:text+=f'.target(name:"{target}",dependencies:{json.dumps(dependencies[target])},swiftSettings:[.strictMemorySafety()]),\n'

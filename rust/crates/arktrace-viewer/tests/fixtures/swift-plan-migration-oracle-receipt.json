@@ -141,7 +141,7 @@
       "byteCount": 2757
     },
     {
-      "path": "tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
+      "path": "test/swift/ArkTraceRenderingTests/TimelineRenderingTests.swift",
       "sha256": "399a3181abe7ec717cb812e034b0c8672985bb4a2454dafd822617a16e3de663",
       "byteCount": 109022
     },

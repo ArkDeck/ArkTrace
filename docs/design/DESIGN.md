@@ -273,9 +273,14 @@ ArkTrace/
 ├── README.md
 ├── LICENSE
 ├── Package.swift
+├── api/                     # 机器契约、共享向量
+│   └── bindings/            # C / C# / Swift FFI 绑定与 ffi-layouts.json
 ├── apple/ArkTrace.xcodeproj
 ├── apple/Apps/
 │   └── ArkTraceApp/
+├── rust/
+│   ├── crates/
+│   └── fuzz/                # 独立 cargo-fuzz workspace
 ├── sources/
 │   ├── ArkTraceCore/
 │   ├── ArkTraceParser/
@@ -288,22 +293,24 @@ ArkTrace/
 │   ├── ArkTraceSignalShim/
 │   ├── ArkTraceCLI/
 │   └── arktrace/
-├── tests/
-│   ├── ArkTraceCoreTests/
-│   ├── ArkTraceStoreTests/
-│   ├── ArkTraceParserTests/
-│   ├── ArkTraceAnalysisTests/
-│   ├── ArkTraceRenderingTests/
-│   ├── ArkTraceAppSupportTests/
-│   ├── ArkTraceCaptureTests/
-│   ├── ArkTraceCLITests/
-│   └── ArkTraceIntegrationTests/
-├── test/fixtures/
-│   ├── traces/
-│   ├── databases/
-│   └── release-evidence/
+├── test/
+│   ├── fixtures/
+│   │   ├── traces/
+│   │   ├── databases/
+│   │   └── release-evidence/
+│   └── swift/
+│       ├── ArkTraceCoreTests/
+│       ├── ArkTraceStoreTests/
+│       ├── ArkTraceParserTests/
+│       ├── ArkTraceAnalysisTests/
+│       ├── ArkTraceRenderingTests/
+│       ├── ArkTraceAppSupportTests/
+│       ├── ArkTraceCaptureTests/
+│       ├── ArkTraceCLITests/
+│       ├── ArkTraceIntegrationTests/
+│       └── ArkTraceRustRuntimeTests/
 ├── third_party/
-│   └── TraceStreamer/
+│   └── trace-streamer/
 ├── hack/
 │   ├── build_trace_streamer.sh
 │   ├── fetch_phase3_fixtures.sh

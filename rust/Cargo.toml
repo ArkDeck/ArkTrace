@@ -1,5 +1,7 @@
 [workspace]
 members = ["crates/*"]
+# cargo-fuzz targets are a separate nightly workspace (see fuzz/README.md).
+exclude = ["fuzz"]
 resolver = "3"
 
 [workspace.package]

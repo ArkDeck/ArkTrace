@@ -61,7 +61,7 @@ expect "test change selects only the SwiftPM lane" \
     'lane_swiftpm=true
 lane_app=false
 lane_contracts=false' \
-    'tests/ArkTraceCoreTests/TraceTimeTests.swift'
+    'test/swift/ArkTraceCoreTests/TraceTimeTests.swift'
 
 expect "CLI-only source selects only the SwiftPM lane" \
     'lane_swiftpm=true
@@ -186,7 +186,14 @@ lane_contracts=true
 lane_rust_macos=true
 lane_rust_windows=true' 'api/time-range-vectors.json'
 
-expect "bindings select their consuming builds" "$all_lanes" 'bindings/Swift/Engine.swift'
+expect "bindings select their consuming builds" "$all_lanes" 'api/bindings/swift/Smoke.swift'
+expect "binding layouts select their consuming builds" "$all_lanes" 'api/bindings/ffi-layouts.json'
+expect "bindings documentation does not build" "$docs_only" 'api/bindings/README.md'
+expect "cargo-fuzz workspace keeps its fail-closed plan" "$all_lanes" 'rust/fuzz/fuzz_targets/ffi_request.rs'
+expect "cargo-fuzz lockfile keeps its fail-closed plan" "$all_lanes" 'rust/fuzz/Cargo.lock'
+expect "former tests root fails closed" "$all_lanes" 'tests/ArkTraceCoreTests/TraceTimeTests.swift'
+expect "former bindings root fails closed" "$all_lanes" 'bindings/c/arktrace_ffi.h'
+expect "former fuzz root fails closed" "$all_lanes" 'fuzz/Cargo.toml'
 
 expect "Windows files select Windows and contract checks" \
     'lane_swiftpm=false
@@ -231,7 +238,7 @@ expect "typed directory SDK tests use the artifact-enabled macOS lane" \
 lane_app=false
 lane_contracts=true
 lane_rust_macos=true
-lane_rust_windows=false' 'tests/ArkTraceRustRuntimeTests/DirectoryPageTests.swift'
+lane_rust_windows=false' 'test/swift/ArkTraceRustRuntimeTests/DirectoryPageTests.swift'
 
 expect "package-external directory owner selects the native SDK compile gate" \
     'lane_swiftpm=false

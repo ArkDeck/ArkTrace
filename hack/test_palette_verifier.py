@@ -29,7 +29,7 @@ import unittest
 SCRIPT = Path(__file__).with_name("verify_palette.py")
 REPO_ROOT = SCRIPT.parent.parent
 PALETTE_RELATIVE = Path("sources/ArkTraceRendering/TimelineColorPalette.swift")
-TESTS_RELATIVE = Path("tests/ArkTraceRenderingTests/TimelinePaletteTests.swift")
+TESTS_RELATIVE = Path("test/swift/ArkTraceRenderingTests/TimelinePaletteTests.swift")
 
 
 def _load_verifier():

@@ -26,3 +26,10 @@ GitHub Releases. History before this file is the git log on `main`.
   every target; target and module names are unchanged. The macOS
   TraceStreamer `buildRecipeVersion` is re-pinned because the build script's
   bytes changed; the pinned binary SHA-256 is unchanged and was not rebuilt.
+- Top-level directories are consolidated: `bindings/` is now `api/bindings/`,
+  `fuzz/` is now `rust/fuzz/` (still a separate cargo-fuzz workspace,
+  excluded from `rust/Cargo.toml`), and the Swift test targets moved from
+  `tests/<Target>/` to `test/swift/<Target>/` next to `test/fixtures/`. Target
+  names are unchanged. Oracle receipts that pin current source bytes are
+  re-pinned for the moved paths and the one-hop-deeper `#filePath` root
+  lookups in the tests; the Swift oracles were not re-run.
