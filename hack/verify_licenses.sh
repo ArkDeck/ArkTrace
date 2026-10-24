@@ -41,7 +41,7 @@ fi
 [ "$(file_bytes "$notice")" = 3087 ] \
     || fail "third-party notice byte count drifted"
 [ "$(shasum -a 256 "$notice" | awk '{print $1}')" = \
-    c4419abec7b2c6abd1c89e83d5234f2b4681737068fc0eae5b2bc69bb4559c33 ] \
+    fc5fdcb3c135890264dd5a09e69f571ae2274cf709f3f304881dafa33b51291c ] \
     || fail "third-party notice SHA drifted"
 
 jq -e '

@@ -241,7 +241,7 @@ Rust `arktrace.exe` 在 Windows 11 x64 上原生运行 `--no-cache` 路径（AT-
 `doctor`、`inspect`、`summary`、`processes`、`threads`、`query`、`context`、`analyze`（两平台同一
 实现）；Windows `licenses` 读取安装目录中的完整许可证集合，核对构建时内嵌的清单、
 notice 和产品许可，以及每份许可证的完整大小与 SHA-256。它同时报告 Windows 构建工具与
-静态 runtime 的许可，并以 `rust` 返回冻结的 37 项 Cargo 依赖与 75 份许可文本。
+静态 runtime 的许可，并以 `rust` 返回冻结的 37 项 Cargo 依赖与 76 份许可文本。
 缺失、增加、修改或链接资源均拒绝；输出预算不足时返回错误，
 不返回部分归属说明。macOS Rust CLI 的 `licenses` 迁移仍待完成。
 

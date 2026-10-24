@@ -2,7 +2,7 @@
 
 The Rust CLI and host-process helper also use the Cargo dependency closure
 recorded in `rust/dependency-licenses.json`. It includes all 37 frozen workspace
-dependencies, including build and platform dependencies, and identifies 75
+dependencies, including build and platform dependencies, and identifies 76
 corresponding license texts under `rust/licenses/`. The Windows CLI distribution
 preserves this inventory and these files under `resources/licenses/rust/`;
 `arktrace licenses` verifies and reports the complete set.

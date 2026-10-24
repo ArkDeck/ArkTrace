@@ -485,7 +485,7 @@
         },
         "rustLicenseFileCount": {
           "type": "integer",
-          "const": 75
+          "const": 76
         },
         "selfTestFixtureSHA256": {
           "type": "string",
