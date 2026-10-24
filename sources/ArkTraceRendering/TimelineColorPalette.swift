@@ -1,6 +1,6 @@
 // The colour *assignment* here is a Swift port of the timeline color logic in
 // openharmony/developtools_smartperf_host, taken at the revision pinned in
-// third_party/TraceStreamer/source-lock.json and licensed under Apache-2.0:
+// third_party/trace-streamer/source-lock.json and licensed under Apache-2.0:
 // ide/src/trace/component/trace/base/ColorUtils.ts and Utils.getStateColor.
 // Neither fill table is: the twenty-entry identity palette and the thread
 // state table are both ArkTrace's own values sitting in upstream's structure,
@@ -99,7 +99,7 @@ package struct TimelineColor: Hashable, Sendable, Comparable {
 /// twenty values it indexes into.
 ///
 /// Ported from `ide/src/trace/component/trace/base/ColorUtils.ts` at the
-/// revision pinned in `third_party/TraceStreamer/source-lock.json`
+/// revision pinned in `third_party/trace-streamer/source-lock.json`
 /// (`447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6`, Apache-2.0). The hash is a
 /// byte-exact port including the two details that make the upstream result
 /// differ from textbook FNV-1a; see ``hash(_:modulus:)``.

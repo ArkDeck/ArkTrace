@@ -22,8 +22,8 @@ def build():
     for name in ['ArkTraceCore','ArkTraceStore','ArkTraceRendering']:
         destination = source/'Sources'/name
         if destination.exists(): shutil.rmtree(destination)
-        shutil.copytree(ROOT/'Sources'/name,destination)
-        paths += sorted((ROOT/'Sources'/name).rglob('*.swift'))
+        shutil.copytree(ROOT/'sources'/name,destination)
+        paths += sorted((ROOT/'sources'/name).rglob('*.swift'))
     shutil.copytree(ROOT/'hack',source/'hack',dirs_exist_ok=True)
     destination = source/'Sources/NativeViewportOracle'
     destination.mkdir(parents=True,exist_ok=True)

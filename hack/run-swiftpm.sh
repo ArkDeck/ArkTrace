@@ -196,11 +196,11 @@ fi
 # The parser is intentionally gitignored. Never let stale or unverified bytes
 # survive in the shared mirror, but retain the full local test/app behavior on
 # a machine that owns the approved binary.
-source_parser=$repository_root/third_party/TraceStreamer/macx/trace_streamer
-mirror_parser=$workspace_path/third_party/TraceStreamer/macx/trace_streamer
+source_parser=$repository_root/third_party/trace-streamer/macx/trace_streamer
+mirror_parser=$workspace_path/third_party/trace-streamer/macx/trace_streamer
 if [ -f "$source_parser" ]; then
     command -v jq >/dev/null 2>&1 || fail 'jq is required to verify TraceStreamer' 69
-    expected=$(jq -er '.binarySHA256' "$repository_root/third_party/TraceStreamer/macx/manifest.json")
+    expected=$(jq -er '.binarySHA256' "$repository_root/third_party/trace-streamer/macx/manifest.json")
     actual=$(shasum -a 256 "$source_parser" | awk '{print $1}')
     [ "$actual" = "$expected" ] || fail 'TraceStreamer differs from the pinned manifest' 65
     mkdir -p "$(dirname -- "$mirror_parser")"

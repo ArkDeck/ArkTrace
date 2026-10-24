@@ -216,16 +216,16 @@ verify_bundled_closure() {
     cmp "$repository_root/THIRD_PARTY_NOTICES.md" \
         "$closure_app/Contents/Resources/THIRD_PARTY_NOTICES.md" >/dev/null 2>&1 \
         || fail "$label third-party notice drifted"
-    cmp "$repository_root/third_party/TraceStreamer/license-inventory.json" \
+    cmp "$repository_root/third_party/trace-streamer/license-inventory.json" \
         "$closure_app/Contents/Resources/license-inventory.json" >/dev/null 2>&1 \
         || fail "$label license inventory drifted"
-    diff -qr "$repository_root/third_party/TraceStreamer/LICENSES" \
+    diff -qr "$repository_root/third_party/trace-streamer/LICENSES" \
         "$closure_app/Contents/Resources/Licenses" >/dev/null 2>&1 \
         || fail "$label license directory drifted"
     helper_sha=$(sha256 "$helper_path")
     [ "$helper_sha" = "$(jq -er '.binarySHA256' "$manifest_path")" ] \
         || fail "$label helper differs from its bundled manifest"
-    repository_manifest="$repository_root/third_party/TraceStreamer/macx/manifest.json"
+    repository_manifest="$repository_root/third_party/trace-streamer/macx/manifest.json"
     jq -e \
         --arg unsigned "$(jq -er '.binarySHA256' "$repository_manifest")" \
         --arg signed "$helper_sha" \

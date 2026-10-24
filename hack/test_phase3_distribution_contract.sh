@@ -19,8 +19,8 @@ team=TEAMTEST01
 mkdir -p "$repository/scripts" "$repository/apple/ArkTrace.xcodeproj" \
     "$repository/apple/Apps/ArkTraceApp" \
     "$repository/apple/Config" \
-    "$repository/third_party/TraceStreamer/macx" \
-    "$repository/third_party/TraceStreamer/LICENSES" \
+    "$repository/third_party/trace-streamer/macx" \
+    "$repository/third_party/trace-streamer/LICENSES" \
     "$repository/test/fixtures/release-evidence" "$repository/contracts" "$fake_bin"
 cp "$source_hack/../api/ffi-v2.sha256" "$repository/api/"
 cp "$source_hack/build_phase3_distribution_candidate.sh" \
@@ -42,16 +42,16 @@ for timestamp in '2026-99-99T00:00:00Z' '2026-08-13T00:00:00Zsuffix' '2026-08-13
         fail "invalid accessibility review timestamp was accepted"
     fi
 done
-printf 'raw parser bytes\n' >"$repository/third_party/TraceStreamer/macx/trace_streamer"
+printf 'raw parser bytes\n' >"$repository/third_party/trace-streamer/macx/trace_streamer"
 raw_sha=$(shasum -a 256 \
-    "$repository/third_party/TraceStreamer/macx/trace_streamer" | awk '{print $1}')
+    "$repository/third_party/trace-streamer/macx/trace_streamer" | awk '{print $1}')
 jq -n --arg sha "$raw_sha" --arg recipe "$(printf recipe | shasum -a 256 | awk '{print $1}')" \
     '{binarySHA256:$sha,buildRecipeVersion:$recipe}' \
-    >"$repository/third_party/TraceStreamer/macx/manifest.json"
+    >"$repository/third_party/trace-streamer/macx/manifest.json"
 printf 'MIT License\nfixture\n' >"$repository/LICENSE"
 printf 'third-party notice\n' >"$repository/THIRD_PARTY_NOTICES.md"
-printf '{}\n' >"$repository/third_party/TraceStreamer/license-inventory.json"
-printf 'component license\n' >"$repository/third_party/TraceStreamer/LICENSES/component.txt"
+printf '{}\n' >"$repository/third_party/trace-streamer/license-inventory.json"
+printf 'component license\n' >"$repository/third_party/trace-streamer/LICENSES/component.txt"
 printf '<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict/></plist>\n' \
     >"$repository/apple/Apps/ArkTraceApp/ArkTraceApp.entitlements"
 cat >"$repository/apple/Config/ArkTraceProduct.xcconfig" <<'CONFIG'
@@ -64,14 +64,14 @@ source_app="$temporary_root/source/ArkTrace.app"
 mkdir -p "$source_app/Contents/Helpers" \
     "$source_app/Contents/Resources/TraceStreamer" \
     "$source_app/Contents/Resources/Licenses" "$source_app/Contents/MacOS"
-cp "$repository/third_party/TraceStreamer/macx/trace_streamer" \
+cp "$repository/third_party/trace-streamer/macx/trace_streamer" \
     "$source_app/Contents/Helpers/trace_streamer"
-cp "$repository/third_party/TraceStreamer/macx/manifest.json" \
+cp "$repository/third_party/trace-streamer/macx/manifest.json" \
     "$source_app/Contents/Resources/TraceStreamer/manifest.json"
 cp "$repository/LICENSE" "$repository/THIRD_PARTY_NOTICES.md" \
-    "$repository/third_party/TraceStreamer/license-inventory.json" \
+    "$repository/third_party/trace-streamer/license-inventory.json" \
     "$source_app/Contents/Resources/"
-cp "$repository/third_party/TraceStreamer/LICENSES/component.txt" \
+cp "$repository/third_party/trace-streamer/LICENSES/component.txt" \
     "$source_app/Contents/Resources/Licenses/"
 printf '#!/bin/sh\nexit 0\n' >"$source_app/Contents/MacOS/ArkTrace"
 chmod +x "$source_app/Contents/MacOS/ArkTrace" \
@@ -229,7 +229,7 @@ p=argparse.ArgumentParser();p.add_argument('--workspace',type=Path,required=True
 p.add_argument('--signing-identity',required=True);p.add_argument('--sdk');a=p.parse_args()
 root=a.workspace;inputs=root/'.arktrace-native/AppInputs'
 digest=lambda data:hashlib.sha256(data).hexdigest()
-helper=b'synthetic native helper\n';parser=(root/'third_party/TraceStreamer/macx/trace_streamer').read_bytes()
+helper=b'synthetic native helper\n';parser=(root/'third_party/trace-streamer/macx/trace_streamer').read_bytes()
 publisher={'teamIdentifier':'TEAMTEST01','helperCodeIdentifier':'com.arktrace.ArkTrace.host-process','parserCodeIdentifier':'com.arktrace.ArkTrace.trace-streamer'}
 for name,data in [('arktrace-host-process',helper),('trace_streamer',parser)]:
  target=inputs/'Helpers'/name;target.parent.mkdir(parents=True,exist_ok=True)
@@ -237,7 +237,7 @@ for name,data in [('arktrace-host-process',helper),('trace_streamer',parser)]:
  target.write_bytes(data)
  subprocess.run(['codesign','--force','--sign',a.signing_identity,'--options','runtime','--timestamp',str(target)],check=True)
  target.chmod(0o555)
-manifest=json.loads((root/'third_party/TraceStreamer/macx/manifest.json').read_text())
+manifest=json.loads((root/'third_party/trace-streamer/macx/manifest.json').read_text())
 manifest['binarySHA256']=digest((inputs/'Helpers/trace_streamer').read_bytes())
 runtime={'formatVersion':1,'contractSHA256':(root/'api/ffi-v2.sha256').read_text().strip(),'helperSHA256':digest((inputs/'Helpers/arktrace-host-process').read_bytes()),'publisher':publisher}
 for name,value in [('TraceStreamer/manifest.json',manifest),('ArkTraceRuntime/manifest.json',runtime),('receipt.json',{'inputs':{'unsignedHelperSHA256':digest(helper)}})]:

@@ -53,7 +53,7 @@ def main():
 
     cargo("build", "-p", "arktrace-platform", "--bin", "arktrace-host-process")
     helper = Path(json.loads(cargo("metadata", "--format-version", "1", "--no-deps"))["target_directory"]) / "debug/arktrace-host-process"
-    parser = ROOT / "third_party/TraceStreamer/macx/trace_streamer"
+    parser = ROOT / "third_party/trace-streamer/macx/trace_streamer"
     manifest = json.loads((parser.parent / "manifest.json").read_text())
     assert sha(parser) == manifest["binarySHA256"]
     parser_identity = {key: manifest[key] for key in ("name", "reportedVersion", "binarySHA256", "upstreamRepository",

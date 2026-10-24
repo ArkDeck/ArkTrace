@@ -128,13 +128,13 @@ def stage_attribution(source_root, destination):
     sources = {
         'LICENSE': source_root / 'LICENSE',
         'THIRD_PARTY_NOTICES.md': source_root / 'THIRD_PARTY_NOTICES.md',
-        'license-inventory.json': source_root / 'third_party/TraceStreamer/license-inventory.json',
-        'windows-license-inventory.json': source_root / 'third_party/TraceStreamer/windows-license-inventory.json',
+        'license-inventory.json': source_root / 'third_party/trace-streamer/license-inventory.json',
+        'windows-license-inventory.json': source_root / 'third_party/trace-streamer/windows-license-inventory.json',
         'rust/dependency-licenses.json': source_root / 'rust/dependency-licenses.json',
     }
     sources.update({relative: source_root / relative for relative in RUST_LICENSES})
     for directory in ('LICENSES', 'LICENSES-windows'):
-        for path in (source_root / 'third_party/TraceStreamer' / directory).iterdir():
+        for path in (source_root / 'third_party/trace-streamer' / directory).iterdir():
             sources[directory + '/' + path.name] = path
     for relative, source in sorted(sources.items()):
         safe_relative(relative)

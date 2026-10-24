@@ -21,8 +21,8 @@ def main():
         target = source / 'Sources' / name
         if target.exists():
             shutil.rmtree(target)
-        shutil.copytree(ROOT / 'Sources' / name, target)
-        pins.extend(sorted((ROOT / 'Sources' / name).rglob('*.swift')))
+        shutil.copytree(ROOT / 'sources' / name, target)
+        pins.extend(sorted((ROOT / 'sources' / name).rglob('*.swift')))
     shutil.copytree(ROOT / 'hack', source / 'hack', dirs_exist_ok=True)
     target = source / 'Sources/BatchOracle'
     target.mkdir(parents=True, exist_ok=True)

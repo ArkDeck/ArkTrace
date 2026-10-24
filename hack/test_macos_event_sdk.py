@@ -26,7 +26,7 @@ def build_reference(kind="event"):
     for module in ("ArkTraceCore", "ArkTraceStore"):
         target = source / "Sources" / module
         if target.exists(): shutil.rmtree(target)
-        shutil.copytree(ROOT / "Sources" / module, target)
+        shutil.copytree(ROOT / "sources" / module, target)
     target = source / "Sources" / name
     target.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(ROOT / "hack/swift-sdk-core/EventProofModel.swift", target / "EventProofModel.swift")

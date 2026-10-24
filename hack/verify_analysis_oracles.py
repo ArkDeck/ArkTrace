@@ -34,7 +34,7 @@ def main():
                 assert hashlib.sha256(data).hexdigest() == entry["sha256"], relative
         assert required <= seen
         if current:
-            assert "Sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift" in seen
+            assert "sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift" in seen
             assert "rust/crates/arktrace-analysis/oracle/OracleHarness.swift" in seen
         inputs = json.loads((ROOT / FIXTURE / f"{input_name}.json").read_text(encoding="utf-8"))
         output = json.loads((ROOT / FIXTURE / f"{stem}.json").read_text(encoding="utf-8"))

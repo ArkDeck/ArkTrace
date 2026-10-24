@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "platform": "windows-x86_64",
-  "sourceLock": "third_party/TraceStreamer/source-lock.json",
+  "sourceLock": "third_party/trace-streamer/source-lock.json",
   "compiler": {
     "name": "mingw-builds x86_64-12.1.0-release-posix-sjlj-rt_v10-rev3",
     "url": "https://github.com/niXman/mingw-builds-binaries/releases/download/12.1.0-rt_v10-rev3/x86_64-12.1.0-release-posix-sjlj-rt_v10-rev3.7z",

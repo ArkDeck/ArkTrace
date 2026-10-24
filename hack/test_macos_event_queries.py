@@ -28,9 +28,9 @@ def install_swift(source, base, parser):
     resources = base / "swift/share/arktrace"
     resources.mkdir(parents=True, mode=0o700)
     for path in [ROOT / "LICENSE", ROOT / "THIRD_PARTY_NOTICES.md", parser.with_name("manifest.json"),
-                 ROOT / "third_party/TraceStreamer/license-inventory.json", ROOT / "test/fixtures/traces/zlib.htrace"]:
+                 ROOT / "third_party/trace-streamer/license-inventory.json", ROOT / "test/fixtures/traces/zlib.htrace"]:
         shutil.copyfile(path, resources / path.name)
-    shutil.copytree(ROOT / "third_party/TraceStreamer/LICENSES", resources / "LICENSES")
+    shutil.copytree(ROOT / "third_party/trace-streamer/LICENSES", resources / "LICENSES")
     return target
 
 
@@ -63,7 +63,7 @@ def main():
     swift_source = args.swift_cli.resolve(strict=True)
     xcode = subprocess.check_output(["/usr/bin/xcodebuild", "-version"], text=True)
     assert xcode.startswith("Xcode 27."), "Xcode 27 required"
-    parser = ROOT / "third_party/TraceStreamer/macx/trace_streamer"
+    parser = ROOT / "third_party/trace-streamer/macx/trace_streamer"
     manifest = json.loads(parser.with_name("manifest.json").read_text())
     oracle = json.loads((ROOT / "docs/migration-runs/AT-RUST-001-2026-10-02-small-oracle.json").read_text())
     assert digest(parser) == manifest["binarySHA256"] == oracle["parser"]["binarySHA256"]

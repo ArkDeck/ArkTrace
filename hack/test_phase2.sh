@@ -13,7 +13,7 @@ done
 
 script_directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 repository_root=$(CDPATH= cd -- "$script_directory/.." && pwd)
-parser="$repository_root/third_party/TraceStreamer/macx/trace_streamer"
+parser="$repository_root/third_party/trace-streamer/macx/trace_streamer"
 small_trace="$repository_root/test/fixtures/traces/zlib.htrace"
 large_trace="$repository_root/test/fixtures/traces/trace_small_10.systrace"
 

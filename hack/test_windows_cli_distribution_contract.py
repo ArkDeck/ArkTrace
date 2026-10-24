@@ -54,7 +54,7 @@ class WindowsDistributionContractTests(unittest.TestCase):
         layout = contract.LAYOUT
         for name in contract.EXECUTABLES:
             self.write(name, pe_image())
-        parser = json.loads((ROOT / 'third_party/TraceStreamer/windows-x86_64/manifest.json').read_text(encoding='utf-8'))
+        parser = json.loads((ROOT / 'third_party/trace-streamer/windows-x86_64/manifest.json').read_text(encoding='utf-8'))
         # The offline model has its own unsigned parser identity, never a claim
         # that these synthetic PE bytes are the reviewed production parser.
         parser['binarySHA256'] = hashlib.sha256(pe_image()).hexdigest()

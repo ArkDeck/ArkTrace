@@ -32,7 +32,7 @@ flowchart LR
     T03["P2-T03 CLI shell"] --> T04["P2-T04 JSON contract"]
     T04 --> T05
     T05 --> T06["P2-T06 Bounds/signals"]
-    T06 --> T07["P2-T07 Tests/docs"]
+    T06 --> T07["P2-T07 tests/docs"]
 ~~~
 
 P2-T01、P2-T02、P2-T03 可以并行。

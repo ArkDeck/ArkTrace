@@ -14,11 +14,11 @@ file_bytes() {
 script_directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 repository_root=${ARKTRACE_VERIFY_LICENSE_ROOT:-$(CDPATH= cd -- "$script_directory/.." && pwd)}
 repository_root=$(CDPATH= cd -- "$repository_root" && pwd -P)
-inventory="$repository_root/third_party/TraceStreamer/license-inventory.json"
-source_lock="$repository_root/third_party/TraceStreamer/source-lock.json"
-windows_inventory="$repository_root/third_party/TraceStreamer/windows-license-inventory.json"
-windows_lock="$repository_root/third_party/TraceStreamer/windows-toolchain-lock.json"
-license_root="$repository_root/third_party/TraceStreamer"
+inventory="$repository_root/third_party/trace-streamer/license-inventory.json"
+source_lock="$repository_root/third_party/trace-streamer/source-lock.json"
+windows_inventory="$repository_root/third_party/trace-streamer/windows-license-inventory.json"
+windows_lock="$repository_root/third_party/trace-streamer/windows-toolchain-lock.json"
+license_root="$repository_root/third_party/trace-streamer"
 product_license="$repository_root/LICENSE"
 notice="$repository_root/THIRD_PARTY_NOTICES.md"
 
@@ -38,10 +38,10 @@ grep -F 'ArkTrace itself is licensed under the MIT License' "$notice" >/dev/null
 if grep -F 'ArkTrace itself is licensed under Apache-2.0' "$notice" >/dev/null; then
     fail "third-party notice misstates ArkTrace as Apache-2.0"
 fi
-[ "$(file_bytes "$notice")" = 3087 ] \
+[ "$(file_bytes "$notice")" = 3092 ] \
     || fail "third-party notice byte count drifted"
 [ "$(shasum -a 256 "$notice" | awk '{print $1}')" = \
-    fc5fdcb3c135890264dd5a09e69f571ae2274cf709f3f304881dafa33b51291c ] \
+    1a32aec7c425b173ffcda1229d297b8befc5866ca7d7f3ea20c0d1acf435d216 ] \
     || fail "third-party notice SHA drifted"
 
 jq -e '

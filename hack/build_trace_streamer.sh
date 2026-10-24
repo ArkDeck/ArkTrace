@@ -1,6 +1,6 @@
 #!/bin/bash
 # Reproducibly builds the pinned TraceStreamer for macOS and stages the binary
-# plus a provenance manifest into third_party/TraceStreamer/macx/.
+# plus a provenance manifest into third_party/trace-streamer/macx/.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
@@ -8,13 +8,13 @@ SAFETY_HELPER="$REPO_ROOT/hack/phase3_shell_safety.sh"
 [ -r "$SAFETY_HELPER" ] || { echo "ERROR: shell safety helper is missing" >&2; exit 1; }
 # shellcheck source=phase3_shell_safety.sh
 . "$SAFETY_HELPER"
-SOURCE_LOCK="$REPO_ROOT/third_party/TraceStreamer/source-lock.json"
-FAULTLOGGERD_PATCH="$REPO_ROOT/third_party/TraceStreamer/patches/faultloggerd-apple-clang.patch"
-PROTO_READER_PATCH="$REPO_ROOT/third_party/TraceStreamer/patches/proto-reader-sparse-validity.patch"
+SOURCE_LOCK="$REPO_ROOT/third_party/trace-streamer/source-lock.json"
+FAULTLOGGERD_PATCH="$REPO_ROOT/third_party/trace-streamer/patches/faultloggerd-apple-clang.patch"
+PROTO_READER_PATCH="$REPO_ROOT/third_party/trace-streamer/patches/proto-reader-sparse-validity.patch"
 REQUESTED_WORK_ROOT="${ARKTRACE_TS_WORK_DIR:-$REPO_ROOT/.build/trace-streamer-workspaces/default}"
-REQUESTED_STAGE_DIR="${ARKTRACE_TS_STAGE_DIR:-$REPO_ROOT/third_party/TraceStreamer/macx}"
+REQUESTED_STAGE_DIR="${ARKTRACE_TS_STAGE_DIR:-$REPO_ROOT/third_party/trace-streamer/macx}"
 SAFE_WORK_PARENT="$REPO_ROOT/.build/trace-streamer-workspaces"
-REPOSITORY_STAGE="$REPO_ROOT/third_party/TraceStreamer/macx"
+REPOSITORY_STAGE="$REPO_ROOT/third_party/trace-streamer/macx"
 WORK_PARENT_MARKER=.arktrace-trace-streamer-workspaces-v1
 WORK_MARKER=.arktrace-trace-streamer-workspace-v1
 STAGE_MARKER=.arktrace-trace-streamer-stage-v1
@@ -43,7 +43,7 @@ arktrace_validate_owned_directory_request "$REQUESTED_WORK_ROOT" "work"
 if [ "$REQUESTED_STAGE_DIR" = "$REPOSITORY_STAGE" ]; then
     for stage_component in \
         "$REPO_ROOT/ThirdParty" \
-        "$REPO_ROOT/third_party/TraceStreamer" \
+        "$REPO_ROOT/third_party/trace-streamer" \
         "$REPOSITORY_STAGE"
     do
         [ -d "$stage_component" ] && [ ! -L "$stage_component" ] \

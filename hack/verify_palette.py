@@ -68,9 +68,9 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-PALETTE_SOURCE = REPO_ROOT / "Sources" / "ArkTraceRendering" / "TimelineColorPalette.swift"
+PALETTE_SOURCE = REPO_ROOT / "sources" / "ArkTraceRendering" / "TimelineColorPalette.swift"
 PALETTE_TESTS = (
-    REPO_ROOT / "Tests" / "ArkTraceRenderingTests" / "TimelinePaletteTests.swift"
+    REPO_ROOT / "tests" / "ArkTraceRenderingTests" / "TimelinePaletteTests.swift"
 )
 
 # Every canvas a fill can land on. `drawTracks` alternates row backgrounds, so

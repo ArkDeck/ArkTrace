@@ -71,7 +71,7 @@ def main():
     contract = sha(ROOT / 'api/ffi-v2.json')
     assert identity.abi_version == json.loads((ROOT/'api/ffi-v2.json').read_text())['abiVersion'] and identity.capabilities == 191
     assert bytes(identity.contract_digest).hex() == contract
-    manifest = json.loads((ROOT / 'third_party/TraceStreamer/macx/manifest.json').read_text())
+    manifest = json.loads((ROOT / 'third_party/trace-streamer/macx/manifest.json').read_text())
     assert sha(tools / 'parser') == manifest['binarySHA256']
     parser_identity = {k: manifest[k] for k in ('name', 'reportedVersion', 'binarySHA256',
         'upstreamRepository', 'upstreamRevision', 'architecture', 'adapterVersion', 'buildRecipeVersion')}

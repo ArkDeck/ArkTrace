@@ -84,8 +84,8 @@ def main():
         artifacts.append({'path':str(destination),'sha256':pin,'byteCount':destination.stat().st_size})
     abi=ABI(retained/'libarktrace_ffi.dylib')
     identity=abi.out('abi_identity','AbiIdentity');assert identity.capabilities==sum(K[k] for k in ('CAP_MACOS_ENGINE','CAP_COLD_JSON','CAP_VIEWPORT_RECORDS','CAP_CACHE_MAINTENANCE','CAP_VIEW_STATE','CAP_VIEW_STATE_BACKUP','CAP_SNAPSHOT_HIT','CAP_DEVELOPMENT_FIXTURES'))
-    manifest=json.loads((ROOT/'third_party/TraceStreamer/macx/manifest.json').read_text())
-    parser=ROOT/'third_party/TraceStreamer/macx/trace_streamer';assert digest(parser)==manifest['binarySHA256']
+    manifest=json.loads((ROOT/'third_party/trace-streamer/macx/manifest.json').read_text())
+    parser=ROOT/'third_party/trace-streamer/macx/trace_streamer';assert digest(parser)==manifest['binarySHA256']
     parser_identity={k:manifest[k] for k in ('name','reportedVersion','binarySHA256','upstreamRepository','upstreamRevision','architecture','adapterVersion','buildRecipeVersion')}
     corpus=json.loads((ROOT/'docs/migration-runs/AT-RUST-001-2026-10-02-small-oracle.json').read_text())['corpus']
     vectors_source=ROOT/'docs/migration-runs/AT-RUST-011-2026-10-04-viewport-owner.json'

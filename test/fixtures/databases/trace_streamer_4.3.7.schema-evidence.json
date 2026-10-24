@@ -14,7 +14,7 @@
     "binarySHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
     "architecture": "arm64",
     "adapterVersion": "1",
-    "buildRecipeVersion": "8ed97c8eb0e4420be25222bba83661e3741b844832b7df16e6ffed3c37a5c2ec"
+    "buildRecipeVersion": "c53ec8a657f05b92a019536ab162a8ebb7d4317162f20abcfb6c688b2f31bb00"
   },
   "schemaAdapterVersion": "2",
   "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",

@@ -29,7 +29,7 @@
   `device/services/plugin_service/src/plugin_service.cpp`；
 - TraceStreamer：`trace_streamer/src/base/pbreader_file_header.h`、
   `trace_streamer/src/parser/pbreader_parser/pbreader_parser.cpp`；
-- revision/仓库 URL 由 `third_party/TraceStreamer/source-lock.json` 锁定；本次核验的
+- revision/仓库 URL 由 `third_party/trace-streamer/source-lock.json` 锁定；本次核验的
   HiProfiler checkout HEAD 与 lock 均为
   `73d26bb5acfcafb2b1f4f94ead5640241d1e5f73`。
 

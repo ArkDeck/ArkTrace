@@ -21,7 +21,7 @@ def main():
     swift = Path("/private/tmp/arktrace-argument-swiftpm/build/out/Products/Debug/ArgumentOracle")
     assert digest(swift) == receipt["executableSHA256"]
     oracle = json.loads((ROOT / "docs/migration-runs/AT-RUST-001-2026-10-02-small-oracle.json").read_text())
-    parser = ROOT / "third_party/TraceStreamer/macx/trace_streamer"
+    parser = ROOT / "third_party/trace-streamer/macx/trace_streamer"
     manifest = json.loads(parser.with_name("manifest.json").read_text())
     assert digest(parser) == manifest["binarySHA256"] == oracle["parser"]["binarySHA256"]
     identity = {k: manifest[k] for k in ("name", "reportedVersion", "binarySHA256", "upstreamRepository", "upstreamRevision", "architecture", "adapterVersion", "buildRecipeVersion")}

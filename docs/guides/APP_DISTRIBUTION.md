@@ -77,8 +77,8 @@ mirror. Fixture SDKs cannot be used for the App. The bundle contains:
 
 The parser's reproducible repository inputs remain:
 
-- `third_party/TraceStreamer/macx/trace_streamer`;
-- `third_party/TraceStreamer/macx/manifest.json`.
+- `third_party/trace-streamer/macx/trace_streamer`;
+- `third_party/trace-streamer/macx/manifest.json`.
 
 Production resolution checks only that bundle location. It never searches
 `PATH`, `DYLD_*`, environment variables, Homebrew, or a user-writable global

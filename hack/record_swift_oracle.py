@@ -67,7 +67,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     cli = args.cli.resolve(strict=True)
-    executable = ROOT / "third_party/TraceStreamer/macx/trace_streamer"
+    executable = ROOT / "third_party/trace-streamer/macx/trace_streamer"
     identity = json.loads(executable.with_name("manifest.json").read_text())
     assert digest(executable) == identity["binarySHA256"], "parser hash drift"
     fixtures = [ROOT / "test/fixtures/traces" / name for name in [
@@ -90,9 +90,9 @@ def main():
         resources = private_root / "share/arktrace"
         resources.mkdir(parents=True)
         for path in [ROOT / "LICENSE", ROOT / "THIRD_PARTY_NOTICES.md", executable.with_name("manifest.json"),
-                     ROOT / "third_party/TraceStreamer/license-inventory.json", fixtures[0]]:
+                     ROOT / "third_party/trace-streamer/license-inventory.json", fixtures[0]]:
             shutil.copy2(path, resources / path.name)
-        shutil.copytree(ROOT / "third_party/TraceStreamer/LICENSES", resources / "LICENSES")
+        shutil.copytree(ROOT / "third_party/trace-streamer/LICENSES", resources / "LICENSES")
         malformed = private_root / "malformed.htrace"
         malformed.write_bytes(b"not a trace\0\xff")
         cases = [("doctor", ["doctor", "--self-test"]), ("licenses", ["licenses"])]

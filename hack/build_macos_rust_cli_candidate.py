@@ -23,7 +23,7 @@ def build_app(output, *, development, namespace):
     output = Path(output)
     if not output.is_absolute() or output.exists():
         raise RuntimeError("candidate destination must be absolute and absent")
-    parser = ROOT / "third_party/TraceStreamer/macx/trace_streamer"
+    parser = ROOT / "third_party/trace-streamer/macx/trace_streamer"
     manifest = json.loads((parser.parent / "manifest.json").read_text())
     assert digest(parser) == manifest["binarySHA256"]
     args = ["build", "-p", "arktrace-cli", "--bin", "arktrace"]

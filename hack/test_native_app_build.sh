@@ -96,10 +96,10 @@ for candidate_app in "$app" "$release_app"; do
     cmp THIRD_PARTY_NOTICES.md \
         "$candidate_app/Contents/Resources/THIRD_PARTY_NOTICES.md" >/dev/null 2>&1 \
         || fail "bundled third-party notice bytes drifted"
-    cmp third_party/TraceStreamer/license-inventory.json \
+    cmp third_party/trace-streamer/license-inventory.json \
         "$candidate_app/Contents/Resources/license-inventory.json" >/dev/null 2>&1 \
         || fail "bundled license inventory bytes drifted"
-    diff -qr third_party/TraceStreamer/LICENSES \
+    diff -qr third_party/trace-streamer/LICENSES \
         "$candidate_app/Contents/Resources/Licenses" >/dev/null \
         || fail "bundled license text directory drifted"
 done

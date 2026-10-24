@@ -10,7 +10,7 @@ case "$phase" in
         exec "$script_directory/benchmark_phase3.sh" "$fixture_class"
         ;;
     phase4)
-        integration_source="$script_directory/../Tests/ArkTraceIntegrationTests/ParserIntegrationTests.swift"
+        integration_source="$script_directory/../tests/ArkTraceIntegrationTests/ParserIntegrationTests.swift"
         grep -F 'TraceContextBuilder(' "$integration_source" >/dev/null 2>&1 \
             || { printf 'Phase 4 benchmark lacks production ContextBuilder\n' >&2; exit 1; }
         grep -F 'TraceDeterministicAnalysisEngine(' "$integration_source" >/dev/null 2>&1 \

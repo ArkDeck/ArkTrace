@@ -35,7 +35,7 @@ def main():
     metadata = json.loads(subprocess.check_output(['python3', str(ROOT / 'hack/run-cargo.py'),
         'metadata', '--format-version', '1', '--no-deps'], cwd=ROOT, text=True))
     helper = Path(metadata['target_directory']) / 'debug/arktrace-host-process'
-    parser = ROOT / 'third_party/TraceStreamer/macx/trace_streamer'
+    parser = ROOT / 'third_party/trace-streamer/macx/trace_streamer'
     manifest = json.loads((parser.parent / 'manifest.json').read_text(encoding='utf-8'))
     assert sha(parser) == manifest['binarySHA256']
     parser_identity = {key: manifest[key] for key in ('name', 'reportedVersion', 'binarySHA256',

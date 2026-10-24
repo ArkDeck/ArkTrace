@@ -28,7 +28,7 @@ package struct TraceStreamerProcessParser: TraceParser {
     public static let expectedArchitecture = "arm64"
     public static let adapterVersion = "1"
     public static let supportedBuildRecipeVersion =
-        "8ed97c8eb0e4420be25222bba83661e3741b844832b7df16e6ffed3c37a5c2ec"
+        "c53ec8a657f05b92a019536ab162a8ebb7d4317162f20abcfb6c688b2f31bb00"
 
     private let configuredExecutableURL: URL
     private let configuredManifestURL: URL?

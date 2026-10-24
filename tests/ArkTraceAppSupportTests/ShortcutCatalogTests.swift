@@ -12,7 +12,7 @@ final class ShortcutCatalogTests: XCTestCase {
     private static let repositoryRoot = URL(filePath: #filePath)
         .deletingLastPathComponent()  // ShortcutCatalogTests.swift
         .deletingLastPathComponent()  // ArkTraceAppSupportTests
-        .deletingLastPathComponent()  // Tests
+        .deletingLastPathComponent()  // tests
 
     private func readme(_ name: String) throws -> String {
         let url = Self.repositoryRoot.appending(path: name)

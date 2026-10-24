@@ -24,7 +24,7 @@ def verify(stem, input_name, count, databases, required, facts):
         data = path.read_bytes()
         assert len(data) == entry["byteCount"] and hashlib.sha256(data).hexdigest() == entry["sha256"], relative
     for name in ("ArkTraceCore", "ArkTraceStore", "ArkTraceAnalysis"):
-        assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "Sources" / name).rglob("*.swift")} == {p for p in seen if p.startswith(f"Sources/{name}/")}
+        assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "sources" / name).rglob("*.swift")} == {p for p in seen if p.startswith(f"sources/{name}/")}
     assert {FIXTURE + input_name + ".json", FIXTURE + stem + ".json", *required} <= seen
     inputs = json.loads((ROOT / FIXTURE / (input_name + ".json")).read_text(encoding="utf-8"))
     output = json.loads((ROOT / FIXTURE / (stem + ".json")).read_text(encoding="utf-8"))

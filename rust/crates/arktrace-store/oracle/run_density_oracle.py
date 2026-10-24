@@ -35,7 +35,7 @@ def main():
         target = source / "Sources" / name
         if target.exists():
             shutil.rmtree(target)
-        shutil.copytree(ROOT / "Sources" / name, target)
+        shutil.copytree(ROOT / "sources" / name, target)
     shutil.copytree(ROOT / "hack", source / "hack", dirs_exist_ok=True)
     target = source / "Sources/DensityOracle"
     target.mkdir(parents=True, exist_ok=True)
@@ -61,7 +61,7 @@ let package = Package(name: "ArkTrace", platforms: [.macOS(.v26)], targets: [
     executable = CACHE / "build/out/Products/Debug/DensityOracle"
     executable_pin = hashlib.sha256(executable.read_bytes()).hexdigest()
     inputs = json.loads(INPUT.read_text())
-    manifest = json.loads((ROOT / "third_party/TraceStreamer/macx/manifest.json").read_text())
+    manifest = json.loads((ROOT / "third_party/trace-streamer/macx/manifest.json").read_text())
     parser = {k: manifest[k] for k in ("name", "reportedVersion", "binarySHA256", "upstreamRepository", "upstreamRevision", "architecture", "adapterVersion", "buildRecipeVersion")}
     records, databases = [], []
     with tempfile.TemporaryDirectory(prefix="arktrace-event-oracle-", dir="/private/tmp") as directory:
@@ -91,7 +91,7 @@ let package = Package(name: "ArkTrace", platforms: [.macOS(.v26)], targets: [
     OUTPUT.write_text(json.dumps(records, ensure_ascii=False, indent=2) + "\n")
     paths = []
     for name in ("ArkTraceCore", "ArkTraceStore", "ArkTraceAnalysis"):
-        paths += sorted((ROOT / "Sources" / name).rglob("*.swift"))
+        paths += sorted((ROOT / "sources" / name).rglob("*.swift"))
     paths += [CRATE / "oracle/DensityOracle.swift", Path(__file__), ROOT / "hack/run-swiftpm.sh", INPUT, OUTPUT]
     receipt = {"oracle": "actual Swift SQLiteTraceRepository density (six sources)", "scope": "controlled SQL query semantics; no real parser/corpus/Viewer acceptance", "xcode": xcode, "swift": subprocess.check_output(["/usr/bin/swift", "--version"], text=True).strip(), "vectors": len(records), "executableSHA256": executable_pin, "databases": databases, "sourceDigests": [digest(p) for p in paths]}
     (CRATE / "tests/fixtures/swift-density-pages-receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")

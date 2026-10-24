@@ -50,7 +50,7 @@ def main():
                            sha256=sha(destination), bytes=destination.stat().st_size, mode=oct(mode)))
     (base / 'input-manifest.json').write_text(json.dumps(inputs, indent=2) + '\n')
     (base / 'artifact-receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
-    manifest = json.loads((ROOT / 'third_party/TraceStreamer/macx/manifest.json').read_text())
+    manifest = json.loads((ROOT / 'third_party/trace-streamer/macx/manifest.json').read_text())
     assert sha(tools / 'parser') == manifest['binarySHA256']
     parser_identity = {k: manifest[k] for k in ('name', 'reportedVersion', 'binarySHA256', 'upstreamRepository',
                       'upstreamRevision', 'architecture', 'adapterVersion', 'buildRecipeVersion')}

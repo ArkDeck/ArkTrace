@@ -27,9 +27,9 @@ def _string_constant(text, pattern, label):
 
 
 def source_contract():
-    parser = _read("Sources/ArkTraceParser/TraceStreamerProcessParser.swift")
-    schema = _read("Sources/ArkTraceStore/TraceSchemaAdapter.swift")
-    preparer = _read("Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift")
+    parser = _read("sources/ArkTraceParser/TraceStreamerProcessParser.swift")
+    schema = _read("sources/ArkTraceStore/TraceSchemaAdapter.swift")
+    preparer = _read("sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift")
     rust = _read("rust/crates/arktrace-contract/src/lib.rs")
     swift = {
         "parser_adapter_version": _string_constant(

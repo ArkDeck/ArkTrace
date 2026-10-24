@@ -27,11 +27,11 @@ def main():
     if git_marker.is_file():
         if not git_marker.read_text().startswith("gitdir: "): raise SystemExit("unexpected oracle Git marker")
         git_marker.unlink()
-    for directory in ("Sources", "Tests", "hack", "third_party", "test/fixtures"):
+    for directory in ("sources", "tests", "hack", "third_party", "test/fixtures"):
         shutil.copytree(ROOT / directory, source / directory, dirs_exist_ok=True,ignore=shutil.ignore_patterns("__pycache__", "trace_streamer"))
     for path in ROOT.iterdir():
         if path.name != ".git" and path.is_file() and not path.is_symlink(): shutil.copyfile(path, source / path.name)
-    controller_path = "Sources/ArkTraceAppSupport/TraceDocumentController.swift"
+    controller_path = "sources/ArkTraceAppSupport/TraceDocumentController.swift"
     original = (ROOT / controller_path).read_text()
     patched = original.replace("    private func scheduleSnapshot(preference: TimelineDetailPreference) {", "    private func scheduleSnapshot(preference: TimelineDetailPreference) {\n        navigationOraclePreferences.append(preference)")
     patched = patched.replace("    private func persistViewState() {", "    private func persistViewState() {\n        navigationOraclePersistCount += 1")
@@ -39,9 +39,9 @@ def main():
     assert patched != original and "navigationOraclePersistCount += 1" in patched
     patched += "\n" + (CRATE / "oracle/navigation_controller_seam.swift").read_text()
     (source / controller_path).write_text(patched)
-    rendering_path = "Sources/ArkTraceRendering/TimelineNSView.swift"
+    rendering_path = "sources/ArkTraceRendering/TimelineNSView.swift"
     (source / rendering_path).write_text((ROOT / rendering_path).read_text()+"\n"+(CRATE / "oracle/navigation_rendering_seam.swift").read_text())
-    test_path = source / "Tests/ArkTraceAppSupportTests/NavigationCanonicalOracleTests.swift"
+    test_path = source / "tests/ArkTraceAppSupportTests/NavigationCanonicalOracleTests.swift"
     shutil.copyfile(CRATE / "oracle/navigation_harness.swift", test_path)
     # No other session can share this mutable source or dependency cache.
     environment = os.environ.copy()
@@ -56,7 +56,7 @@ def main():
         data = path.read_bytes(); return dict(path=str(path),sha256=hashlib.sha256(data).hexdigest(),byteCount=len(data))
     receipt = dict(schemaVersion=1,canonical="Current Swift TraceDocumentController.loadCatalog + original action methods + TimelineNSView private focus/anchor methods",command=command,exitCode=result.returncode,sourceFiles=[digest(ROOT / controller_path),digest(ROOT / rendering_path)],patchedSources=[digest(source / controller_path),digest(source / rendering_path)],seams=[digest(CRATE / "oracle/navigation_controller_seam.swift"),digest(CRATE / "oracle/navigation_rendering_seam.swift")],harness=digest(CRATE / "oracle/navigation_harness.swift"),inputs=[digest(CRATE / "tests/fixtures/navigation-inputs.json"),digest(CRATE / "tests/fixtures/navigation-rendering-inputs.json")],log=digest(cache / "navigation-oracle.log"),note="Synthetic typed repository facts; no real DB corpus and no parser. Only access/logging changed; catalog and actions execute original code. Unicode matcher is a host port.")
     receipt["inputs"].append(digest(CRATE/"tests/fixtures/navigation-restore-inputs.json"))
-    receipt["sourceFiles"] += [digest(ROOT/p) for p in ("Sources/ArkTraceAppSupport/TraceViewStateStore.swift","Sources/ArkTraceRendering/TimelineModels.swift","Sources/ArkTraceCore/Model/TraceModels.swift","Sources/ArkTraceCore/Model/TraceEventModels.swift")]
+    receipt["sourceFiles"] += [digest(ROOT/p) for p in ("sources/ArkTraceAppSupport/TraceViewStateStore.swift","sources/ArkTraceRendering/TimelineModels.swift","sources/ArkTraceCore/Model/TraceModels.swift","sources/ArkTraceCore/Model/TraceEventModels.swift")]
     if result.returncode == 0: receipt["outputs"] = [digest(CRATE / "tests/fixtures/navigation-swift-oracle.json"),digest(CRATE / "tests/fixtures/navigation-rendering-swift-oracle.json"),digest(CRATE/"tests/fixtures/navigation-restore-swift-oracle.json"),digest(CRATE/"tests/fixtures/navigation-whitespace-swift-oracle.json")]
     (CRATE / "tests/fixtures/navigation-swift-receipt.json").write_text(json.dumps(receipt,indent=2)+"\n")
     print(json.dumps(dict(exitCode=result.returncode,log=str(cache / "navigation-oracle.log"))))

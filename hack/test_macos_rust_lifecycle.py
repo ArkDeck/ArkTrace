@@ -27,8 +27,8 @@ def main():
     assert identity(executable) == receipt['lifecycleExecutable']
     cargo('build', '-p', 'arktrace-platform', '--bin', 'arktrace-host-process')
     target = Path(json.loads(cargo('metadata', '--format-version', '1', '--no-deps'))['target_directory']) / 'debug'
-    manifest = json.loads((ROOT / 'third_party/TraceStreamer/macx/manifest.json').read_text())
-    trace_parser = ROOT / 'third_party/TraceStreamer/macx/trace_streamer'
+    manifest = json.loads((ROOT / 'third_party/trace-streamer/macx/manifest.json').read_text())
+    trace_parser = ROOT / 'third_party/trace-streamer/macx/trace_streamer'
     assert sha(trace_parser) == manifest['binarySHA256']
     parser_identity = {k: manifest[k] for k in ('name', 'reportedVersion', 'binarySHA256', 'upstreamRepository', 'upstreamRevision', 'architecture', 'adapterVersion', 'buildRecipeVersion')}
     corpus = json.loads((ROOT / 'docs/migration-runs/AT-RUST-001-2026-10-02-small-oracle.json').read_text())['corpus']

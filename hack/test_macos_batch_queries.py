@@ -29,7 +29,7 @@ def main():
         path = ROOT / source['path']
         assert path.stat().st_size == source['byteCount'] and digest(path) == source['sha256']
     oracle = json.loads((ROOT / 'docs/migration-runs/AT-RUST-001-2026-10-02-small-oracle.json').read_text(encoding='utf-8'))
-    parser = ROOT / 'third_party/TraceStreamer/macx/trace_streamer'
+    parser = ROOT / 'third_party/trace-streamer/macx/trace_streamer'
     manifest = json.loads(parser.with_name('manifest.json').read_text(encoding='utf-8'))
     assert digest(parser) == manifest['binarySHA256'] == oracle['parser']['binarySHA256']
     for fixture in oracle['corpus']:

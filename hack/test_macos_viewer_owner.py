@@ -24,7 +24,7 @@ def main():
     paths += sorted((ROOT/'rust/crates').rglob('*.rs'))
     pins = [{'path':p.relative_to(ROOT).as_posix(),'byteCount':p.stat().st_size,'sha256':digest(p)} for p in paths]
     oracle = json.loads((ROOT/'docs/migration-runs/AT-RUST-001-2026-10-02-small-oracle.json').read_text())
-    parser = ROOT/'third_party/TraceStreamer/macx/trace_streamer'
+    parser = ROOT/'third_party/trace-streamer/macx/trace_streamer'
     manifest = json.loads(parser.with_name('manifest.json').read_text())
     assert digest(parser) == manifest['binarySHA256'] == oracle['parser']['binarySHA256']
     for fixture in oracle['corpus']:

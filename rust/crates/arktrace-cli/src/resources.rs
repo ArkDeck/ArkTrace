@@ -91,7 +91,7 @@ mod layout {
     pub const PARSER_SNAPSHOT: &str = "trace-streamer";
     pub const SELF_TEST_TRACE: &str = "Resources/zlib.htrace";
     pub const PARSER_MANIFEST: &[u8] =
-        include_bytes!("../../../../third_party/TraceStreamer/macx/manifest.json");
+        include_bytes!("../../../../third_party/trace-streamer/macx/manifest.json");
 }
 /// Closed Windows installation layout, relative to the directory holding
 /// `arktrace.exe` (docs/guides/CLI.md "Windows installation layout"). Images keep
@@ -106,7 +106,7 @@ mod layout {
     pub const PARSER_SNAPSHOT: &str = "trace-streamer.exe";
     pub const SELF_TEST_TRACE: &str = "resources/zlib.htrace";
     pub const PARSER_MANIFEST: &[u8] =
-        include_bytes!("../../../../third_party/TraceStreamer/windows-x86_64/manifest.json");
+        include_bytes!("../../../../third_party/trace-streamer/windows-x86_64/manifest.json");
 }
 fn fixed_identity() -> Result<TraceParserIdentity, PublicError> {
     let value: serde_json::Value =
@@ -204,9 +204,9 @@ mod attribution {
     pub const PRODUCT_LICENSE: &[u8] = include_bytes!("../../../../LICENSE");
     pub const NOTICE: &[u8] = include_bytes!("../../../../THIRD_PARTY_NOTICES.md");
     pub const INVENTORY: &[u8] =
-        include_bytes!("../../../../third_party/TraceStreamer/license-inventory.json");
+        include_bytes!("../../../../third_party/trace-streamer/license-inventory.json");
     pub const WINDOWS_INVENTORY: &[u8] =
-        include_bytes!("../../../../third_party/TraceStreamer/windows-license-inventory.json");
+        include_bytes!("../../../../third_party/trace-streamer/windows-license-inventory.json");
     pub const RUST_INVENTORY: &[u8] = include_bytes!("../../../dependency-licenses.json");
     pub const TOP_LEVEL: [&str; 7] = [
         "LICENSE",

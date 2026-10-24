@@ -62,9 +62,9 @@ chmod 755 "$app/Contents/MacOS/arktrace" "$app/Contents/Helpers/trace_streamer"
 /usr/bin/ditto --noqtn "$repository_root/LICENSE" "$resource/LICENSE"
 /usr/bin/ditto --noqtn "$repository_root/THIRD_PARTY_NOTICES.md" \
     "$resource/THIRD_PARTY_NOTICES.md"
-/usr/bin/ditto --noqtn "$repository_root/third_party/TraceStreamer/license-inventory.json" \
+/usr/bin/ditto --noqtn "$repository_root/third_party/trace-streamer/license-inventory.json" \
     "$resource/license-inventory.json"
-/usr/bin/ditto --noqtn "$repository_root/third_party/TraceStreamer/LICENSES" \
+/usr/bin/ditto --noqtn "$repository_root/third_party/trace-streamer/LICENSES" \
     "$resource/LICENSES"
 /usr/bin/ditto --noqtn "$repository_root/test/fixtures/traces/zlib.htrace" \
     "$resource/zlib.htrace"
@@ -72,9 +72,9 @@ chmod 755 "$app/Contents/MacOS/arktrace" "$app/Contents/Helpers/trace_streamer"
     "$app/Contents/Resources/Attribution/LICENSE"
 /usr/bin/ditto --noqtn "$repository_root/THIRD_PARTY_NOTICES.md" \
     "$app/Contents/Resources/Attribution/THIRD_PARTY_NOTICES.md"
-/usr/bin/ditto --noqtn "$repository_root/third_party/TraceStreamer/license-inventory.json" \
+/usr/bin/ditto --noqtn "$repository_root/third_party/trace-streamer/license-inventory.json" \
     "$app/Contents/Resources/Attribution/license-inventory.json"
-/usr/bin/ditto --noqtn "$repository_root/third_party/TraceStreamer/LICENSES" \
+/usr/bin/ditto --noqtn "$repository_root/third_party/trace-streamer/LICENSES" \
     "$app/Contents/Resources/Attribution/LICENSES"
 
 info="$app/Contents/Info.plist"

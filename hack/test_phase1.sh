@@ -14,8 +14,8 @@ command -v file >/dev/null 2>&1 || fail "file is unavailable"
 
 script_directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 repository_root=$(CDPATH= cd -- "$script_directory/.." && pwd)
-manifest="$repository_root/third_party/TraceStreamer/macx/manifest.json"
-binary="$repository_root/third_party/TraceStreamer/macx/trace_streamer"
+manifest="$repository_root/third_party/trace-streamer/macx/manifest.json"
+binary="$repository_root/third_party/trace-streamer/macx/trace_streamer"
 schema_evidence="$repository_root/test/fixtures/databases/trace_streamer_4.3.7.schema-evidence.json"
 license="$repository_root/test/fixtures/traces/LICENSE.Apache-2.0.txt"
 

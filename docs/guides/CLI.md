@@ -264,7 +264,7 @@ Windows 的无扩展名输入使用 parser 的内容识别，与 Artifact ID 存
 stderr 格式，stdout 为空。
 
 - 每个 image 均以 `.exe` 命名（`CreateProcessW` 会为无扩展名补 `.exe`，从而执行另一个文件）。
-- parser identity 取自 `third_party/TraceStreamer/windows-x86_64/manifest.json`，`architecture` 为
+- parser identity 取自 `third_party/trace-streamer/windows-x86_64/manifest.json`，`architecture` 为
   `x86_64`；Machine envelope 中 parser 名称仍为 `trace_streamer`。
 - 信任：`development-resources` 构建只按整文件 SHA-256 pin；release 构建另外要求 Authenticode
   签名者等于编译时 `ARKTRACE_WINDOWS_PUBLISHER` 指定的 publisher（按 publisher 身份，不钉会轮换的

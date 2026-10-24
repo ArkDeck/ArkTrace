@@ -10,8 +10,8 @@ script_directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 repository_root=$(CDPATH= cd -- "$script_directory/.." && pwd -P)
 . "$script_directory/phase3_shell_safety.sh"
 arktrace_validate_reviewed_roots "$repository_root"
-parser="$repository_root/third_party/TraceStreamer/macx/trace_streamer"
-parser_manifest="$repository_root/third_party/TraceStreamer/macx/manifest.json"
+parser="$repository_root/third_party/trace-streamer/macx/trace_streamer"
+parser_manifest="$repository_root/third_party/trace-streamer/macx/manifest.json"
 small_trace="$repository_root/test/fixtures/traces/zlib.htrace"
 
 for command_name in swift jq shasum grep cmp git stat; do

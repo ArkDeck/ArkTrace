@@ -65,10 +65,10 @@ def main():
         assert sha(helper) == config["helperSHA256"] and sha(trace_parser) == identity["binarySHA256"]
         source_format = "htrace"
     else:
-        manifest = json.loads((ROOT / "third_party/TraceStreamer/macx/manifest.json").read_text())
+        manifest = json.loads((ROOT / "third_party/trace-streamer/macx/manifest.json").read_text())
         identity = {k: manifest[k] for k in ("name", "reportedVersion", "binarySHA256", "upstreamRepository", "upstreamRevision", "architecture", "adapterVersion", "buildRecipeVersion")}
         helper = target / "arktrace-host-process"
-        trace_parser = ROOT / "third_party/TraceStreamer/macx/trace_streamer"
+        trace_parser = ROOT / "third_party/trace-streamer/macx/trace_streamer"
         assert sha(trace_parser) == identity["binarySHA256"]
         corpus = json.loads((ROOT / "docs/migration-runs/AT-RUST-001-2026-10-02-small-oracle.json").read_text())["corpus"]
         fixture = next(v for v in corpus if Path(v["path"]).name == "zlib.htrace")
@@ -98,7 +98,7 @@ def main():
         persistent = base / "sdk-cache"; persistent.mkdir(mode=0o700)
         input_path = base / "sdk-input.json"
         input_path.write_text(json.dumps(dict(source=str(source), format=1, vectors=[], namespace=str(namespace), cacheDirectory=str(persistent), maintenance=options.sdk_maintenance,
-            productRuntime=options.product_runtime, manifest=str(ROOT / "third_party/TraceStreamer/macx/manifest.json"),
+            productRuntime=options.product_runtime, manifest=str(ROOT / "third_party/trace-streamer/macx/manifest.json"),
             helper=str(tools / "helper"), parser=str(tools / "parser"), helperSHA256=sha(tools / "helper"), parserIdentity=identity), indent=2) + "\n")
         input_path.chmod(0o400)
         sdk, sdk_command = execute([str(saved), str(input_path)], base, "sdk")

@@ -67,8 +67,8 @@ def prepare(workspace, sdk=None, signing_identity=None):
     sdk = sdk.absolute()
     sdk_receipt, _ = verified_receipt(sdk, False)
     helper_bytes = build_helper()
-    parser = ROOT / "third_party/TraceStreamer/macx/trace_streamer"
-    parser_manifest = ROOT / "third_party/TraceStreamer/macx/manifest.json"
+    parser = ROOT / "third_party/trace-streamer/macx/trace_streamer"
+    parser_manifest = ROOT / "third_party/trace-streamer/macx/manifest.json"
     for path in (parser, parser_manifest):
         regular(path)
     original_manifest = json.loads(parser_manifest.read_text())

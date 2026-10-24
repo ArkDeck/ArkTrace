@@ -49,7 +49,7 @@ final class ProductionCommandExecutorTests: XCTestCase {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
         let parserURL = repositoryRoot
-            .appending(path: "third_party/TraceStreamer/macx/trace_streamer")
+            .appending(path: "third_party/trace-streamer/macx/trace_streamer")
         let fixtureURL = repositoryRoot
             .appending(path: "test/fixtures/traces/zlib.htrace")
         let root = FileManager.default.temporaryDirectory
@@ -195,7 +195,7 @@ final class ProductionCommandExecutorTests: XCTestCase {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
         let parserURL = repositoryRoot
-            .appending(path: "third_party/TraceStreamer/macx/trace_streamer")
+            .appending(path: "third_party/trace-streamer/macx/trace_streamer")
         let fixtureURL = repositoryRoot
             .appending(path: "test/fixtures/traces/zlib.htrace")
         XCTAssertTrue(FileManager.default.isExecutableFile(atPath: parserURL.path))

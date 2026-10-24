@@ -10,7 +10,7 @@ def main():
  source=CACHE/'validation-source';source.mkdir(parents=True,exist_ok=True)
  for directory in ['rust','api','hack']:
   shutil.copytree(ROOT/directory,source/directory,dirs_exist_ok=True,ignore=shutil.ignore_patterns('target','__pycache__'))
- manifest='third_party/TraceStreamer/macx/manifest.json';(source/manifest).parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/manifest,source/manifest)
+ manifest='third_party/trace-streamer/macx/manifest.json';(source/manifest).parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/manifest,source/manifest)
  subprocess.run(['git','init','--quiet'],cwd=source,check=True)
  registry=CACHE/'dependencies/registry'
  if not registry.exists() and (Path.home()/'.cargo/registry').exists():shutil.copytree(Path.home()/'.cargo/registry',registry)

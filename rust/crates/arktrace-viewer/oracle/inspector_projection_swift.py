@@ -9,9 +9,9 @@ def main():
  source=CACHE/'oracle-source';source.mkdir(parents=True,exist_ok=True)
  xcode=subprocess.check_output(['xcodebuild','-version'],text=True,encoding='utf-8');swift=subprocess.check_output(['swift','--version'],text=True,encoding='utf-8')
  if xcode.splitlines()[0]!='Xcode 27.0'or 'Apple Swift version 6.4 'not in swift:raise SystemExit('Xcode27.0/Swift6.4 required')
- for directory in ['Sources/ArkTraceCore','Sources/ArkTraceRendering','Tests/ArkTraceRenderingTests','hack']:shutil.copytree(ROOT/directory,source/directory,dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__'))
- tests=['Tests/ArkTraceCoreTests/TraceEventModelContractTests.swift','Tests/ArkTraceCoreTests/TraceTimeTests.swift']
- for relative in tests:p=source/relative;p.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/relative,p)
+ for directory in ['sources/ArkTraceCore','sources/ArkTraceRendering','tests/ArkTraceRenderingTests','hack']:shutil.copytree(ROOT/directory,source/directory.replace('sources/','Sources/',1).replace('tests/','Tests/',1),dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__'))
+ tests=['tests/ArkTraceCoreTests/TraceEventModelContractTests.swift','tests/ArkTraceCoreTests/TraceTimeTests.swift']
+ for relative in tests:p=source/relative.replace('sources/','Sources/',1).replace('tests/','Tests/',1);p.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/relative,p)
  package=source/'Package.swift';package.write_text('''// swift-tools-version: 6.3
 import PackageDescription
 let package=Package(name:"ArkTrace",platforms:[.macOS(.v26)],targets:[
@@ -34,7 +34,7 @@ let package=Package(name:"ArkTrace",platforms:[.macOS(.v26)],targets:[
  if regressions:print(log.read_text(encoding='utf-8')[-1600:]);return 0
  def digest(p):
   data=p.read_bytes();return {'path':str(p.relative_to(ROOT))if p.is_relative_to(ROOT)else str(p),'byteCount':len(data),'sha256':hashlib.sha256(data).hexdigest()}
- paths=list((ROOT/'Sources/ArkTraceCore').rglob('*.swift'))+list((ROOT/'Sources/ArkTraceRendering').rglob('*.swift'))+list((ROOT/'Tests/ArkTraceRenderingTests').rglob('*.swift'))+[ROOT/p for p in tests]+list((CRATE/'oracle').glob('inspector_projection_*'))+[inp,out]
+ paths=list((ROOT/'sources/ArkTraceCore').rglob('*.swift'))+list((ROOT/'sources/ArkTraceRendering').rglob('*.swift'))+list((ROOT/'tests/ArkTraceRenderingTests').rglob('*.swift'))+[ROOT/p for p in tests]+list((CRATE/'oracle').glob('inspector_projection_*'))+[inp,out]
  result=json.loads(out.read_text(encoding='utf-8'));receipt={'oracle':'Actual TimelineSnapshotLoader.detailPrimitives/counterPrimitives through private-call wrapper; assigned real typed DTO pages; read every Inspector field and computed isInstant','xcode':xcode.strip(),'swift':swift.strip(),'cases':len(result['cases']),'positions':sum(len(c['facts'])for c in result['cases']),'sourceDigests':[digest(p)for p in sorted(paths)],'cacheOnlyAugmentedSources':[digest(loader),digest(harness),digest(package)],'copiedInspectorConstructorAlgorithms':False,'repositoryNormalizationProven':False,'nativeUIFormatterOrSDKProof':False}
  (CRATE/'tests/fixtures/inspector-projection-swift-receipt.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');print(receipt['cases'],'cases',receipt['positions'],'positions');return 0
 if __name__=='__main__':sys.exit(main())

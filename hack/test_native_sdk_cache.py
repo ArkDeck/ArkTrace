@@ -60,7 +60,7 @@ def main():
         write_changed(sdk.parent / 'receipt.json', json.dumps({'files': files, 'compilerFixtureOnly': True}, sort_keys=True))
         sdks[name] = sdk
     properties = []
-    configuration = (ROOT / 'Sources/ArkTraceRustRuntime/RustConfiguration.swift').read_text()
+    configuration = (ROOT / 'sources/ArkTraceRustRuntime/RustConfiguration.swift').read_text()
     for line in configuration.splitlines():
         if line.startswith(('    let abiVersion:', '    let contractDigest:')):
             properties.append(line)
