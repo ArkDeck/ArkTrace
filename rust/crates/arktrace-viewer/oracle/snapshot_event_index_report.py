@@ -29,7 +29,7 @@ for p in ROOT.rglob('*'):
  new_paths.append(rel)
 owned=sorted(set(changed+new_paths+[STEM+s for s in ('.md','.json','.sha256')]+[str((V/name).relative_to(ROOT)) for name in ('ci-plan.log','ci-plan-receipt.json')]))
 # Planner consumes the complete proposed import, not the outer ignored .build path.
-plan_cmd=['sh','scripts/ci_plan.sh']; diff=''.join(x+'\n' for x in owned)
+plan_cmd=['sh','hack/ci_plan.sh']; diff=''.join(x+'\n' for x in owned)
 run=subprocess.run(plan_cmd,cwd=ROOT,input=diff,text=True,encoding='utf-8',capture_output=True)
 assert run.returncode==0
 plan_log=V/'ci-plan.log';plan_log.write_text(run.stdout+run.stderr,encoding='utf-8')

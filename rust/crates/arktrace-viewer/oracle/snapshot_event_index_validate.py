@@ -8,7 +8,7 @@ cache=Path(os.environ['ARKTRACE_CARGO_CACHE_ROOT']).resolve()
 assert not cache.is_relative_to(ROOT)
 env=os.environ.copy();env.update(GIT_DIR=str(cache/'source-index.git'),GIT_WORK_TREE=str(ROOT),CARGO_NET_OFFLINE='true')
 subprocess.run(['git','add','.'],cwd=ROOT,env=env,check=True)
-commands=[('format',['python3','scripts/run-cargo.py','fmt','--all']),('fmt-check',['python3','scripts/run-cargo.py','fmt','--all','--check']),('clippy',['python3','scripts/run-cargo.py','clippy','--workspace','--all-targets','--','-D','warnings']),('viewer-tests',['python3','scripts/run-cargo.py','test','-p','arktrace-viewer','--','--nocapture']),('workspace',['python3','scripts/verify_rust_workspace.py']),('licenses',['sh','scripts/verify_licenses.sh'])]
+commands=[('format',['python3','hack/run-cargo.py','fmt','--all']),('fmt-check',['python3','hack/run-cargo.py','fmt','--all','--check']),('clippy',['python3','hack/run-cargo.py','clippy','--workspace','--all-targets','--','-D','warnings']),('viewer-tests',['python3','hack/run-cargo.py','test','-p','arktrace-viewer','--','--nocapture']),('workspace',['python3','hack/verify_rust_workspace.py']),('licenses',['sh','hack/verify_licenses.sh'])]
 folder=CRATE/'tests/fixtures/snapshot-event-index-verification';folder.mkdir(exist_ok=True)
 receipts=[]
 for label,cmd in commands:

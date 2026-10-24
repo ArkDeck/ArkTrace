@@ -29,7 +29,7 @@ fn definitions() -> Result<&'static [Definition], StoreError> {
     DEFS.get_or_init(|| {
         let data = include_bytes!(concat!(
             env!("CARGO_MANIFEST_DIR"),
-            "/../../../contracts/index-definitions.json"
+            "/../../../api/index-definitions.json"
         ));
         let corpus: Definitions =
             serde_json::from_slice(data).map_err(|_| StoreError::InvalidIndexContract)?;

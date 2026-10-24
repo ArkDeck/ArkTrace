@@ -20,11 +20,11 @@ def main():
     # Runner sees only this snapshot through an external private index.
     subprocess.run(["git","add","."],cwd=ROOT,env=environment,check=True)
     commands=[
-        ("fmt",[sys.executable,"scripts/run-cargo.py","fmt","--all","--check"]),
-        ("clippy",[sys.executable,"scripts/run-cargo.py","clippy","-p","arktrace-viewer","--all-targets","--offline","--","-D","warnings"]),
-        ("tests",[sys.executable,"scripts/run-cargo.py","test","-p","arktrace-viewer","--offline"]),
-        ("workspace",[sys.executable,"scripts/verify_rust_workspace.py"]),
-        ("licenses",["sh","scripts/verify_licenses.sh"]),
+        ("fmt",[sys.executable,"hack/run-cargo.py","fmt","--all","--check"]),
+        ("clippy",[sys.executable,"hack/run-cargo.py","clippy","-p","arktrace-viewer","--all-targets","--offline","--","-D","warnings"]),
+        ("tests",[sys.executable,"hack/run-cargo.py","test","-p","arktrace-viewer","--offline"]),
+        ("workspace",[sys.executable,"hack/verify_rust_workspace.py"]),
+        ("licenses",["sh","hack/verify_licenses.sh"]),
     ]
     records=[]
     for name,command in commands:

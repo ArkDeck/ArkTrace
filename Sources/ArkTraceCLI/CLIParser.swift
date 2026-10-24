@@ -168,7 +168,7 @@ package struct CLIArgumentParser: Sendable {
         }
         // A leading `--` terminated option parsing for the entire invocation;
         // the command name still dispatches, but every later token is an
-        // operand — never re-parsed as an option (docs/CLI.md).
+        // operand — never re-parsed as an option (docs/guides/CLI.md).
         var optionsTerminated = false
         if remaining.first == "--" {
             remaining.removeFirst()

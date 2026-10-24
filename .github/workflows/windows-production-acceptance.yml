@@ -65,7 +65,7 @@ jobs:
           $delivery = Join-Path $env:RUNNER_TEMP ('arktrace-delivery-' + [guid]::NewGuid().ToString('N'))
           [void](New-Item -ItemType Directory -Path $delivery -ErrorAction Stop)
           $package = Join-Path $delivery 'package'
-          $receiptBytes = & python scripts/package_windows_cli_distribution.py --output $package `
+          $receiptBytes = & python hack/package_windows_cli_distribution.py --output $package `
             --parser $env:ARKTRACE_PARSER_PATH --publisher $env:ARKTRACE_WINDOWS_PUBLISHER `
             --certificate-thumbprint $env:ARKTRACE_CERT_THUMBPRINT --timestamp-url $env:ARKTRACE_TIMESTAMP_URL
           if ($LASTEXITCODE -ne 0) { throw 'Production packaging failed.' }
@@ -84,8 +84,8 @@ jobs:
           $export = Join-Path $delivery 'export'
           [void](New-Item -ItemType Directory -Path $export -ErrorAction Stop)
           Copy-Item -LiteralPath $receipt.archive -Destination (Join-Path $export 'ArkTrace.windows.zip')
-          Copy-Item -LiteralPath scripts/Test-WindowsInstalledDistribution.ps1 -Destination $export
-          $harnessSha = (Get-FileHash -LiteralPath scripts/Test-WindowsInstalledDistribution.ps1 -Algorithm SHA256).Hash.ToLowerInvariant()
+          Copy-Item -LiteralPath hack/Test-WindowsInstalledDistribution.ps1 -Destination $export
+          $harnessSha = (Get-FileHash -LiteralPath hack/Test-WindowsInstalledDistribution.ps1 -Algorithm SHA256).Hash.ToLowerInvariant()
           if ((Get-FileHash -LiteralPath (Join-Path $export 'ArkTrace.windows.zip')).Hash.ToLowerInvariant() -cne $receipt.archiveSHA256 -or
               (Get-FileHash -LiteralPath (Join-Path $export 'Test-WindowsInstalledDistribution.ps1')).Hash.ToLowerInvariant() -cne $harnessSha) {
             throw 'Production delivery changed while copying.'

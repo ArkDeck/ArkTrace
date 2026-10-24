@@ -6,7 +6,7 @@ import XCTest
 @concurrent
 func openingFixture() async throws -> Data {
     let root = URL(filePath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-    let metadata = try JSONSerialization.jsonObject(with: Data(contentsOf: root.appending(path: "contracts/ready-metadata.json")))
+    let metadata = try JSONSerialization.jsonObject(with: Data(contentsOf: root.appending(path: "api/ready-metadata.json")))
     return try JSONSerialization.data(withJSONObject: ["formatVersion": 1, "session": 7, "request": 9, "body": [
         "metadata": metadata, "inspection": ["capabilities": ["cpuScheduling": true, "threadStates": false, "namedSlices": true,
             "cpuCounters": false, "processCounters": true], "schemaFingerprint": String(repeating: "a", count: 64),
