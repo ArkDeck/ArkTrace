@@ -30,7 +30,7 @@ final class MigrationCacheContractTests: XCTestCase {
         let root = URL(filePath: #filePath).deletingLastPathComponent()
             .deletingLastPathComponent().deletingLastPathComponent()
         let corpus = try JSONDecoder().decode(Corpus.self, from: Data(contentsOf:
-            root.appending(path: "contracts/cache-lease-vectors.json")))
+            root.appending(path: "api/cache-lease-vectors.json")))
         XCTAssertEqual(corpus.version, 1)
         XCTAssertFalse(corpus.vectors.isEmpty)
         for vector in corpus.vectors {

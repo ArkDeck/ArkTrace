@@ -18,13 +18,13 @@ def build():
     assert xcode.startswith('Xcode 27.'), xcode
     source = cache / 'oracle-source'
     source.mkdir(parents=True,exist_ok=True)
-    paths = [Path(__file__),CRATE/'oracle/NativeViewportOracle.swift',ROOT/'scripts/run-swiftpm.sh']
+    paths = [Path(__file__),CRATE/'oracle/NativeViewportOracle.swift',ROOT/'hack/run-swiftpm.sh']
     for name in ['ArkTraceCore','ArkTraceStore','ArkTraceRendering']:
         destination = source/'Sources'/name
         if destination.exists(): shutil.rmtree(destination)
         shutil.copytree(ROOT/'Sources'/name,destination)
         paths += sorted((ROOT/'Sources'/name).rglob('*.swift'))
-    shutil.copytree(ROOT/'scripts',source/'scripts',dirs_exist_ok=True)
+    shutil.copytree(ROOT/'hack',source/'hack',dirs_exist_ok=True)
     destination = source/'Sources/NativeViewportOracle'
     destination.mkdir(parents=True,exist_ok=True)
     shutil.copyfile(CRATE/'oracle/NativeViewportOracle.swift',destination/'NativeViewportOracle.swift')
@@ -57,7 +57,7 @@ let package = Package(name: "ArkTrace", platforms: [.macOS(.v26)], targets: [
     env = os.environ.copy();env['ARKTRACE_SWIFTPM_CACHE_ROOT']=str(cache)
     log = cache/'native-viewport-build.log'
     with log.open('w') as output:
-        run = subprocess.run(['sh','scripts/run-swiftpm.sh','build','--disable-sandbox','--config-path',str(cache/'configuration'),
+        run = subprocess.run(['sh','hack/run-swiftpm.sh','build','--disable-sandbox','--config-path',str(cache/'configuration'),
             '--security-path',str(cache/'security'),'--product','NativeViewportOracle'],cwd=source,env=env,stdout=output,stderr=subprocess.STDOUT)
     if run.returncode:
         print(log.read_text()[-12000:]);run.check_returncode()

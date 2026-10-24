@@ -19,7 +19,7 @@ final class TraceOfflineInspectionServiceTests: XCTestCase {
         let root = URL(filePath: #filePath).deletingLastPathComponent()
             .deletingLastPathComponent().deletingLastPathComponent()
         let corpus = try JSONDecoder().decode(
-            Corpus.self, from: Data(contentsOf: root.appending(path: "contracts/quality-vectors.json"))
+            Corpus.self, from: Data(contentsOf: root.appending(path: "api/quality-vectors.json"))
         )
         XCTAssertEqual(corpus.version, 1)
         XCTAssertFalse(corpus.vectors.isEmpty)

@@ -36,7 +36,7 @@ pub(crate) struct Resources {
     /// which verifies its pinned whole SHA-256 first.
     pub self_test_trace: PathBuf,
 }
-/// Fixtures/traces/zlib.htrace, the reviewed bundled self-test trace.
+/// test/fixtures/traces/zlib.htrace, the reviewed bundled self-test trace.
 pub(crate) const SELF_TEST_TRACE_SHA256: &str =
     "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe";
 fn unavailable() -> PublicError {
@@ -91,10 +91,10 @@ mod layout {
     pub const PARSER_SNAPSHOT: &str = "trace-streamer";
     pub const SELF_TEST_TRACE: &str = "Resources/zlib.htrace";
     pub const PARSER_MANIFEST: &[u8] =
-        include_bytes!("../../../../ThirdParty/TraceStreamer/macx/manifest.json");
+        include_bytes!("../../../../third_party/TraceStreamer/macx/manifest.json");
 }
 /// Closed Windows installation layout, relative to the directory holding
-/// `arktrace.exe` (docs/CLI.md "Windows installation layout"). Images keep
+/// `arktrace.exe` (docs/guides/CLI.md "Windows installation layout"). Images keep
 /// `.exe` names: `CreateProcessW` would otherwise append one.
 #[cfg(windows)]
 mod layout {
@@ -106,7 +106,7 @@ mod layout {
     pub const PARSER_SNAPSHOT: &str = "trace-streamer.exe";
     pub const SELF_TEST_TRACE: &str = "resources/zlib.htrace";
     pub const PARSER_MANIFEST: &[u8] =
-        include_bytes!("../../../../ThirdParty/TraceStreamer/windows-x86_64/manifest.json");
+        include_bytes!("../../../../third_party/TraceStreamer/windows-x86_64/manifest.json");
 }
 fn fixed_identity() -> Result<TraceParserIdentity, PublicError> {
     let value: serde_json::Value =
@@ -204,9 +204,9 @@ mod attribution {
     pub const PRODUCT_LICENSE: &[u8] = include_bytes!("../../../../LICENSE");
     pub const NOTICE: &[u8] = include_bytes!("../../../../THIRD_PARTY_NOTICES.md");
     pub const INVENTORY: &[u8] =
-        include_bytes!("../../../../ThirdParty/TraceStreamer/license-inventory.json");
+        include_bytes!("../../../../third_party/TraceStreamer/license-inventory.json");
     pub const WINDOWS_INVENTORY: &[u8] =
-        include_bytes!("../../../../ThirdParty/TraceStreamer/windows-license-inventory.json");
+        include_bytes!("../../../../third_party/TraceStreamer/windows-license-inventory.json");
     pub const RUST_INVENTORY: &[u8] = include_bytes!("../../../dependency-licenses.json");
     pub const TOP_LEVEL: [&str; 7] = [
         "LICENSE",

@@ -5,7 +5,7 @@ import XCTest
 ///
 /// SwiftUI + Observation invalidates exactly the views whose `body` read a
 /// changed property, so the boundary IS the set of `controller.` reads inside
-/// each child view. These tests parse the feature files in `Apps/ArkTraceApp` and
+/// each child view. These tests parse the feature files in `apple/Apps/ArkTraceApp` and
 /// fail when a high-frequency property read creeps back into a view that must
 /// stay out of its invalidation set — the regression that previously made
 /// every snapshot/hover/search update re-evaluate the whole window.

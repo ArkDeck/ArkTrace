@@ -17,8 +17,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
-      "sha256": "f192c466dea365b053f35e1fd24413c1ef656abc00cdb07653821bb31cf89197",
-      "byteCount": 29092
+      "sha256": "10d43f4808a4f02178618cba8cf7c660a668bc463cf2c9b688714b23a59f64cc",
+      "byteCount": 29086
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
@@ -62,8 +62,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
-      "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2",
-      "byteCount": 375
+      "sha256": "10734224b0b15b736c7620623ef7a7591ec59913912097b951df4224eaa162ee",
+      "byteCount": 381
     },
     {
       "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
@@ -167,8 +167,8 @@
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/run_swift_oracle.py",
-      "sha256": "94522fed80590263242d6a81c593ac27bee86a27a410a0a6c188b790e5e630a6",
-      "byteCount": 7717
+      "sha256": "1571b087b5ea684689dbfd711226977070ba739ae37bd44f845040981c4d8281",
+      "byteCount": 7708
     }
   ],
   "oracleOnlyTransformations": {

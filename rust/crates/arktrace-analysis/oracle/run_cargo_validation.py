@@ -20,10 +20,10 @@ def main():
         raise SystemExit("cargo cache must be absolute and outside source")
     source = CACHE / "validation-source"
     source.mkdir(parents=True, exist_ok=True)
-    for directory in ("rust", "contracts", "scripts"):
+    for directory in ("rust", "api", "hack"):
         shutil.copytree(ROOT / directory, source / directory, dirs_exist_ok=True,
             ignore=shutil.ignore_patterns("target", "__pycache__"))
-    manifest = "ThirdParty/TraceStreamer/macx/manifest.json"
+    manifest = "third_party/TraceStreamer/macx/manifest.json"
     (source / manifest).parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(ROOT / manifest, source / manifest)
     subprocess.run(["git", "init", "--quiet"], cwd=source, check=True)
@@ -41,12 +41,12 @@ def main():
     seed = os.environ.get("ARKTRACE_ANALYSIS_SEED_CARGO_HOME")
     if seed:
         shutil.copytree(Path(seed) / "registry", registry, dirs_exist_ok=True)
-    runner = [sys.executable, "scripts/run-cargo.py"]
+    runner = [sys.executable, "hack/run-cargo.py"]
     result = subprocess.run(runner + ["generate-lockfile", "--offline"], cwd=source, env=environment)
     if result.returncode: return result.returncode
     args = sys.argv[1:] or ["test", "-p", "arktrace-analysis", "--offline"]
     if args == ["verify"]:
-        return subprocess.run([sys.executable, "scripts/verify_rust_workspace.py"], cwd=source, env=environment).returncode
+        return subprocess.run([sys.executable, "hack/verify_rust_workspace.py"], cwd=source, env=environment).returncode
     result = subprocess.run(runner + args, cwd=source, env=environment)
     if result.returncode == 0 and args[0] == "fmt" and "--check" not in args:
         for path in (source / "rust/crates/arktrace-analysis").rglob("*.rs"):

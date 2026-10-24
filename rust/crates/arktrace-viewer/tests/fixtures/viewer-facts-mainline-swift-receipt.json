@@ -13,244 +13,244 @@
   ],
   "sourceDigests": [
     {
-      "path": "Apps/ArkTraceApp/ArkTraceApp.swift",
+      "path": "apple/Apps/ArkTraceApp/ArkTraceApp.swift",
       "byteCount": 4409,
       "sha256": "4843ff3e5210d87998f79c25ea6f2f87b03d42d78deb1780b9397bc36c075214"
     },
     {
-      "path": "Apps/ArkTraceApp/Capture/TraceCaptureStatusView.swift",
+      "path": "apple/Apps/ArkTraceApp/Capture/TraceCaptureStatusView.swift",
       "byteCount": 2524,
       "sha256": "3eaec55b5e5ffcfc30793e60eafe6c04e633e267aaeada4db44d1789228f297c"
     },
     {
-      "path": "Apps/ArkTraceApp/Capture/TraceCaptureWindow.swift",
+      "path": "apple/Apps/ArkTraceApp/Capture/TraceCaptureWindow.swift",
       "byteCount": 18974,
       "sha256": "fed6cd1822ca013041c2519e305fdc60867c37efb9053bac7312b71174771391"
     },
     {
-      "path": "Apps/ArkTraceApp/Help/ShortcutHelpView.swift",
+      "path": "apple/Apps/ArkTraceApp/Help/ShortcutHelpView.swift",
       "byteCount": 1621,
       "sha256": "658ae3836a8af11a56010d40730bc48a977cd9a629c01dabe240749878a476a1"
     },
     {
-      "path": "Apps/ArkTraceApp/Inspector/AnnotationInspectorView.swift",
+      "path": "apple/Apps/ArkTraceApp/Inspector/AnnotationInspectorView.swift",
       "byteCount": 2848,
       "sha256": "a2d2765aecbe794ec7b385a5ec6a5f6042b461a6caf7544a91f33555e2dadf02"
     },
     {
-      "path": "Apps/ArkTraceApp/Inspector/AnnotationRow.swift",
+      "path": "apple/Apps/ArkTraceApp/Inspector/AnnotationRow.swift",
       "byteCount": 1948,
       "sha256": "98ca43295143b039a6b67797ff50c9907824024789fdbbe847c7bff2ba696610"
     },
     {
-      "path": "Apps/ArkTraceApp/Inspector/EventInspectorView.swift",
+      "path": "apple/Apps/ArkTraceApp/Inspector/EventInspectorView.swift",
       "byteCount": 2732,
       "sha256": "a62d385e860a2b4a32e58a285055eb6c5386b7b62a05cb2b3609a1bea6a842c3"
     },
     {
-      "path": "Apps/ArkTraceApp/Inspector/FlagTagEditor.swift",
+      "path": "apple/Apps/ArkTraceApp/Inspector/FlagTagEditor.swift",
       "byteCount": 3255,
       "sha256": "5170f6cad8d54e6d9633e0ca655741e126ec56ca313822a744124ccc2f596555"
     },
     {
-      "path": "Apps/ArkTraceApp/Inspector/InspectorDockMenu.swift",
+      "path": "apple/Apps/ArkTraceApp/Inspector/InspectorDockMenu.swift",
       "byteCount": 1535,
       "sha256": "43881394e18655c8c781e14c2c45ea27708c179cce485f78018ecd4851098251"
     },
     {
-      "path": "Apps/ArkTraceApp/Inspector/InspectorFocusButton.swift",
+      "path": "apple/Apps/ArkTraceApp/Inspector/InspectorFocusButton.swift",
       "byteCount": 6912,
       "sha256": "436bf3341206d8c721d8473a0982c172b615cf7e297f5599249910ccdd98107c"
     },
     {
-      "path": "Apps/ArkTraceApp/Inspector/InspectorToolbarToggle.swift",
+      "path": "apple/Apps/ArkTraceApp/Inspector/InspectorToolbarToggle.swift",
       "byteCount": 1710,
       "sha256": "77d55dc272f1b3252caeb54d6050428ad46c03e2c6c234961f3aeb18f869c155"
     },
     {
-      "path": "Apps/ArkTraceApp/Inspector/RangeInspectorView.swift",
+      "path": "apple/Apps/ArkTraceApp/Inspector/RangeInspectorView.swift",
       "byteCount": 13812,
       "sha256": "ffd9929c334295d236db604929ba01339c0c7e3826731ecb855aaf75d9732ce8"
     },
     {
-      "path": "Apps/ArkTraceApp/Inspector/SliceAggregateSort.swift",
+      "path": "apple/Apps/ArkTraceApp/Inspector/SliceAggregateSort.swift",
       "byteCount": 300,
       "sha256": "5c116b7e44cbbab2ed659631317cd797a6e7041b29c8a56dea869fabe36b9700"
     },
     {
-      "path": "Apps/ArkTraceApp/Inspector/TraceInspectorDock+Symbol.swift",
+      "path": "apple/Apps/ArkTraceApp/Inspector/TraceInspectorDock+Symbol.swift",
       "byteCount": 560,
       "sha256": "09b8e92085663095498ba5d2c4cbd408035a02848e78ee2b339f62ca3c9af079"
     },
     {
-      "path": "Apps/ArkTraceApp/Inspector/TraceInspectorPane.swift",
+      "path": "apple/Apps/ArkTraceApp/Inspector/TraceInspectorPane.swift",
       "byteCount": 4050,
       "sha256": "488451ef3f5a4f5b7c92a984a776f67c837dc278f6d79648c6656af53a3f8fd5"
     },
     {
-      "path": "Apps/ArkTraceApp/NativeAppBootstrap.swift",
+      "path": "apple/Apps/ArkTraceApp/NativeAppBootstrap.swift",
       "byteCount": 5499,
       "sha256": "6821aa62c8f112c3ff9ff078aceefacfeeb8fdf792be8f759daf9f6cb960be5e"
     },
     {
-      "path": "Apps/ArkTraceApp/Settings/SettingsRootView.swift",
+      "path": "apple/Apps/ArkTraceApp/Settings/SettingsRootView.swift",
       "byteCount": 765,
       "sha256": "6c82cd13789a1a02708486d696ce32d900b16f1d87d091534f5e4ef8aedd92c0"
     },
     {
-      "path": "Apps/ArkTraceApp/Settings/TraceCacheSettingsView.swift",
+      "path": "apple/Apps/ArkTraceApp/Settings/TraceCacheSettingsView.swift",
       "byteCount": 1705,
       "sha256": "35dd20e39da7a8be87120f50b5f1cbb1fe4f5a06cfc48516a0327d94b4512fdb"
     },
     {
-      "path": "Apps/ArkTraceApp/Settings/TraceLicensesView.swift",
+      "path": "apple/Apps/ArkTraceApp/Settings/TraceLicensesView.swift",
       "byteCount": 2962,
       "sha256": "4540c23ec4064dd56e287fa88dfa5145e9714075c59bbfd113b36dd57e8eda19"
     },
     {
-      "path": "Apps/ArkTraceApp/Shared/ArkTraceWindow.swift",
+      "path": "apple/Apps/ArkTraceApp/Shared/ArkTraceWindow.swift",
       "byteCount": 177,
       "sha256": "e709903e14a06ba5465e72e4cdd57c3bc59eda4bca3c78df58ac9a64d8de390a"
     },
     {
-      "path": "Apps/ArkTraceApp/Shared/FocusableTextField.swift",
+      "path": "apple/Apps/ArkTraceApp/Shared/FocusableTextField.swift",
       "byteCount": 3858,
       "sha256": "130f019cf848c7ce86a968b626e383f9bb3b1fb79c3716a8346b693c288b4d38"
     },
     {
-      "path": "Apps/ArkTraceApp/Shared/TraceAccessibilityMessage+Localization.swift",
+      "path": "apple/Apps/ArkTraceApp/Shared/TraceAccessibilityMessage+Localization.swift",
       "byteCount": 1442,
       "sha256": "ce07a5d9f90cd01286c66de87a58aa4513c50910ce227b1f3b55c6a6b3d9a64f"
     },
     {
-      "path": "Apps/ArkTraceApp/Shared/TraceAppErrorTitle+Localization.swift",
+      "path": "apple/Apps/ArkTraceApp/Shared/TraceAppErrorTitle+Localization.swift",
       "byteCount": 494,
       "sha256": "2fc6216071d592478d2b3ec0a8cabb4db2092a7c05496248b4e09638bdfb0942"
     },
     {
-      "path": "Apps/ArkTraceApp/Shared/TraceFormatting.swift",
+      "path": "apple/Apps/ArkTraceApp/Shared/TraceFormatting.swift",
       "byteCount": 713,
       "sha256": "20cb0e6fb57fbafc8e58f46babfa9b25fbbeb277e67d55bf1235aced9b34ec0d"
     },
     {
-      "path": "Apps/ArkTraceApp/Shared/TraceLoadingStageLabel.swift",
+      "path": "apple/Apps/ArkTraceApp/Shared/TraceLoadingStageLabel.swift",
       "byteCount": 488,
       "sha256": "bc714ebb46e4ff088d382f11d7bd530bf8684c746a9d30c10dcd097ed826d302"
     },
     {
-      "path": "Apps/ArkTraceApp/Shared/View+PrimaryToolbarTarget.swift",
+      "path": "apple/Apps/ArkTraceApp/Shared/View+PrimaryToolbarTarget.swift",
       "byteCount": 329,
       "sha256": "bf24aa57b06a88c72eae1525cbebdea4dc6fb5c6a56e195498b862bebcb3e173"
     },
     {
-      "path": "Apps/ArkTraceApp/Sidebar/DepthDisclosureButton.swift",
+      "path": "apple/Apps/ArkTraceApp/Sidebar/DepthDisclosureButton.swift",
       "byteCount": 1255,
       "sha256": "c125af537b6a3b3b650ffe35374078b6c7aa935ce37b90f19cf5ee9f2a5d82b1"
     },
     {
-      "path": "Apps/ArkTraceApp/Sidebar/ProcessFilterBar.swift",
+      "path": "apple/Apps/ArkTraceApp/Sidebar/ProcessFilterBar.swift",
       "byteCount": 2714,
       "sha256": "a7173e16a3918733f0116715ad9b62fdf246a51acd76dc2654a52559871491b9"
     },
     {
-      "path": "Apps/ArkTraceApp/Sidebar/RecentDocumentRow.swift",
+      "path": "apple/Apps/ArkTraceApp/Sidebar/RecentDocumentRow.swift",
       "byteCount": 2686,
       "sha256": "bf112be9b2ef0a466f15babf2f08854b0fc30095c8dc62e9067de5a27c928f4d"
     },
     {
-      "path": "Apps/ArkTraceApp/Sidebar/RecentDocumentsSection.swift",
+      "path": "apple/Apps/ArkTraceApp/Sidebar/RecentDocumentsSection.swift",
       "byteCount": 927,
       "sha256": "55cd02bc4270dee8cd9ddfabed0ac2f46b7e3e824f0151af9d9912f6730645b3"
     },
     {
-      "path": "Apps/ArkTraceApp/Sidebar/SearchResultsSection.swift",
+      "path": "apple/Apps/ArkTraceApp/Sidebar/SearchResultsSection.swift",
       "byteCount": 3574,
       "sha256": "89e75120646e60a863b00f66e80e0e99876524c9b56306e4b5ad47d3527c7128"
     },
     {
-      "path": "Apps/ArkTraceApp/Sidebar/TraceViewerSidebar.swift",
+      "path": "apple/Apps/ArkTraceApp/Sidebar/TraceViewerSidebar.swift",
       "byteCount": 5381,
       "sha256": "9f486050dfbff9af776492d1f375b499d941567a247f915c73426d8af8f29c9e"
     },
     {
-      "path": "Apps/ArkTraceApp/Sidebar/TrackRow.swift",
+      "path": "apple/Apps/ArkTraceApp/Sidebar/TrackRow.swift",
       "byteCount": 2413,
       "sha256": "a13442fef6d5253be2b0c37c30e89252bf85cac33b86b4c54be5e6e7b017aae5"
     },
     {
-      "path": "Apps/ArkTraceApp/Viewer/TraceAnnouncementBridge.swift",
+      "path": "apple/Apps/ArkTraceApp/Viewer/TraceAnnouncementBridge.swift",
       "byteCount": 1951,
       "sha256": "7f0ff0155dd66c5ab358a04c76acefa39766044c13b384db49210eabc1f97471"
     },
     {
-      "path": "Apps/ArkTraceApp/Viewer/TraceErrorBannerOverlay.swift",
+      "path": "apple/Apps/ArkTraceApp/Viewer/TraceErrorBannerOverlay.swift",
       "byteCount": 2183,
       "sha256": "796be29f2a14eb7f5698521ef711e2c62fdc92ecbc884b944ec313fecd285357"
     },
     {
-      "path": "Apps/ArkTraceApp/Viewer/TraceLoadingPane.swift",
+      "path": "apple/Apps/ArkTraceApp/Viewer/TraceLoadingPane.swift",
       "byteCount": 5803,
       "sha256": "98fd2b8715a8a5df60545480deb591556a9969d8d0529256a613d85cd60ba373"
     },
     {
-      "path": "Apps/ArkTraceApp/Viewer/TraceReloadButton.swift",
+      "path": "apple/Apps/ArkTraceApp/Viewer/TraceReloadButton.swift",
       "byteCount": 441,
       "sha256": "40b0e6cc86452a354fad6a9f8a1ec38b3b726437bffcd83f740140364e2fd625"
     },
     {
-      "path": "Apps/ArkTraceApp/Viewer/TraceResetZoomButton.swift",
+      "path": "apple/Apps/ArkTraceApp/Viewer/TraceResetZoomButton.swift",
       "byteCount": 461,
       "sha256": "56a6617049de260aedc89a07f561aa2ca5f3ba9730c7793dc2e6c111be47861c"
     },
     {
-      "path": "Apps/ArkTraceApp/Viewer/TraceSearchField.swift",
+      "path": "apple/Apps/ArkTraceApp/Viewer/TraceSearchField.swift",
       "byteCount": 1054,
       "sha256": "d956c261c0f8b955fb67b7428f9610bcffcb54c773c629512d177a84d3640e3f"
     },
     {
-      "path": "Apps/ArkTraceApp/Viewer/TraceTimelinePane.swift",
+      "path": "apple/Apps/ArkTraceApp/Viewer/TraceTimelinePane.swift",
       "byteCount": 11722,
       "sha256": "9b0cddea6df19d028358284aae93ee52285de35aaaf206e7300cb860f2ae6275"
     },
     {
-      "path": "Apps/ArkTraceApp/Viewer/TraceViewStateBackupButton.swift",
+      "path": "apple/Apps/ArkTraceApp/Viewer/TraceViewStateBackupButton.swift",
       "byteCount": 5977,
       "sha256": "290bd2c32865cb34c60c6265f33548e54b28d2b83128b69b3a71bcdfb36a232f"
     },
     {
-      "path": "Apps/ArkTraceApp/Viewer/TraceViewerRootView.swift",
+      "path": "apple/Apps/ArkTraceApp/Viewer/TraceViewerRootView.swift",
       "byteCount": 14083,
       "sha256": "c7d0ecaf4abde1104d1401c471e2993c1f116430e261605efaaaebe2c4f9d9f7"
     },
     {
-      "path": "Apps/ArkTraceApp/Viewer/TraceZoomInButton.swift",
+      "path": "apple/Apps/ArkTraceApp/Viewer/TraceZoomInButton.swift",
       "byteCount": 424,
       "sha256": "276585b10ea04da3847557f58ee3433e6557ce6b7d986a41f73c2ca2fe577833"
     },
     {
-      "path": "Apps/ArkTraceApp/Viewer/TraceZoomOutButton.swift",
+      "path": "apple/Apps/ArkTraceApp/Viewer/TraceZoomOutButton.swift",
       "byteCount": 428,
       "sha256": "cf37b115761d8dbbadcfdc1995c8a6527eb363f54db47fdae0749bcf7adaf44d"
     },
     {
-      "path": "Apps/ArkTraceApp/Viewer/TraceZoomSelectionButton.swift",
+      "path": "apple/Apps/ArkTraceApp/Viewer/TraceZoomSelectionButton.swift",
       "byteCount": 451,
       "sha256": "1e56e34e623a24210030b7556f6f64a0e8342f00b545aa3c616be71bf377afc8"
     },
     {
       "path": "Package.swift",
-      "byteCount": 10778,
-      "sha256": "1b8bb2f2ac8db595f76bf060ee7cd21f8140eb0ebea04852114940c52d79b20f"
+      "byteCount": 10782,
+      "sha256": "8e4a038790925236d2443a11e4805d2d42fa4e9afcc659ceef18f1b62a4ac65e"
     },
     {
       "path": "README.md",
-      "byteCount": 16021,
-      "sha256": "26e2a8523749bd0e5eab1288f2d85f1e4b63551b2421ee208f5bbc6b3ef3b3da"
+      "byteCount": 16353,
+      "sha256": "ae831ee6821df648549e384a80d9a720abfbd04688a364fcb07c2b921313c8cc"
     },
     {
       "path": "README.zh-CN.md",
-      "byteCount": 15485,
-      "sha256": "70deb183ca3c594143ad630e467b33a58d962f7403e0babadd53a9d5d6f93f38"
+      "byteCount": 15817,
+      "sha256": "daf4f1617bef94262ae1b36e6c3d6b2de6da60d672bc63a3632634c33d0764db"
     },
     {
       "path": "Sources/ArkTraceAnalysis/TraceAgentQuery.swift",
@@ -359,8 +359,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
-      "byteCount": 375,
-      "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2"
+      "byteCount": 381,
+      "sha256": "10734224b0b15b736c7620623ef7a7591ec59913912097b951df4224eaa162ee"
     },
     {
       "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
@@ -439,13 +439,13 @@
     },
     {
       "path": "Sources/ArkTraceParser/TraceStreamerManifest.swift",
-      "byteCount": 11624,
-      "sha256": "5dd5b227954141de5e92a49c1ab632114f780a364d5476479debf0c1b6e70866"
+      "byteCount": 11621,
+      "sha256": "f5f4f9a5ca29ec2c8cdd1e7223b86b52d6957b0491259f55d6a8f00cf690c898"
     },
     {
       "path": "Sources/ArkTraceParser/TraceStreamerProcessParser.swift",
       "byteCount": 79370,
-      "sha256": "6ea3b715384ec1083727c216c84e3c08eb9d2d77c796e866ad0b9eb87f960a84"
+      "sha256": "69715c8e7c43bc630273ef3d305a5b4023164a4164d7426a8594e46ff5d3d419"
     },
     {
       "path": "Sources/ArkTraceParser/TraceStreamerProgressScanner.swift",
@@ -464,8 +464,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
-      "byteCount": 29092,
-      "sha256": "f192c466dea365b053f35e1fd24413c1ef656abc00cdb07653821bb31cf89197"
+      "byteCount": 29086,
+      "sha256": "10d43f4808a4f02178618cba8cf7c660a668bc463cf2c9b688714b23a59f64cc"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
@@ -539,18 +539,18 @@
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/AppCommandTests.swift",
-      "byteCount": 6174,
-      "sha256": "3ba80bbc3c8ee90d6556c2c9b6eb96a256814030b641ca6806b83c3054e42ef2"
+      "byteCount": 6180,
+      "sha256": "186e40f557fc421e882249a94ce66255eeb33c5df7013ab21aa3a82865459401"
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/AppDistributionTests.swift",
-      "byteCount": 29664,
-      "sha256": "7ce086c78d281058b47c6de7dbc1ca126a72b233565e66e44bf16590fc1b22d9"
+      "byteCount": 29693,
+      "sha256": "eb3419d123fd250e6a8177de66d7b3ae406cb01a0d2c12c88f9f33bc27099ecd"
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/AppSource.swift",
-      "byteCount": 3276,
-      "sha256": "3760827686befcd68239ccb7c675c4837fc85b741e3ea3ba08081e4682f138a9"
+      "byteCount": 3282,
+      "sha256": "29cef65cf51c34728cb8853a8760f7b768adbec0f90b2eb1f8b5a016b6c60ef7"
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/CatalogBatchTests.swift",
@@ -559,8 +559,8 @@
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/LocalizationCatalogTests.swift",
-      "byteCount": 8943,
-      "sha256": "8fad3848c4048431b8aa8806b653dc086da3819e4cb9872eb9a6d9d26bc94e66"
+      "byteCount": 8949,
+      "sha256": "c3dc26347b8ee33d876cdafe26dd5901654861f063517990b3ae9c525088235a"
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/NativeProductProfileTests.swift",
@@ -574,8 +574,8 @@
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/ObservationBoundaryTests.swift",
-      "byteCount": 4907,
-      "sha256": "796cba188da93ba3cf4704cfbec0fab6d2182d994538ad68283e67461167c4a0"
+      "byteCount": 4913,
+      "sha256": "b54c8bfa2b3adfe1d44273e08f9d341ff772c95de91ed10268fee484a71e04f8"
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/RangeAnalysisDocumentGenerationTests.swift",
@@ -594,8 +594,8 @@
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/SidebarLabelTests.swift",
-      "byteCount": 2828,
-      "sha256": "d0452f9020fe7720b1ef34c9f56261c781c17b9b8ec72d93d9d4c00578f2b139"
+      "byteCount": 2834,
+      "sha256": "b04ba7bbaa8445663e59c99737044591259390352b322bcfca7f73ee4127fcbd"
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/TraceBundledRustRuntimeTests.swift",
@@ -609,8 +609,8 @@
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/TraceOfflineInspectionServiceTests.swift",
-      "byteCount": 14951,
-      "sha256": "d8dd37fb6ef32e7cdfb96cca6746532fe6de1b238949cdc4e03ff8b990f2b406"
+      "byteCount": 14945,
+      "sha256": "818741ff523f3b4be95c0cbcdff34f8029e0a311cf19957b685253d9ceb86caf"
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/TraceViewStateStoreTests.swift",
@@ -644,8 +644,8 @@
     },
     {
       "path": "Tests/ArkTraceCoreTests/MigrationTimeContractTests.swift",
-      "byteCount": 1724,
-      "sha256": "2a76990963356ddbf2fdc9bca6b6a6d8378bfc5f6e7fe05eb6dbce60f0d50926"
+      "byteCount": 1718,
+      "sha256": "448c58f8367d87b56d65cd2c43ac64ab861d5f2d42644a4793dead8d3601fb6a"
     },
     {
       "path": "Tests/ArkTraceCoreTests/TraceEventModelContractTests.swift",
@@ -799,8 +799,8 @@
     },
     {
       "path": "Tests/ArkTraceRenderingTests/TimelinePaletteTests.swift",
-      "byteCount": 17740,
-      "sha256": "67241e0022c4defa7052cf484c9419af59f9c133b7afe2858de76f38cd1c3b05"
+      "byteCount": 17735,
+      "sha256": "16e0f1585643796a424385963f31ed519af1f17ca22dadf1391239a554916292"
     },
     {
       "path": "Tests/ArkTraceRenderingTests/TimelinePointerGestureTests.swift",
@@ -854,13 +854,13 @@
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/action_catalog_swift.py",
-      "byteCount": 6643,
-      "sha256": "fd5f909129c0b02926d02d2b20736e0c928c81fc7a089f95810bae30f9ea9d2b"
+      "byteCount": 6652,
+      "sha256": "2352adaa2e9cdb94d7deb72166b280dfadcecad2ba5f9602489cb0e987bfc6f3"
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/action_catalog_validate.py",
-      "byteCount": 1873,
-      "sha256": "43dbb1050cc402d85f116a0b8895c2c1e727f82a4c3590a26983b0ed9587d7f9"
+      "byteCount": 1859,
+      "sha256": "b01d0aea36d5bfdc78dba95f2871cebca8f67188762863b32b974a46c6414ed4"
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/inspector_projection_access.swift",
@@ -889,13 +889,13 @@
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/inspector_projection_swift.py",
-      "byteCount": 4945,
-      "sha256": "e730c1963f5b4103f34d6afb511e23b77ceb74642de0daf7f4aa7aea37ab39f7"
+      "byteCount": 4939,
+      "sha256": "c7724e7649e77e25344a9c81f11ba1875b7e9bc5f0f9d6ed4698be048b70da62"
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/inspector_projection_validate.py",
-      "byteCount": 1897,
-      "sha256": "cdf5791ed74f8ac162026a565c6d66c27bcb3fee8eba8464be86f15c0871f8f5"
+      "byteCount": 1883,
+      "sha256": "e9fadb452d9411d3f450f4ca751d088078f7818bba133fb0afddc0ab54602800"
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_controller_seam.swift",
@@ -919,13 +919,13 @@
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_report.py",
-      "byteCount": 15036,
-      "sha256": "13eaea4753892622637ed60ee7346707617b8b70af21901aa6887f27ce287c77"
+      "byteCount": 15033,
+      "sha256": "c0748dc157e3c91e88e97b821e37c804421bd7ea93a83ab7a98f5c607e14e74e"
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_run_swift.py",
-      "byteCount": 4922,
-      "sha256": "133aeef5048d3eb707148351cdcdee42bb32f74cf93d3c85cbb66e3609b0fdfa"
+      "byteCount": 4981,
+      "sha256": "f5ca2c4234c65e099c2e15e4a0a31ac7266d704cfcc7d3e7df2bc820bad9fdd8"
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_swift_logging.patch",
@@ -934,8 +934,8 @@
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_validate.py",
-      "byteCount": 1886,
-      "sha256": "c2826081c74b5b3e438c8687a6db1713677518c6e0e3af125fcd815ab10bcbc2"
+      "byteCount": 1868,
+      "sha256": "19abe20212fd42c745ad640fb29c785dd52f9b81bd6970a9780eb0781363459e"
     },
     {
       "path": "rust/crates/arktrace-viewer/tests/fixtures/action-catalog-display-swift.json",
@@ -989,7 +989,7 @@
     {
       "command": [
         "sh",
-        "scripts/run-swiftpm.sh",
+        "hack/run-swiftpm.sh",
         "test",
         "--disable-sandbox",
         "--config-path",
@@ -1031,7 +1031,7 @@
     {
       "command": [
         "sh",
-        "scripts/run-swiftpm.sh",
+        "hack/run-swiftpm.sh",
         "test",
         "--disable-sandbox",
         "--config-path",
@@ -1073,7 +1073,7 @@
     {
       "argv": [
         "sh",
-        "scripts/run-swiftpm.sh",
+        "hack/run-swiftpm.sh",
         "test",
         "--disable-sandbox",
         "--config-path",
@@ -1101,7 +1101,7 @@
     {
       "argv": [
         "sh",
-        "scripts/run-swiftpm.sh",
+        "hack/run-swiftpm.sh",
         "test",
         "--disable-sandbox",
         "--config-path",
@@ -1163,8 +1163,8 @@
     "atUtc": "2026-10-06T09:52:46.528982+00:00",
     "baseCommit": "e0c6d390bcb17a544598c4265c3dd7cc6626f7cb",
     "sourceDelta": [
-      "Apps/ArkTraceApp/Inspector/InspectorFocusButton.swift",
-      "Apps/ArkTraceApp/Viewer/TraceViewStateBackupButton.swift"
+      "apple/Apps/ArkTraceApp/Inspector/InspectorFocusButton.swift",
+      "apple/Apps/ArkTraceApp/Viewer/TraceViewStateBackupButton.swift"
     ],
     "actualCanonicalTests": [
       "-[ArkTraceAppSupportTests.ActionCatalogDisplayOracleTests testActualShortcutCatalog]",
@@ -1219,8 +1219,8 @@
     "atUtc": "2026-10-06T10:10:48.897322+00:00",
     "baseCommit": "e0c6d390bcb17a544598c4265c3dd7cc6626f7cb",
     "sourceDelta": [
-      "Apps/ArkTraceApp/Inspector/InspectorFocusButton.swift",
-      "Apps/ArkTraceApp/Viewer/TraceViewStateBackupButton.swift"
+      "apple/Apps/ArkTraceApp/Inspector/InspectorFocusButton.swift",
+      "apple/Apps/ArkTraceApp/Viewer/TraceViewStateBackupButton.swift"
     ],
     "actualCanonicalTests": [
       "-[ArkTraceAppSupportTests.ActionCatalogDisplayOracleTests testActualShortcutCatalog]",

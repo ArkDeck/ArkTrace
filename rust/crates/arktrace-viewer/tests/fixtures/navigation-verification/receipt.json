@@ -11,7 +11,7 @@
       "name": "fmt",
       "command": [
         "/opt/homebrew/opt/python@3.14/bin/python3.14",
-        "scripts/run-cargo.py",
+        "hack/run-cargo.py",
         "fmt",
         "--all",
         "--check"
@@ -24,7 +24,7 @@
       "name": "clippy",
       "command": [
         "/opt/homebrew/opt/python@3.14/bin/python3.14",
-        "scripts/run-cargo.py",
+        "hack/run-cargo.py",
         "clippy",
         "-p",
         "arktrace-viewer",
@@ -42,7 +42,7 @@
       "name": "tests",
       "command": [
         "/opt/homebrew/opt/python@3.14/bin/python3.14",
-        "scripts/run-cargo.py",
+        "hack/run-cargo.py",
         "test",
         "-p",
         "arktrace-viewer",
@@ -56,7 +56,7 @@
       "name": "workspace",
       "command": [
         "/opt/homebrew/opt/python@3.14/bin/python3.14",
-        "scripts/verify_rust_workspace.py"
+        "hack/verify_rust_workspace.py"
       ],
       "exitCode": 0,
       "log": "rust/crates/arktrace-viewer/tests/fixtures/navigation-verification/workspace.log",
@@ -66,7 +66,7 @@
       "name": "licenses",
       "command": [
         "sh",
-        "scripts/verify_licenses.sh"
+        "hack/verify_licenses.sh"
       ],
       "exitCode": 0,
       "log": "rust/crates/arktrace-viewer/tests/fixtures/navigation-verification/licenses.log",

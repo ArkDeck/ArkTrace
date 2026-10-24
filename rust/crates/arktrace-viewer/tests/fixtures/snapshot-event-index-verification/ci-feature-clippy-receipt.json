@@ -1,7 +1,7 @@
 {
   "command": [
     "python3",
-    "scripts/run-cargo.py",
+    "hack/run-cargo.py",
     "clippy",
     "--workspace",
     "--all-targets",

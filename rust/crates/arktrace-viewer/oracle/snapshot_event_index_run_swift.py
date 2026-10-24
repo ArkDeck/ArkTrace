@@ -6,8 +6,9 @@ ROOT=Path(__file__).resolve().parents[4]; CRATE=ROOT/'rust/crates/arktrace-viewe
 cache=Path(os.environ['ARKTRACE_SWIFTPM_CACHE_ROOT']).resolve()
 assert cache.is_absolute() and not cache.is_relative_to(ROOT)
 source=cache/'snapshot-event-index-oracle-source'; source.mkdir(parents=True,exist_ok=True)
-for directory in ('Sources','Tests','scripts','ThirdParty','Fixtures','Apps'):
- shutil.copytree(ROOT/directory,source/directory,dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__','trace_streamer'))
+for directory in ('Sources','Tests','hack','third_party','test/fixtures','Apps'):
+ origin=ROOT/'apple/Apps' if directory=='Apps' else ROOT/directory
+ shutil.copytree(origin,source/directory,dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__','trace_streamer'))
 for path in ROOT.iterdir():
  if path.is_file() and not path.is_symlink(): shutil.copyfile(path,source/path.name)
 controller='Sources/ArkTraceAppSupport/TraceDocumentController.swift'
@@ -51,7 +52,7 @@ inputs=CRATE/'tests/fixtures/snapshot-event-index-inputs.json'; output=CRATE/'te
 env.update(ARKTRACE_SNAPSHOT_EVENT_INDEX_INPUT=str(inputs),ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT=str(output))
 filter_name='SnapshotEventIndexCanonicalOracleTests' if len(sys.argv)<2 else sys.argv[1]
 label='canonical' if filter_name=='SnapshotEventIndexCanonicalOracleTests' else 'regressions'
-cmd=['sh','scripts/run-swiftpm.sh','test','--disable-sandbox','--config-path',str(cache/'configuration'),'--security-path',str(cache/'security'),'--filter',filter_name]
+cmd=['sh','hack/run-swiftpm.sh','test','--disable-sandbox','--config-path',str(cache/'configuration'),'--security-path',str(cache/'security'),'--filter',filter_name]
 log=CRATE/f'tests/fixtures/snapshot-event-index-swift-{label}.log'
 with log.open('w',encoding='utf-8') as out: run=subprocess.run(cmd,cwd=source,env=env,stdout=out,stderr=subprocess.STDOUT)
 def receipt(p):

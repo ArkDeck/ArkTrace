@@ -35,7 +35,7 @@ def main():
     if not xcode.startswith("Xcode 27."):
         raise SystemExit("Xcode 27 required")
     SOURCE.mkdir(parents=True, exist_ok=True)
-    for directory in ("Sources/ArkTraceCore", "Sources/ArkTraceRendering", "Tests/ArkTraceRenderingTests", "scripts"):
+    for directory in ("Sources/ArkTraceCore", "Sources/ArkTraceRendering", "Tests/ArkTraceRenderingTests", "hack"):
         shutil.copytree(ROOT / directory, SOURCE / directory, dirs_exist_ok=True)
     (SOURCE / "Package.swift").write_text('''// swift-tools-version: 6.3
 import PackageDescription
@@ -64,7 +64,7 @@ extension TimelineNSView {
         ARKTRACE_VIEWER_ORACLE_INPUT=str(INPUT),
         ARKTRACE_VIEWER_ORACLE_OUTPUT=str(OUTPUT))
     with (CACHE / f"{STEM}.log").open("w") as log:
-        result = subprocess.run(["sh", "scripts/run-swiftpm.sh", "test", "--disable-sandbox", "--config-path", str(CACHE / "configuration"), "--security-path", str(CACHE / "security"), "--filter", ("TimelineRenderingTests.testActualDetailDTOOracle" if DETAIL else "TimelineRenderingTests.testParallelViewerBoundaryOracle" if BOUNDARIES else "TimelineRenderingTests.testParallelViewerPlanOracle" if PLAN else "TimelineRenderingTests.testParallelViewerGeometryOracle")],
+        result = subprocess.run(["sh", "hack/run-swiftpm.sh", "test", "--disable-sandbox", "--config-path", str(CACHE / "configuration"), "--security-path", str(CACHE / "security"), "--filter", ("TimelineRenderingTests.testActualDetailDTOOracle" if DETAIL else "TimelineRenderingTests.testParallelViewerBoundaryOracle" if BOUNDARIES else "TimelineRenderingTests.testParallelViewerPlanOracle" if PLAN else "TimelineRenderingTests.testParallelViewerGeometryOracle")],
             cwd=SOURCE, env=environment, stdout=log, stderr=subprocess.STDOUT)
     if result.returncode:
         print((CACHE / f"{STEM}.log").read_text()[-10000:])
@@ -94,7 +94,7 @@ extension TimelineNSView {
     if "--regressions" in sys.argv:
         selected = "TimelineRenderingTests.test(DetailBudgetContract|GeometryAndHitTestingUseSameFrameAndDensityCarriesNoEventKey|OverlappingDetailHitUsesTheSameClosedStyleZOrderAsDrawing|PrimitivesOutsideTheViewportAreNeitherDrawnNorHitTested|InstantDetailRetainsDomainRangeButDrawsAtLeastOnePhysicalPixel|ExtremeInt64ViewportEndpointsRoundTripAndRulerDrawsWithoutTrap|PanDeltaSaturatesAndRejectsNonFinitePointDeltas|ViewportRejectsNonFiniteNanosecondsPerPoint|PanAndCursorAnchoredZoomAreOverflowSafe|PrimitiveBudgetIsGlobalAcrossTracks|AutomaticLODDoesNotGiveUnusedBudgetToTheFinalBusyTrack|DensityPrefetchChunksBeyondTheEventBatchQueryCap|LoaderQueriesOnlyVerticallyVisibleTracksWithOverscan|ExplicitDetailQueriesOnlyVerticallyVisibleTracksWithOverscan|NestedDepthRowsAreDistinctAndHitTestMatchesTheDrawnFrame|LoaderBuildsDepthRowsAndFlatteningReturnsToOneBand|DepthBeyondReservedRowsClampsInsideTheTrack)|TimelineDensitySelectionTests|TimelinePointerGestureTests.test(EndpointHitAreasAreLargeEnoughAndNeverOverlap|DraggingAnEndpointMovesOnlyThatEndpoint|PressingAwayFromAHandleStillSweepsANewRange)"
         with (CACHE / "swift-regressions.log").open("w") as log:
-            result = subprocess.run(["sh", "scripts/run-swiftpm.sh", "test", "--disable-sandbox", "--config-path", str(CACHE / "configuration"), "--security-path", str(CACHE / "security"), "--filter", selected], cwd=SOURCE, env=environment, stdout=log, stderr=subprocess.STDOUT)
+            result = subprocess.run(["sh", "hack/run-swiftpm.sh", "test", "--disable-sandbox", "--config-path", str(CACHE / "configuration"), "--security-path", str(CACHE / "security"), "--filter", selected], cwd=SOURCE, env=environment, stdout=log, stderr=subprocess.STDOUT)
         print((CACHE / "swift-regressions.log").read_text()[-7000:])
         return result.returncode
     return 0

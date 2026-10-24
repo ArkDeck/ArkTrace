@@ -27,7 +27,7 @@ def main():
     if git_marker.is_file():
         if not git_marker.read_text().startswith("gitdir: "): raise SystemExit("unexpected oracle Git marker")
         git_marker.unlink()
-    for directory in ("Sources", "Tests", "scripts", "ThirdParty", "Fixtures"):
+    for directory in ("Sources", "Tests", "hack", "third_party", "test/fixtures"):
         shutil.copytree(ROOT / directory, source / directory, dirs_exist_ok=True,ignore=shutil.ignore_patterns("__pycache__", "trace_streamer"))
     for path in ROOT.iterdir():
         if path.name != ".git" and path.is_file() and not path.is_symlink(): shutil.copyfile(path, source / path.name)
@@ -50,7 +50,7 @@ def main():
     environment.update(ARKTRACE_NAVIGATION_INPUT=str(CRATE / "tests/fixtures/navigation-inputs.json"),ARKTRACE_NAVIGATION_OUTPUT=str(CRATE / "tests/fixtures/navigation-swift-oracle.json"),ARKTRACE_NAVIGATION_RENDERING_INPUT=str(CRATE / "tests/fixtures/navigation-rendering-inputs.json"),ARKTRACE_NAVIGATION_RENDERING_OUTPUT=str(CRATE / "tests/fixtures/navigation-rendering-swift-oracle.json"))
     environment.update(ARKTRACE_NAVIGATION_RESTORE_INPUT=str(CRATE / "tests/fixtures/navigation-restore-inputs.json"),ARKTRACE_NAVIGATION_RESTORE_OUTPUT=str(CRATE / "tests/fixtures/navigation-restore-swift-oracle.json"),ARKTRACE_NAVIGATION_TEST_CACHE=str(cache/"navigation-test-fixtures"))
     environment["ARKTRACE_NAVIGATION_WHITESPACE_OUTPUT"] = str(CRATE/"tests/fixtures/navigation-whitespace-swift-oracle.json")
-    command = ["sh", "scripts/run-swiftpm.sh", "test", "--disable-sandbox", "--config-path",str(cache / "configuration"),"--security-path",str(cache / "security"),"--filter","NavigationCanonicalOracleTests"]
+    command = ["sh", "hack/run-swiftpm.sh", "test", "--disable-sandbox", "--config-path",str(cache / "configuration"),"--security-path",str(cache / "security"),"--filter","NavigationCanonicalOracleTests"]
     with (cache / "navigation-oracle.log").open("w") as log: result = subprocess.run(command,cwd=source,env=environment,stdout=log,stderr=subprocess.STDOUT)
     def digest(path):
         data = path.read_bytes(); return dict(path=str(path),sha256=hashlib.sha256(data).hexdigest(),byteCount=len(data))

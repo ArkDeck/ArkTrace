@@ -5,7 +5,7 @@ import Foundation
 ///
 /// The identity-bearing fields are required and are validated before the
 /// executable can be launched. The remaining fields preserve the build
-/// evidence emitted by `scripts/build_trace_streamer.sh`.
+/// evidence emitted by `hack/build_trace_streamer.sh`.
 package struct TraceStreamerManifest: Codable, Equatable, Sendable {
     public let name: String
     public let upstreamRepository: String
