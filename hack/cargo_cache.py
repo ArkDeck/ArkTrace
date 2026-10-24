@@ -20,12 +20,12 @@ import time
 import uuid
 
 STATE = '.arktrace-cargo-owner.json'
-SOURCE_PATHS = ('rust', 'api', 'third_party/TraceStreamer/macx/manifest.json',
-                'third_party/TraceStreamer/windows-x86_64/manifest.json',
+SOURCE_PATHS = ('rust', 'api', 'third_party/trace-streamer/macx/manifest.json',
+                'third_party/trace-streamer/windows-x86_64/manifest.json',
                 # The Windows `licenses` command embeds the reviewed attribution bytes.
                 'LICENSE', 'THIRD_PARTY_NOTICES.md',
-                'third_party/TraceStreamer/license-inventory.json',
-                'third_party/TraceStreamer/windows-license-inventory.json')
+                'third_party/trace-streamer/license-inventory.json',
+                'third_party/trace-streamer/windows-license-inventory.json')
 EVIDENCE_KINDS = {'source', 'manifest', 'lockfile', 'dependencyRecord', 'binary', 'log'}
 
 

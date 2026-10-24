@@ -6,182 +6,182 @@
   "positions": 393,
   "sourceDigests": [
     {
-      "path": "Sources/ArkTraceCore/Error/ArkTraceError.swift",
+      "path": "sources/ArkTraceCore/Error/ArkTraceError.swift",
       "byteCount": 11275,
       "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a"
     },
     {
-      "path": "Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+      "path": "sources/ArkTraceCore/IO/BoundedRegularFile.swift",
       "byteCount": 4367,
       "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3"
     },
     {
-      "path": "Sources/ArkTraceCore/IO/LowercaseHex.swift",
+      "path": "sources/ArkTraceCore/IO/LowercaseHex.swift",
       "byteCount": 1042,
       "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981"
     },
     {
-      "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+      "path": "sources/ArkTraceCore/Model/ArkTraceProduct.swift",
       "byteCount": 381,
       "sha256": "10734224b0b15b736c7620623ef7a7591ec59913912097b951df4224eaa162ee"
     },
     {
-      "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+      "path": "sources/ArkTraceCore/Model/IdentityGrammar.swift",
       "byteCount": 862,
       "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd"
     },
     {
-      "path": "Sources/ArkTraceCore/Model/TraceEventModels.swift",
+      "path": "sources/ArkTraceCore/Model/TraceEventModels.swift",
       "byteCount": 17503,
       "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7"
     },
     {
-      "path": "Sources/ArkTraceCore/Model/TraceIdentity.swift",
+      "path": "sources/ArkTraceCore/Model/TraceIdentity.swift",
       "byteCount": 1526,
       "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765"
     },
     {
-      "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
+      "path": "sources/ArkTraceCore/Model/TraceModels.swift",
       "byteCount": 13541,
       "sha256": "ad2ec7a333007ddb6b525920adc7c113382bfb6a243b413a956333db24ff60e9"
     },
     {
-      "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+      "path": "sources/ArkTraceCore/Model/TraceViewerModels.swift",
       "byteCount": 5258,
       "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e"
     },
     {
-      "path": "Sources/ArkTraceCore/Parser/TraceParser.swift",
+      "path": "sources/ArkTraceCore/Parser/TraceParser.swift",
       "byteCount": 8071,
       "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6"
     },
     {
-      "path": "Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+      "path": "sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
       "byteCount": 3147,
       "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f"
     },
     {
-      "path": "Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+      "path": "sources/ArkTraceCore/Query/TraceAgentQuery.swift",
       "byteCount": 16011,
       "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a"
     },
     {
-      "path": "Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+      "path": "sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
       "byteCount": 1186,
       "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331"
     },
     {
-      "path": "Sources/ArkTraceCore/Query/TraceDensity.swift",
+      "path": "sources/ArkTraceCore/Query/TraceDensity.swift",
       "byteCount": 3873,
       "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d"
     },
     {
-      "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+      "path": "sources/ArkTraceCore/Query/TraceEventQueries.swift",
       "byteCount": 9744,
       "sha256": "aca5ec6f3e2e864a4329537ccf26de56dc2fb386d0f2a92a0367b2fdce11f989"
     },
     {
-      "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+      "path": "sources/ArkTraceCore/Query/TraceFrameQuery.swift",
       "byteCount": 863,
       "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc"
     },
     {
-      "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
+      "path": "sources/ArkTraceCore/Query/TraceQueries.swift",
       "byteCount": 17200,
       "sha256": "6bca47633ca3ee379f9931f7130d509390157c834e073062862fcdfacd44b604"
     },
     {
-      "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
+      "path": "sources/ArkTraceCore/Time/TraceTime.swift",
       "byteCount": 2757,
       "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f"
     },
     {
-      "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
+      "path": "sources/ArkTraceRendering/TimelineAnnotations.swift",
       "byteCount": 6608,
       "sha256": "0344cd987512a24c45071f47e1cdd59c103661326c5abd62bdcb6601bbecfc56"
     },
     {
-      "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
-      "byteCount": 29086,
-      "sha256": "10d43f4808a4f02178618cba8cf7c660a668bc463cf2c9b688714b23a59f64cc"
+      "path": "sources/ArkTraceRendering/TimelineColorPalette.swift",
+      "byteCount": 29088,
+      "sha256": "a542e23ddc3f92bce35369ed78a0ab39c4c53610891534c1d58f8637dcf5e996"
     },
     {
-      "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
+      "path": "sources/ArkTraceRendering/TimelineGeometry.swift",
       "byteCount": 8339,
       "sha256": "ef5c1239ba6fc8e780f0fcd1932a8c49049a1bd1454811dd961bea82aa137ac8"
     },
     {
-      "path": "Sources/ArkTraceRendering/TimelineModels.swift",
+      "path": "sources/ArkTraceRendering/TimelineModels.swift",
       "byteCount": 27152,
       "sha256": "6277f0095d896e56a6bbc8ff342ccc4d82f3863113a95e51a9cd2d3ad428b997"
     },
     {
-      "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
+      "path": "sources/ArkTraceRendering/TimelineNSView.swift",
       "byteCount": 102182,
       "sha256": "2f075ef959c47e64fa8b1364dcb94e18eeb9151f6ecc01e4be49c658ee853be6"
     },
     {
-      "path": "Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
+      "path": "sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
       "byteCount": 41220,
       "sha256": "81e784d31a7b24b224213ea4fc12cc494191b90ab5a533f90c5862887210b1e9"
     },
     {
-      "path": "Tests/ArkTraceCoreTests/TraceEventModelContractTests.swift",
+      "path": "tests/ArkTraceCoreTests/TraceEventModelContractTests.swift",
       "byteCount": 7059,
       "sha256": "da86f36e673f4cdcfb676e924bfd1d81ebe9ee7175be41a7006936fb9f1cf15e"
     },
     {
-      "path": "Tests/ArkTraceCoreTests/TraceTimeTests.swift",
+      "path": "tests/ArkTraceCoreTests/TraceTimeTests.swift",
       "byteCount": 4756,
       "sha256": "cef5992375591128abe8d787cd7a979665698dfe4103cc13ac001acc3d0ac671"
     },
     {
-      "path": "Tests/ArkTraceRenderingTests/TimelineAnnotationKeyTests.swift",
+      "path": "tests/ArkTraceRenderingTests/TimelineAnnotationKeyTests.swift",
       "byteCount": 9931,
       "sha256": "69e3a947d72e976d21e1df0b12df32c77e5180772cf148c2f34903f9b9f5a7df"
     },
     {
-      "path": "Tests/ArkTraceRenderingTests/TimelineDensitySelectionTests.swift",
+      "path": "tests/ArkTraceRenderingTests/TimelineDensitySelectionTests.swift",
       "byteCount": 19408,
       "sha256": "899a00ecbbca2b30d4e2725e0fa80815cc6625596ab05fa9ad84f0a831d3ed09"
     },
     {
-      "path": "Tests/ArkTraceRenderingTests/TimelineFlagSelectionTests.swift",
+      "path": "tests/ArkTraceRenderingTests/TimelineFlagSelectionTests.swift",
       "byteCount": 3386,
       "sha256": "1443963da1fb39d43cfed7e621f96ede91afbd8aefb283e4955a585f2ae4d5cc"
     },
     {
-      "path": "Tests/ArkTraceRenderingTests/TimelineFrameLaneTests.swift",
+      "path": "tests/ArkTraceRenderingTests/TimelineFrameLaneTests.swift",
       "byteCount": 5608,
       "sha256": "2568a184ab2c8d46a777933efa99d069dee9b250e559ea93cd44848ad75c00ec"
     },
     {
-      "path": "Tests/ArkTraceRenderingTests/TimelineHoverTests.swift",
+      "path": "tests/ArkTraceRenderingTests/TimelineHoverTests.swift",
       "byteCount": 7516,
       "sha256": "0027fd7f0ffa8597119b1d2567c12ae61cc76945df212b390fb09e91887c9db2"
     },
     {
-      "path": "Tests/ArkTraceRenderingTests/TimelineNavigationKeyTests.swift",
+      "path": "tests/ArkTraceRenderingTests/TimelineNavigationKeyTests.swift",
       "byteCount": 10854,
       "sha256": "e274318c1dd87beec0cb802eeb09e14a394b10f9c3cc4ab26d1ced96f14e0cc3"
     },
     {
-      "path": "Tests/ArkTraceRenderingTests/TimelinePaletteTests.swift",
-      "byteCount": 17735,
-      "sha256": "16e0f1585643796a424385963f31ed519af1f17ca22dadf1391239a554916292"
+      "path": "tests/ArkTraceRenderingTests/TimelinePaletteTests.swift",
+      "byteCount": 17736,
+      "sha256": "4349ce406c8b4ef2f2b74c6d80d2b746740955bd08985631b2a3e6d5a854c7a4"
     },
     {
-      "path": "Tests/ArkTraceRenderingTests/TimelinePointerGestureTests.swift",
+      "path": "tests/ArkTraceRenderingTests/TimelinePointerGestureTests.swift",
       "byteCount": 21205,
       "sha256": "f56c091781571be1c479567209d05584a8fbc38baa71fe79e3bf6822721ff771"
     },
     {
-      "path": "Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
+      "path": "tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
       "byteCount": 109022,
       "sha256": "399a3181abe7ec717cb812e034b0c8672985bb4a2454dafd822617a16e3de663"
     },
     {
-      "path": "Tests/ArkTraceRenderingTests/TimelineTimeLabelFormatTests.swift",
+      "path": "tests/ArkTraceRenderingTests/TimelineTimeLabelFormatTests.swift",
       "byteCount": 2477,
       "sha256": "0222bf15c130326db8215ab76e9a6a1145522a8e2a744a2080cad1a495b86ebc"
     },
@@ -212,13 +212,13 @@
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/inspector_projection_swift.py",
-      "byteCount": 4939,
-      "sha256": "c7724e7649e77e25344a9c81f11ba1875b7e9bc5f0f9d6ed4698be048b70da62"
+      "byteCount": 5063,
+      "sha256": "782d8d8f157ff35250cb77b4044262c3cc5c5b79c68c8077973bf31014402a2f"
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/inspector_projection_validate.py",
-      "byteCount": 1883,
-      "sha256": "e9fadb452d9411d3f450f4ca751d088078f7818bba133fb0afddc0ab54602800"
+      "byteCount": 1884,
+      "sha256": "61e67c3c0f18e61b27a76d870b5b6f381e7d54404200c809648cfb8944230b5c"
     },
     {
       "path": "rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-inputs.json",

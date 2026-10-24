@@ -72,7 +72,7 @@ while IFS= read -r path; do
             rust_macos=true
             rust_windows=true
             ;;
-        Sources/ArkTraceRustRuntime/*|Tests/ArkTraceRustRuntimeTests/*|hack/swift-sdk-conformance/*|hack/swift-sdk-lifecycle/*|hack/swift-sdk-directory/*|hack/swift-sdk-summary/*|hack/swift-sdk-core/*|hack/build_macos_rust_sdk.py|hack/stage_macos_rust_sdk.py|hack/test_stage_macos_rust_sdk.py|hack/test_macos_rust_sdk.py|hack/test_macos_rust_lifecycle.py|hack/test_macos_directory_sdk.py|hack/test_macos_summary_sdk.py|hack/test_macos_core_sdk.py|hack/test_macos_event_sdk.py|hack/test_macos_density_sdk.py|hack/test_macos_batch_sdk.py|hack/test_macos_deadline_sdk.py|hack/test_macos_repository_sdk.py)
+        sources/ArkTraceRustRuntime/*|tests/ArkTraceRustRuntimeTests/*|hack/swift-sdk-conformance/*|hack/swift-sdk-lifecycle/*|hack/swift-sdk-directory/*|hack/swift-sdk-summary/*|hack/swift-sdk-core/*|hack/build_macos_rust_sdk.py|hack/stage_macos_rust_sdk.py|hack/test_stage_macos_rust_sdk.py|hack/test_macos_rust_sdk.py|hack/test_macos_rust_lifecycle.py|hack/test_macos_directory_sdk.py|hack/test_macos_summary_sdk.py|hack/test_macos_core_sdk.py|hack/test_macos_event_sdk.py|hack/test_macos_density_sdk.py|hack/test_macos_batch_sdk.py|hack/test_macos_deadline_sdk.py|hack/test_macos_repository_sdk.py)
             # Native Swift SDK is compiled by the macOS Rust lane using an
             # explicit immutable local artifact; default SwiftPM has no asset.
             contracts=true
@@ -100,7 +100,7 @@ while IFS= read -r path; do
             swiftpm=true
             app=true
             ;;
-        Sources/ArkTraceRendering/TimelineColorPalette.swift)
+        sources/ArkTraceRendering/TimelineColorPalette.swift)
             # The palette tables are also an offline contract:
             # hack/verify_palette.py reads this file and re-measures every
             # figure AT-RENDER-008 quotes, so an edit here has to run the
@@ -109,22 +109,22 @@ while IFS= read -r path; do
             app=true
             contracts=true
             ;;
-        Sources/ArkTraceParser/TraceStreamerProcessParser.swift|Sources/ArkTraceStore/TraceSchemaAdapter.swift|Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift)
+        sources/ArkTraceParser/TraceStreamerProcessParser.swift|sources/ArkTraceStore/TraceSchemaAdapter.swift|sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift)
             # Parser, schema, and index versions are exported for ArkDeck.
             swiftpm=true
             app=true
             contracts=true
             ;;
-        Sources/ArkTraceCore/*|Sources/ArkTraceParser/*|Sources/ArkTraceStore/*|Sources/ArkTraceRuntime/*|Sources/ArkTraceAnalysis/*|Sources/ArkTraceRendering/*|Sources/ArkTraceAppSupport/*|Sources/ArkTraceCapture/*)
+        sources/ArkTraceCore/*|sources/ArkTraceParser/*|sources/ArkTraceStore/*|sources/ArkTraceRuntime/*|sources/ArkTraceAnalysis/*|sources/ArkTraceRendering/*|sources/ArkTraceAppSupport/*|sources/ArkTraceCapture/*)
             # These modules are linked directly or transitively by ArkTraceApp.
             swiftpm=true
             app=true
             ;;
-        Sources/ArkTraceCLI/*|Sources/ArkTraceSignalShim/*|Sources/ArkTraceCLIResourceFixtures/*|Sources/arktrace/*|Tests/*)
+        sources/ArkTraceCLI/*|sources/ArkTraceSignalShim/*|sources/ArkTraceCLIResourceFixtures/*|sources/arktrace/*|tests/*)
             # Tests and command-line-only targets never feed the app binary.
             swiftpm=true
             ;;
-        Sources/*)
+        sources/*)
             # A newly added source target has unknown app reachability.
             select_all
             ;;
@@ -133,7 +133,7 @@ while IFS= read -r path; do
             # rides the SwiftPM lane rather than the offline contract lane.
             swiftpm=true
             ;;
-        hack/test_macos_file_volumes.py|hack/test_macos_parser_process.py|hack/test_macos_directory_commands.py|hack/test_macos_event_queries.py|hack/test_macos_slice_queries.py|hack/test_macos_counter_queries.py|hack/test_macos_frame_queries.py|hack/test_macos_argument_queries.py|hack/test_macos_search.py|hack/test_macos_density_queries.py|hack/test_macos_batch_queries.py|hack/test_macos_async_runtime.py|hack/test_macos_viewer_owner.py|hack/test_macos_viewport_owner.py|hack/test_macos_ffi_owner.py|hack/test_macos_bounded_analysis.py|hack/test_macos_rust_cli.py|hack/build_macos_rust_cli_candidate.py|third_party/TraceStreamer/macx/manifest.json)
+        hack/test_macos_file_volumes.py|hack/test_macos_parser_process.py|hack/test_macos_directory_commands.py|hack/test_macos_event_queries.py|hack/test_macos_slice_queries.py|hack/test_macos_counter_queries.py|hack/test_macos_frame_queries.py|hack/test_macos_argument_queries.py|hack/test_macos_search.py|hack/test_macos_density_queries.py|hack/test_macos_batch_queries.py|hack/test_macos_async_runtime.py|hack/test_macos_viewer_owner.py|hack/test_macos_viewport_owner.py|hack/test_macos_ffi_owner.py|hack/test_macos_bounded_analysis.py|hack/test_macos_rust_cli.py|hack/build_macos_rust_cli_candidate.py|third_party/trace-streamer/macx/manifest.json)
             # This native acceptance harness consumes the macOS Rust port.
             rust_macos=true
             contracts=true
@@ -152,7 +152,7 @@ while IFS= read -r path; do
             swiftpm=true
             contracts=true
             ;;
-        third_party/TraceStreamer/windows-x86_64/manifest.json|third_party/TraceStreamer/license-inventory.json|third_party/TraceStreamer/windows-license-inventory.json|third_party/TraceStreamer/LICENSES/*|third_party/TraceStreamer/LICENSES-windows/*|LICENSE|THIRD_PARTY_NOTICES.md|hack/stage_windows_cli_candidate.py|hack/package_windows_cli_distribution.py|hack/verify_windows_cli_distribution.py|hack/windows_cli_distribution.py|hack/smoke_windows_cli_distribution.py|hack/test_windows_cli_distribution_contract.py)
+        third_party/trace-streamer/windows-x86_64/manifest.json|third_party/trace-streamer/license-inventory.json|third_party/trace-streamer/windows-license-inventory.json|third_party/trace-streamer/LICENSES/*|third_party/trace-streamer/LICENSES-windows/*|LICENSE|THIRD_PARTY_NOTICES.md|hack/stage_windows_cli_candidate.py|hack/package_windows_cli_distribution.py|hack/verify_windows_cli_distribution.py|hack/windows_cli_distribution.py|hack/smoke_windows_cli_distribution.py|hack/test_windows_cli_distribution_contract.py)
             # Embedded by, or packaged with, the Windows Rust CLI.
             rust_windows=true
             contracts=true

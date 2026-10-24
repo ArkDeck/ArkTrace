@@ -45,7 +45,7 @@ capture/inspect/export 对等、Viewer 后置，因此 Windows Viewer 不是 Ark
 
 ### 2.1 模块清单
 
-下表为上述 ArkTrace 基线的 `Sources/<module>/**/*.swift` 实测，行数包含注释和空行。
+下表为上述 ArkTrace 基线的 `sources/<module>/**/*.swift` 实测，行数包含注释和空行。
 它表示迁移面，不是工期或需要逐行翻译的工作量。
 
 | 现有模块 | 文件 / 行数 | 目标动作与责任 |
@@ -64,7 +64,7 @@ capture/inspect/export 对等、Viewer 后置，因此 Windows Viewer 不是 Ark
 | ArkTraceCLIResourceFixtures | 仅测试资源 | retain：测试资源来源，不进入生产依赖闭包 |
 
 表外还有两类迁移面：`apple/Apps/ArkTraceApp/`（43 个 Swift 文件 / 3,182 行，另含 xcstrings、
-Assets）保留为 macOS 原生 UI；`Tests/` 的 44 个文件 / 29,633 行是 001 提取行为向量的主要来源。
+Assets）保留为 macOS 原生 UI；`tests/` 的 44 个文件 / 29,633 行是 001 提取行为向量的主要来源。
 
 依赖事实源为 [Package.swift](../../Package.swift)。对外 API 已有独立包的
 [编译基线](../../hack/api-baseline/Sources/ArkTraceAPIBaseline/APIBaseline.swift)，
@@ -74,16 +74,16 @@ Assets）保留为 macOS 原生 UI；`Tests/` 的 44 个文件 / 29,633 行是 0
 
 | 缺口 | 已核对事实 | 迁移处理 |
 |---|---|---|
-| Windows parser | 仅有 [macx manifest](../../third_party/TraceStreamer/macx/manifest.json)，arm64、上游 `447a0a49…`、4.3.7；无仓内 Windows 可审查发行包 | 早期完成 Windows x64 构建与语义比对，不能等 UI 做完 |
+| Windows parser | 仅有 [macx manifest](../../third_party/trace-streamer/macx/manifest.json)，arm64、上游 `447a0a49…`、4.3.7；无仓内 Windows 可审查发行包 | 早期完成 Windows x64 构建与语义比对，不能等 UI 做完 |
 | Apple 平台绑定 | Darwin、MachO、CryptoKit、OSLog、CoreGraphics；CLI doctor/identity 与签名布局也受平台约束 | 明确 port，不靠扩大 `cfg` 或禁用校验完成移植 |
 | ArkDeck loader | Rust loader/trust/doctor 只在 macOS 编译：校验 product `0.1.0`/build `1`、arm64、bundle id、JSON contract 1.0、`ArkTraceCLI.app` 布局、Developer ID + 公证 + staple、CDHash，tree digest 含 POSIX mode；Windows daemon 一旦设置 `ARKDECK_ARKTRACE_DESCRIPTOR` 即拒绝启动，且 Windows 没有 `runtime service install/update` | Windows 发行契约、loader 与 descriptor 选择方式都是 ArkDeck 侧独立交付；macOS 新版本号同样要 loader 放行 |
 | ArkDeck inspect | Rust `HostServices::trace_inspection` 只有默认实现，对所有请求答 `operationUnavailable`；2026-09-25 裁定：G5 内保持拒绝 (c)，之后走 (b) 由已加载的 reviewed CLI 回答，(a) 在 ArkDeck 内重写解析被否决 | 017/018 经 CLI `inspect --json` 接入，含 handler、`resourceNotFound` 帧、schema 扩展、成功与拒绝路径 |
-| 质量事实转换 | [TraceOfflineInspectionService](../../Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift) 因 `issue.message != nil` 拒绝整个结果；ArkDeck 裁定这是 ArkTrace 缺陷，CLI Machine 契约已在边界丢弃 message | 不等 Rust：现行 Swift 先在边界丢弃自由文本、继续校验 category/scope/count（001）；Rust 继承修正后行为，修正前后各留向量 |
+| 质量事实转换 | [TraceOfflineInspectionService](../../sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift) 因 `issue.message != nil` 拒绝整个结果；ArkDeck 裁定这是 ArkTrace 缺陷，CLI Machine 契约已在边界丢弃 message | 不等 Rust：现行 Swift 先在边界丢弃自由文本、继续校验 category/scope/count（001）；Rust 继承修正后行为，修正前后各留向量 |
 | 版本错配 | ArkDeck 链接 ArkTrace `9172c952…`，其 manifest 只接受 recipe `a2e47752…`；ArkDeck 不 pin CLI revision、只 pin 合同，现有 reviewed CLI 构建于落后 74 个提交的 `61d0f2ae…`，携带 recipe `e4fec8cc…`；ArkDeck App 另自带 recipe `a2e47752…` 的 parser | 维护者从 ArkDeck 链接的 revision 重新发布 reviewed distribution（(b) 的另一前置）；兼容记录同时覆盖 engine、SDK、CLI 与各产品自带 parser，不沿用旧 PASS |
 | 两类下游消费者 | ArkDeck daemon 经 descriptor 消费 CLI（`summary`/`context`/`analyze`，固定 `--json --no-cache` 与预算）；ArkDeck macOS App 直接 import Core/Analysis/AppSupport/Rendering（Runtime 经 `ArkDeckTraceAdapter`），以 `signedBundleInPlace` 原位执行自带 parser | CLI 接入和 Swift SDK 接入分别验收 |
 | ArkDeck 现有 Rust 移植 | ArkDeck daemon 已移植 distribution loader/trust/doctor、summary 与 analysis envelope validator、三个 provenance 常量，以及 purge-only 的 cache 维护（macOS 根在 App 容器，Windows 根为 `%LOCALAPPDATA%\ArkDeck\Trace`，`LockFileEx` 锁 `u64::MAX-1` 一个字节） | 这些是 ArkTrace CLI、manifest、Machine JSON 与 cache 格式的第二个消费实现；任何格式变化与 ArkDeck 对应移植同批验证 |
 | Windows 采集 | ArkDeck Windows HDC tuple 为空（CHG-2026-078 仍为 proposed），managed HDC 与 USB mapping 未闭合；其 XPA-021 还要求 Windows 主机 + DAYU200 并依赖 XPA-020 | 属 ArkDeck 设备通路；本仓离线迁移不依赖它也不绕过它；capture/inspect/export 对等仍是 ArkDeck 自己的验收门 |
-| 标注与缓存耦合 | [view-state.json](../../Sources/ArkTraceAppSupport/TraceViewStateStore.swift) 放在 parser-key 对应 cache entry 中，按 AT-APP-004 随该 entry 回收 | 换实现、parser hash 或 cache root 会使旧标注不可见；切换前必须备份并导入（§9），不能以清缓存代替迁移 |
+| 标注与缓存耦合 | [view-state.json](../../sources/ArkTraceAppSupport/TraceViewStateStore.swift) 放在 parser-key 对应 cache entry 中，按 AT-APP-004 随该 entry 回收 | 换实现、parser hash 或 cache root 会使旧标注不可见；切换前必须备份并导入（§9），不能以清缓存代替迁移 |
 
 ### 2.3 如何参考 ArkDeck
 
@@ -214,7 +214,7 @@ self-contained x64 仅作可复用的候选组合，AT-RUST-002/014 须在本项
 拟新增 `api/`，只存消费者真正需要的 JSON schema、枚举、操作清单、ABI 描述和向量。
 AT-RUST-001 从当前实现、规范、测试提取，不先设计一套无调用者的通用 DSL。
 生成 Rust/Swift/C# 的边界类型与绑定；公式和状态转换在 Rust 实现，并以测试约束。
-继续保留现有 `Tests/ArkTraceCLITests/Fixtures/MachineJSON/` 作为来源，迁入时记录
+继续保留现有 `tests/ArkTraceCLITests/Fixtures/MachineJSON/` 作为来源，迁入时记录
 原文件 digest，不维持两份可独立编辑的正本。
 
 CLI Machine JSON `1.0`、CLI argv、SDK API、FFI ABI、cache schema、distribution manifest

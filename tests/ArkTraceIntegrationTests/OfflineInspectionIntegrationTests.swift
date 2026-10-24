@@ -8,7 +8,7 @@ final class OfflineInspectionIntegrationTests: XCTestCase {
     func testRealSmallFixturesReturnPathFreeReportsAndCleanEphemeralStorage() async throws {
         let root = URL(filePath: #filePath).deletingLastPathComponent()
             .deletingLastPathComponent().deletingLastPathComponent()
-        let parser = root.appending(path: "third_party/TraceStreamer/macx/trace_streamer")
+        let parser = root.appending(path: "third_party/trace-streamer/macx/trace_streamer")
         guard FileManager.default.isExecutableFile(atPath: parser.path) else {
             throw XCTSkip("Pinned parser bytes are required for offline inspection integration")
         }

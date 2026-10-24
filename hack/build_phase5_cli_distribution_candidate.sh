@@ -190,10 +190,10 @@ run_external "legacy SwiftPM notice copy failed" \
         "$legacy_bundle/THIRD_PARTY_NOTICES.md"
 run_external "legacy SwiftPM inventory copy failed" \
     /usr/bin/ditto --noqtn \
-        "$repository_root/third_party/TraceStreamer/license-inventory.json" \
+        "$repository_root/third_party/trace-streamer/license-inventory.json" \
         "$legacy_bundle/license-inventory.json"
 run_external "legacy SwiftPM license files copy failed" \
-    /usr/bin/ditto --noqtn "$repository_root/third_party/TraceStreamer/LICENSES" \
+    /usr/bin/ditto --noqtn "$repository_root/third_party/trace-streamer/LICENSES" \
         "$legacy_bundle/LICENSES"
 run_external "legacy SwiftPM self-test fixture copy failed" \
     /usr/bin/ditto --noqtn "$repository_root/test/fixtures/traces/zlib.htrace" \
@@ -243,16 +243,16 @@ run_external "CLI notice copy failed" \
         "$cli_resources/THIRD_PARTY_NOTICES.md"
 run_external "CLI license inventory copy failed" \
     /usr/bin/ditto --noqtn \
-        "$repository_root/third_party/TraceStreamer/license-inventory.json" \
+        "$repository_root/third_party/trace-streamer/license-inventory.json" \
         "$cli_resources/license-inventory.json"
 run_external "CLI license files copy failed" \
-    /usr/bin/ditto --noqtn "$repository_root/third_party/TraceStreamer/LICENSES" \
+    /usr/bin/ditto --noqtn "$repository_root/third_party/trace-streamer/LICENSES" \
         "$cli_resources/LICENSES"
 run_external "TraceStreamer copy failed" \
-    /usr/bin/ditto --noqtn "$repository_root/third_party/TraceStreamer/macx/trace_streamer" \
+    /usr/bin/ditto --noqtn "$repository_root/third_party/trace-streamer/macx/trace_streamer" \
         "$app/Contents/Helpers/trace_streamer"
 run_external "TraceStreamer manifest copy failed" \
-    /usr/bin/ditto --noqtn "$repository_root/third_party/TraceStreamer/macx/manifest.json" \
+    /usr/bin/ditto --noqtn "$repository_root/third_party/trace-streamer/macx/manifest.json" \
         "$app/Contents/Resources/TraceStreamer/manifest.json"
 run_external "license copy failed" \
     /usr/bin/ditto --noqtn "$repository_root/LICENSE" \
@@ -261,10 +261,10 @@ run_external "notice copy failed" \
     /usr/bin/ditto --noqtn "$repository_root/THIRD_PARTY_NOTICES.md" \
         "$app/Contents/Resources/Attribution/THIRD_PARTY_NOTICES.md"
 run_external "license inventory copy failed" \
-    /usr/bin/ditto --noqtn "$repository_root/third_party/TraceStreamer/license-inventory.json" \
+    /usr/bin/ditto --noqtn "$repository_root/third_party/trace-streamer/license-inventory.json" \
         "$app/Contents/Resources/Attribution/license-inventory.json"
 run_external "third-party licenses copy failed" \
-    /usr/bin/ditto --noqtn "$repository_root/third_party/TraceStreamer/LICENSES" \
+    /usr/bin/ditto --noqtn "$repository_root/third_party/trace-streamer/LICENSES" \
         "$app/Contents/Resources/Attribution/LICENSES"
 
 info="$app/Contents/Info.plist"
@@ -289,7 +289,7 @@ run_external "nested TraceStreamer signing failed" \
     codesign --force --sign "$certificate_sha1" --options runtime --timestamp "$helper"
 signed_parser_sha=$(shasum -a 256 "$helper" | awk '{print $1}')
 unsigned_parser_sha=$(jq -er '.binarySHA256' \
-    "$repository_root/third_party/TraceStreamer/macx/manifest.json")
+    "$repository_root/third_party/trace-streamer/macx/manifest.json")
 jq --arg sha "$signed_parser_sha" '.binarySHA256 = $sha' "$parser_manifest" \
     >"$temporary_root/parser-manifest.json" \
     || fail "signed parser manifest update failed"
@@ -355,10 +355,10 @@ cmp "$repository_root/LICENSE" "$app/Contents/Resources/Attribution/LICENSE" \
 cmp "$repository_root/THIRD_PARTY_NOTICES.md" \
     "$app/Contents/Resources/Attribution/THIRD_PARTY_NOTICES.md" \
     >/dev/null 2>&1 || fail "candidate third-party notice drifted"
-cmp "$repository_root/third_party/TraceStreamer/license-inventory.json" \
+cmp "$repository_root/third_party/trace-streamer/license-inventory.json" \
     "$app/Contents/Resources/Attribution/license-inventory.json" \
     >/dev/null 2>&1 || fail "candidate license inventory drifted"
-diff -qr "$repository_root/third_party/TraceStreamer/LICENSES" \
+diff -qr "$repository_root/third_party/trace-streamer/LICENSES" \
     "$app/Contents/Resources/Attribution/LICENSES" >/dev/null 2>&1 \
     || fail "candidate license files drifted"
 

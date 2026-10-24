@@ -17,10 +17,10 @@ xcuserdata/
 
 # Pinned TraceStreamer binary is built locally via hack/build_trace_streamer.sh;
 # only the provenance manifest is committed.
-third_party/TraceStreamer/macx/trace_streamer
+third_party/trace-streamer/macx/trace_streamer
 # Windows: hack/build_trace_streamer_windows.sh; manifest.json is committed.
-third_party/TraceStreamer/windows-x86_64/trace_streamer.exe
-third_party/TraceStreamer/windows-x86_64/.*.partial
+third_party/trace-streamer/windows-x86_64/trace_streamer.exe
+third_party/trace-streamer/windows-x86_64/.*.partial
 
 # API baseline consumer build products
 hack/api-baseline/.build/

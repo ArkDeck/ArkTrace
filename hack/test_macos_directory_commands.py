@@ -49,7 +49,7 @@ def run_probe(base, identity, helper_pin, oracle):
 def main():
     if sys.platform != "darwin" or os.uname().machine != "arm64":
         raise SystemExit("native macOS arm64 required; no simulated PASS")
-    parser = ROOT / "third_party/TraceStreamer/macx/trace_streamer"
+    parser = ROOT / "third_party/trace-streamer/macx/trace_streamer"
     manifest = json.loads((parser.parent / "manifest.json").read_text())
     oracle = json.loads((ROOT / "docs/migration-runs/AT-RUST-001-2026-10-02-small-oracle.json").read_text())
     assert digest(parser) == manifest["binarySHA256"] == oracle["parser"]["binarySHA256"]

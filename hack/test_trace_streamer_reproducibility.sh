@@ -28,8 +28,8 @@ for run in one two; do
     fi
 done
 
-repository_binary="$repository_root/third_party/TraceStreamer/macx/trace_streamer"
-repository_manifest="$repository_root/third_party/TraceStreamer/macx/manifest.json"
+repository_binary="$repository_root/third_party/trace-streamer/macx/trace_streamer"
+repository_manifest="$repository_root/third_party/trace-streamer/macx/manifest.json"
 
 verify_binary_manifest_pair() {
     binary=$1
@@ -70,7 +70,7 @@ second_recipe=$(jq -er '.buildRecipeVersion' "$temporary_root/stage-two/manifest
 
 first_sources=$(jq -cS '.thirdPartyRevisions' "$temporary_root/stage-one/manifest.json")
 locked_sources=$(jq -cS 'reduce .sources[] as $source ({}; .[$source.name] = $source.revision)' \
-    "$repository_root/third_party/TraceStreamer/source-lock.json")
+    "$repository_root/third_party/trace-streamer/source-lock.json")
 [ "$first_sources" = "$locked_sources" ] \
     || fail "manifest source revisions do not equal the source lock"
 

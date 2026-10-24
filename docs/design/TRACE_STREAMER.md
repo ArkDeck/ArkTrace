@@ -39,17 +39,17 @@ trace_streamer <trace-file> -e <output.db> [-nm]
 
 ```bash
 hack/build_trace_streamer.sh
-# 产物：third_party/TraceStreamer/macx/trace_streamer + manifest.json
+# 产物：third_party/trace-streamer/macx/trace_streamer + manifest.json
 ```
 
 构建事实：
 
-1. `third_party/TraceStreamer/source-lock.json` 固定 canonical upstream、13 个 source dependency 的 exact revision，以及 GN/Ninja URL、SHA-256、byte count；构建不再接受浮动 tip；
+1. `third_party/trace-streamer/source-lock.json` 固定 canonical upstream、13 个 source dependency 的 exact revision，以及 GN/Ninja URL、SHA-256、byte count；构建不再接受浮动 tip；
 2. 两个本地补丁都独立、可审计且 fail-closed 应用：`faultloggerd-apple-clang.patch` 把 Apple clang 拒绝的 pointer → `Elf32_Addr` 截断改为经 `uintptr_t` 的显式转换；`proto-reader-sparse-validity.patch` 用紧凑存在位图替代每条 protobuf 消息对稀疏 `DataArea[max_field_id + 1]` 的全量清零，保持字段访问和重复字段语义不变；
 3. **插件裁剪**：`./build.sh -e hilog,hisysevent,arkts,bytrace,rawtrace,htrace,ffrt,memory,hidump,cpudata,network,diskio,process,xpower`——禁用 hiperf/ebpf/native_hook（ArkTrace 不消费 perf/malloc 栈数据，它们是脆弱 native unwinder 的唯一使用方）；
 4. `gsed` 实际未被 CLI 构建路径使用（脚本只赋值未引用），无需安装；
 5. GN/Ninja 的锁定 darwin-x86 archive 经 Rosetta 2 运行；下载后先校验 exact size/SHA，再解包；产出的 trace_streamer 本体仍为原生 arm64；
-6. 构建脚本、共享 shell safety helper、source lock 与两个 local patch 各自 SHA-256 经稳定 recipe 编码生成 `buildRecipeVersion`；当前 recipe 与 unsigned binary SHA-256 以 `third_party/TraceStreamer/macx/manifest.json` 为准；Developer ID 分发会在内层签名后记录新的 helper SHA，详见 `APP_DISTRIBUTION.md`；
+6. 构建脚本、共享 shell safety helper、source lock 与两个 local patch 各自 SHA-256 经稳定 recipe 编码生成 `buildRecipeVersion`；当前 recipe 与 unsigned binary SHA-256 以 `third_party/trace-streamer/macx/manifest.json` 为准；Developer ID 分发会在内层签名后记录新的 helper SHA，详见 `APP_DISTRIBUTION.md`；
 7. `mac_depend.sh` **不得执行**：现代 macOS 的 `/usr/lib/*.dylib` 已并入 dyld shared cache，该脚本 `find /usr` 找不到 libc++ 文件，却仍会把二进制的 libc++ 依赖改写为相对路径 `./lib/libc++.1.dylib`，直接损坏二进制。上游仓库中它恰好缺执行位而失败——`build.sh` 因此以非零退出，但二进制此时已完整链接。构建脚本以"新鲜二进制存在 + `--version` 可运行 + 未被改写依赖"为真实成功判据，并显式校验。
 
 ### CI approved binary asset
@@ -60,7 +60,7 @@ GitHub 托管 runner 不重新认定自己构建的字节。nightly/manual bench
 - SHA-256：`0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a`；
 - 架构：`arm64`；
 - 上游 revision：`447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6`；
-- build recipe：`8ed97c8eb0e4420be25222bba83661e3741b844832b7df16e6ffed3c37a5c2ec`。
+- build recipe：`c53ec8a657f05b92a019536ab162a8ebb7d4317162f20abcfb6c688b2f31bb00`。
 
 Release asset 是 CI 的字节传输渠道，不是新的信任根；提交中的 manifest SHA 仍是执行许可。asset 即使被替换，
 下载步骤也会 fail closed。重新构建产生不同 SHA 时不得覆盖该 asset，须先完成 §5 的 re-pin 审阅。
@@ -84,7 +84,7 @@ hack/test_trace_streamer_reproducibility.sh
 
 ```bash
 ARKTRACE_TS_PYTHON=/c/<path>/python.exe hack/build_trace_streamer_windows.sh
-# 产物：third_party/TraceStreamer/windows-x86_64/trace_streamer.exe + manifest.json
+# 产物：third_party/trace-streamer/windows-x86_64/trace_streamer.exe + manifest.json
 ```
 
 构建事实：
@@ -103,7 +103,7 @@ ARKTRACE_TS_PYTHON=/c/<path>/python.exe hack/build_trace_streamer_windows.sh
    `proto-reader-sparse-validity.patch`；`faultloggerd-apple-clang.patch` 仅为 Apple clang
    所需，GCC 不需要。新增 `windows-reproducible-utf8-link.patch` 只改 Windows link 命令：
    `-Wl,--no-insert-timestamp` 去掉 PE 链接时间戳，并链接
-   `third_party/TraceStreamer/windows/trace_streamer.manifest` 编译出的资源；
+   `third_party/trace-streamer/windows/trace_streamer.manifest` 编译出的资源；
 4. 该 application manifest 声明 `activeCodePage=UTF-8`（并 `longPathAware`）。未加时上游
    以 ANSI 代码页读取 `argv`，任何非 ASCII 输入/输出路径（中文、Latin-1、emoji）都以
    exit 1 失败且不产出 DB；加入后四类路径全部成功；
@@ -123,7 +123,7 @@ ARKTRACE_TS_PYTHON=/c/<path>/python.exe hack/build_trace_streamer_windows.sh
 | imports | `ADVAPI32.dll`、`KERNEL32.dll`、`msvcrt.dll` |
 | `--version` | `version 4.3.7` |
 
-两份 manifest 只有 `builtAt` 不同；`third_party/TraceStreamer/windows-x86_64/manifest.json`
+两份 manifest 只有 `builtAt` 不同；`third_party/trace-streamer/windows-x86_64/manifest.json`
 为第一次构建的记录。此前工作阶段 4 并发的两次构建因主机内存不足在编译阶段被中止，
 建议 `ARKTRACE_TS_JOBS` 不超过 4 且两次串行执行。
 

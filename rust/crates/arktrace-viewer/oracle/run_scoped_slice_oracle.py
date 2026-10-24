@@ -23,7 +23,7 @@ def main():
  for name in ['ArkTraceCore','ArkTraceStore','ArkTraceRendering']:
   dest=source/'Sources'/name
   if dest.exists():shutil.rmtree(dest)
-  shutil.copytree(ROOT/'Sources'/name,dest)
+  shutil.copytree(ROOT/'sources'/name,dest)
  shutil.copytree(ROOT/'hack',source/'hack',dirs_exist_ok=True)
  harness=CRATE/'oracle/ScopedSliceOracle.swift';dest=source/'Sources/ScopedSliceOracle';dest.mkdir(parents=True,exist_ok=True);shutil.copyfile(harness,dest/harness.name)
  (source/'Package.swift').write_text('''// swift-tools-version: 6.3
@@ -43,7 +43,7 @@ let package = Package(name: "ArkTrace", platforms: [.macOS(.v26)], targets: [
  if run.returncode: print(log.read_text()[-10000:]);run.check_returncode()
  assert 'warning:' not in log.read_text()
  executable=CACHE/'build/out/Products/Debug/ScopedSliceOracle'
- inputs=json.loads(INPUT.read_text());manifest=json.loads((ROOT/'third_party/TraceStreamer/macx/manifest.json').read_text())
+ inputs=json.loads(INPUT.read_text());manifest=json.loads((ROOT/'third_party/trace-streamer/macx/manifest.json').read_text())
  parser={k:manifest[k] for k in ['name','reportedVersion','binarySHA256','upstreamRepository','upstreamRevision','architecture','adapterVersion','buildRecipeVersion']}
  with tempfile.TemporaryDirectory(prefix='arktrace-scoped-slices-',dir='/private/tmp') as tmp:
   db=Path(tmp)/'controlled.sqlite';conn=sqlite3.connect(db);conn.executescript(inputs['sql']);conn.commit();conn.close();db.chmod(0o400)
@@ -56,7 +56,7 @@ let package = Package(name: "ArkTrace", platforms: [.macOS(.v26)], targets: [
   database={'byteCount':db.stat().st_size,'sha256':before,'bytesUnchanged':True}
  OUTPUT.write_text(json.dumps(records,ensure_ascii=False,indent=2)+'\n')
  paths=[harness,Path(__file__),INPUT,OUTPUT]
- for name in ['ArkTraceCore','ArkTraceStore','ArkTraceRendering']:paths+=sorted((ROOT/'Sources'/name).rglob('*.swift'))
+ for name in ['ArkTraceCore','ArkTraceStore','ArkTraceRendering']:paths+=sorted((ROOT/'sources'/name).rglob('*.swift'))
  receipt={'oracle':'actual Swift SQLiteTraceRepository + TimelineSnapshotLoader','scope':'controlled SQL; full typed page/snapshot; not parser or SDK/App acceptance','vectors':len(records),'xcode':xcode,'swift':subprocess.check_output(['swift','--version'],text=True).strip(),'executableSHA256':hashlib.sha256(executable.read_bytes()).hexdigest(),'database':database,'sourceDigests':[digest(p) for p in paths]}
  retained=CACHE/f'{STEM}-{receipt["executableSHA256"]}.executable'
  if not retained.exists(): shutil.copyfile(executable,retained);retained.chmod(0o500)

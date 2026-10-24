@@ -45,7 +45,7 @@ The TraceStreamer binary is a locally built artifact excluded from Git — cloni
 hack/build_trace_streamer.sh
 ```
 
-This produces `third_party/TraceStreamer/macx/trace_streamer` and its identity manifest. Pinned revision and build recipe: [docs/design/TRACE_STREAMER.md](docs/design/TRACE_STREAMER.md).
+This produces `third_party/trace-streamer/macx/trace_streamer` and its identity manifest. Pinned revision and build recipe: [docs/design/TRACE_STREAMER.md](docs/design/TRACE_STREAMER.md).
 
 ### 2. Build and test
 
@@ -69,7 +69,7 @@ sh hack/run-xcodebuild.sh
 A small sample trace ships in the repository, so this works out of the box:
 
 ```bash
-PARSER="$PWD/third_party/TraceStreamer/macx/trace_streamer"
+PARSER="$PWD/third_party/trace-streamer/macx/trace_streamer"
 .build/release/arktrace --trace-streamer "$PARSER" inspect test/fixtures/traces/zlib.htrace
 .build/release/arktrace --trace-streamer "$PARSER" --json summary test/fixtures/traces/zlib.htrace
 .build/release/arktrace --trace-streamer "$PARSER" --json processes test/fixtures/traces/zlib.htrace --limit 100
@@ -185,4 +185,4 @@ ArkTrace does not rewrite the parser; it reuses the pinned upstream TraceStreame
 
 ArkTrace is released under the [MIT License](LICENSE).
 
-The bundled TraceStreamer's 14 source components, 2 build tools, license expressions and exact license bytes are tracked in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and `third_party/TraceStreamer/license-inventory.json`; `hack/verify_licenses.sh` verifies the inventory, source lock and file hashes fail-closed. In the app, **Settings → Licenses** shows the same locked set that `arktrace licenses` prints.
+The bundled TraceStreamer's 14 source components, 2 build tools, license expressions and exact license bytes are tracked in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and `third_party/trace-streamer/license-inventory.json`; `hack/verify_licenses.sh` verifies the inventory, source lock and file hashes fail-closed. In the app, **Settings → Licenses** shows the same locked set that `arktrace licenses` prints.

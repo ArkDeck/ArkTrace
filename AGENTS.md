@@ -20,12 +20,12 @@
 | 涉及的工作 | 首选入口 |
 |---|---|
 | 能力规格与变更 | [openspec/project.md](openspec/project.md)、`openspec/specs/`、`openspec/changes/`；细则仍见 [SPECIFICATION.md](docs/design/SPECIFICATION.md) |
-| 平台、模块与依赖 | [Package.swift](Package.swift)、`Sources/`、[SPECIFICATION.md](docs/design/SPECIFICATION.md) §2–4 |
-| Parser、SQLite、cache | `Sources/ArkTraceCore/`、`Sources/ArkTraceParser/`、`Sources/ArkTraceStore/`、`Sources/ArkTraceRuntime/`；[TRACE_STREAMER.md](docs/design/TRACE_STREAMER.md) |
-| 包外消费的离线检查与 cache 维护 | `Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift`、`Sources/ArkTraceRuntime/TraceCache.swift`；`hack/api-baseline/` |
-| CLI、查询、分析 | `Sources/ArkTraceCLI/`、`Sources/arktrace/`、`Sources/ArkTraceAnalysis/`；[CLI.md](docs/guides/CLI.md) |
-| Viewer、交互与本地化 | `apple/Apps/ArkTraceApp/`、`Sources/ArkTraceAppSupport/`、`Sources/ArkTraceRendering/`；DESIGN §13–14 |
-| GUI 设备采集 | `Sources/ArkTraceCapture/`、`apple/Apps/ArkTraceApp/Capture/`；[CAPTURE.md](docs/design/CAPTURE.md) |
+| 平台、模块与依赖 | [Package.swift](Package.swift)、`sources/`、[SPECIFICATION.md](docs/design/SPECIFICATION.md) §2–4 |
+| Parser、SQLite、cache | `sources/ArkTraceCore/`、`sources/ArkTraceParser/`、`sources/ArkTraceStore/`、`sources/ArkTraceRuntime/`；[TRACE_STREAMER.md](docs/design/TRACE_STREAMER.md) |
+| 包外消费的离线检查与 cache 维护 | `sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift`、`sources/ArkTraceRuntime/TraceCache.swift`；`hack/api-baseline/` |
+| CLI、查询、分析 | `sources/ArkTraceCLI/`、`sources/arktrace/`、`sources/ArkTraceAnalysis/`；[CLI.md](docs/guides/CLI.md) |
+| Viewer、交互与本地化 | `apple/Apps/ArkTraceApp/`、`sources/ArkTraceAppSupport/`、`sources/ArkTraceRendering/`；DESIGN §13–14 |
+| GUI 设备采集 | `sources/ArkTraceCapture/`、`apple/Apps/ArkTraceApp/Capture/`；[CAPTURE.md](docs/design/CAPTURE.md) |
 | ArkDeck 消费或分发 | [ARKDECK_INTEGRATION.md](docs/guides/ARKDECK_INTEGRATION.md)、[CLI_DISTRIBUTION.md](docs/guides/CLI_DISTRIBUTION.md)、[APP_DISTRIBUTION.md](docs/guides/APP_DISTRIBUTION.md) |
 | 构建与 CI | [ci.yml](.github/workflows/ci.yml)、[ci_plan.sh](hack/ci_plan.sh)、对应 `hack/` 入口 |
 

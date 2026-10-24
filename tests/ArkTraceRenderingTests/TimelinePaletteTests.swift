@@ -7,7 +7,7 @@ import XCTest
 /// Every expectation in this file was produced by running the upstream
 /// `ColorUtils.hash` / `hashFunc` / `funcTextColor` implementations from
 /// `openharmony/developtools_smartperf_host` at the revision pinned in
-/// `third_party/TraceStreamer/source-lock.json`
+/// `third_party/trace-streamer/source-lock.json`
 /// (`447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6`) under Node, then transcribing
 /// the output. The names below deliberately include the cases where a textbook
 /// 32-bit FNV-1a diverges from upstream's JavaScript `Number` arithmetic, so a

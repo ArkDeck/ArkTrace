@@ -1,7 +1,7 @@
 # ArkTrace ↔ SmartPerf Host 离线能力对齐审计
 
 > 审计日期：2026-08-17
-> 上游 pin：`447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6`（`third_party/TraceStreamer/source-lock.json` 的 `upstream.revision`，fetch 后 `git rev-parse HEAD` 逐字符核对相等）
+> 上游 pin：`447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6`（`third_party/trace-streamer/source-lock.json` 的 `upstream.revision`，fetch 后 `git rev-parse HEAD` 逐字符核对相等）
 > 上游源码根：`smartperf_host/ide/src/trace/`
 > 审计性质：只读。本文是 [PHASE_7_TASKS.md](PHASE_7_TASKS.md) 的证据基线，任务实现者应以本文的 `path:line` 引用为起点，不要凭记忆重建上游行为
 > 覆盖结论：共核实 36 项面向用户的离线能力 —— ALIGNED 7、INTENTIONAL-DIFFERENCE 3、PARTIAL 4、GAP 15、OUT-OF-SCOPE 6、UNCLEAR 1
@@ -22,7 +22,7 @@
 ### 2.1 取上游 pin 版源码
 
 ```bash
-REV=$(python3 -c "import json;print(json.load(open('third_party/TraceStreamer/source-lock.json'))['upstream']['revision'])")
+REV=$(python3 -c "import json;print(json.load(open('third_party/trace-streamer/source-lock.json'))['upstream']['revision'])")
 mkdir -p /tmp/sp-upstream && cd /tmp/sp-upstream
 git init && git remote add origin https://gitcode.com/openharmony/developtools_smartperf_host.git
 git fetch --filter=blob:none --depth 1 origin "$REV"
@@ -65,7 +65,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 
 - **上游**：`database/sql/ProcessThread.sql.ts:544-560` `queryProcessMemData` —— `from process_measure c, trace_range tb where filter_id = $id`；`:535` `queryProcessMemDataCount` 同样 `from process_measure c left join process_measure_filter f on f.id = c.filter_id`。上游 process counter 样本来自 **`process_measure`**。
 - **对照**：`database/sql/Cpu.sql.ts:127-134` 显示上游 **CPU** counter 来自 `measure` + `cpu_measure_filter` —— 与 ArkTrace 一致，错的只有 process 一路。
-- **ArkTrace**：`Sources/ArkTraceStore/SQLiteTraceRepository.swift:1977`（`counterRows`）、`:1533`（`density(_:)` 的 process 分支）、`:2374`（`boundedCounterSeriesCount`）与 `Sources/ArkTraceStore/TraceSchemaAdapter.swift:303/317`（capability 探针）全部从 `measure` 读。`grep -rn "process_measure" Sources/ | grep -v _filter` 无命中 → 无 fallback。
+- **ArkTrace**：`sources/ArkTraceStore/SQLiteTraceRepository.swift:1977`（`counterRows`）、`:1533`（`density(_:)` 的 process 分支）、`:2374`（`boundedCounterSeriesCount`）与 `sources/ArkTraceStore/TraceSchemaAdapter.swift:303/317`（capability 探针）全部从 `measure` 读。`grep -rn "process_measure" sources/ | grep -v _filter` 无命中 → 无 fallback。
 - **用户可见后果**：capability 探针恒返回空 → `capabilities.processCounters = false` → `counters()`（`SQLiteTraceRepository.swift:1237-1238`）返回 `.unavailable` → Sidebar "Process Counters" 组显示 "Not available in this trace"（`apple/Apps/ArkTraceApp/ArkTraceApp.swift:318-321`）。丢失的是 `H:VSync-app`（16 343 样本）、`H:FrameBuffer`（5 312）、`H:settings0`（3 615）、`H:PreferredFrameRate`（2 987）、`H:VSync-rs`（2 762）等 66 条命名 series —— 正是看掉帧与渲染节奏最需要的几条。
 - **旁证**：`test/fixtures/databases/trace_streamer_4.3.7.schema-evidence.json` 两个 fixture 的 `capabilities.processCounters` 也都是 `false`，说明该路径可能从未在任何真实 trace 上成立过。README:14 明写支持 counter 泳道。
 - **实证命令**：
@@ -84,25 +84,25 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 **已对齐（P7-T04，2026-08-18）。** depth 行几何由 snapshot 推导，draw 与 hit-test 同源；同名 slice 在任何 depth 上同色（有断言且实测可失败）。
 
 - **上游**：`database/ui-worker/ProcedureWorkerFunc.ts:237` —— `funcNode.frame.y = funcNode.depth! * 18 + 3`，每层深度一条 18px 泳道；`:269` 选中判定含 `data.depth === selectFuncStruct?.depth`；`:100` 折叠态只画 `depth === 0`。
-- **ArkTrace**：`Sources/ArkTraceRendering/TimelineModels.swift:290-313` `TimelineDetailPrimitive` 无 depth 字段；`Sources/ArkTraceRendering/TimelineGeometry.swift:72-77` `frame(for:in:viewport:backingScale:)` 恒返回 `y: rulerHeight + track.y + 3`、`height: track.height - 6`（单一带）；`Sources/ArkTraceRendering/TimelineSnapshotLoader.swift:266-271` 构造 primitive 时未传 `$0.depth`。
+- **ArkTrace**：`sources/ArkTraceRendering/TimelineModels.swift:290-313` `TimelineDetailPrimitive` 无 depth 字段；`sources/ArkTraceRendering/TimelineGeometry.swift:72-77` `frame(for:in:viewport:backingScale:)` 恒返回 `y: rulerHeight + track.y + 3`、`height: track.height - 6`（单一带）；`sources/ArkTraceRendering/TimelineSnapshotLoader.swift:266-271` 构造 primitive 时未传 `$0.depth`。
 - **用户可见后果**：嵌套调用栈全部叠画在同一条带里，深层覆盖浅层，看不出调用层级。
-- **落地成本**：数据已有，只缺渲染几何 —— `TraceSlice.depth` 已建模（`Sources/ArkTraceCore/Model/TraceEventModels.swift:185`）、repository 已 SELECT 且有 `callstackHasDepth` capability 与按 depth 过滤能力（`SQLiteTraceRepository.swift:1023-1031`）、`TraceSliceQuery.depth` 已存在（`Sources/ArkTraceCore/Query/TraceEventQueries.swift:117`）、真库 `callstack.depth` 列已核实。→ P7-T04
+- **落地成本**：数据已有，只缺渲染几何 —— `TraceSlice.depth` 已建模（`sources/ArkTraceCore/Model/TraceEventModels.swift:185`）、repository 已 SELECT 且有 `callstackHasDepth` capability 与按 depth 过滤能力（`SQLiteTraceRepository.swift:1023-1031`）、`TraceSliceQuery.depth` 已存在（`sources/ArkTraceCore/Query/TraceEventQueries.swift:117`）、真库 `callstack.depth` 列已核实。→ P7-T04
 
 ### G03 — 缺按 slice 名聚合的统计表
 
 **已对齐（P7-T05，2026-08-18）。** reduction 版；受限时显式标注为下界。
 
 - **上游**：`component/trace/sheet/process/TabPaneSlices.ts:395-398` 列 `Name` / `Wall duration(ms)` / `Avg Wall duration(ms)` / `Occurrences` / `selfTime(ms)`（`:197-234` 计算 selfTime 与合计）；`component/trace/base/TraceSheet.ts:334-336` 给 `box-slices` 绑 `td-click`，`:1673-1697` `tdSliceClickHandler` 用 `SliceBoxJumpParam` 下钻到 `box-slice-child` 列出全部 occurrence。
-- **ArkTrace**：`apple/Apps/ArkTraceApp/ArkTraceApp.swift:772-800` `RangeInspectorView` 只渲染 `TraceRangeAnalysis` 的三段 `cpuUtilization` / `topThreads` / `longSlices`（`Sources/ArkTraceAnalysis/TraceViewerAnalysis.swift:310-320`）。`longSlices` 是**单条**最长 slice 列表（`:271-281`），不是按名汇总。
+- **ArkTrace**：`apple/Apps/ArkTraceApp/ArkTraceApp.swift:772-800` `RangeInspectorView` 只渲染 `TraceRangeAnalysis` 的三段 `cpuUtilization` / `topThreads` / `longSlices`（`sources/ArkTraceAnalysis/TraceViewerAnalysis.swift:310-320`）。`longSlices` 是**单条**最长 slice 列表（`:271-281`），不是按名汇总。
 - **用户可见后果**：答不了「这段区间里某函数一共花了多少、调了几次」，看不出「调 1 万次、每次很短、总和最贵」这类真正热点。
-- **落地成本**：repository 只有一处 `GROUP BY`（`SQLiteTraceRepository.swift:1550`，density 用），其余分析都是 Swift 侧对 bounded page 做 reduction（范式见 `Sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift:765-800` `stateDistribution`）。可照同一模式实现，但聚合范围受 page limit 约束。→ P7-T05
+- **落地成本**：repository 只有一处 `GROUP BY`（`SQLiteTraceRepository.swift:1550`，density 用），其余分析都是 Swift 侧对 bounded page 做 reduction（范式见 `sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift:765-800` `stateDistribution`）。可照同一模式实现，但聚合范围受 page limit 约束。→ P7-T05
 
 ### G04 — 泳道按种类而非按进程组织
 
 **已对齐（P7-T06，2026-08-18）。** 混合组织：CPU / CPU counter 按种类，线程/进程拥有的泳道按进程分组（开放问题 4 裁决）。
 
 - **上游**：`component/chart/SpProcessChart.ts:857` `processRow.folder = true`、`:579` `addChildTraceRow(processRow)`、`:1146-1187`/`:1243` 往同一 `processRow` 下挂 expected/actual 帧行与 hang 行。时间轴本身是 process → thread 层级树，一个进程的泳道物理相邻。
-- **ArkTrace**：`Sources/ArkTraceAppSupport/TraceDocumentController.swift:234-240` `TraceTrackGroupKind` 只有 `cpu / threadState / namedSlice / cpuCounter / processCounter`，**无 process 维度**；`:1106-1121` "Thread State" 是全部线程的扁平列表且 title 只有 `thread.name ?? "TID n"`（**不含进程名**）；`:1122-1143` "Processes & Named Slices" 的 title 才带 `"processName · threadName"`。`TimelineTrackSource`（`Sources/ArkTraceRendering/TimelineModels.swift:16-21`）也没有 process case。
+- **ArkTrace**：`sources/ArkTraceAppSupport/TraceDocumentController.swift:234-240` `TraceTrackGroupKind` 只有 `cpu / threadState / namedSlice / cpuCounter / processCounter`，**无 process 维度**；`:1106-1121` "Thread State" 是全部线程的扁平列表且 title 只有 `thread.name ?? "TID n"`（**不含进程名**）；`:1122-1143` "Processes & Named Slices" 的 title 才带 `"processName · threadName"`。`TimelineTrackSource`（`sources/ArkTraceRendering/TimelineModels.swift:16-21`）也没有 process case。
 - **文档漂移**：DESIGN §13.3 把 "Process" 列为 MVP track 类型，实现中无对应 group kind 或 track source。
 - **用户可见后果**：真机 trace 199 个线程，同名线程（`Thread-1` 之类）在 Thread State 列表里无法区分；看一个进程要在两个扁平列表里各找一次同一线程。
 - **落地成本**：`TraceThread.processKey` / `processName` 已在 catalog 遍历中（`TraceDocumentController.swift:1113-1118`）。→ P7-T06
@@ -112,15 +112,15 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 **已对齐（P7-T03，2026-08-18）。** 单行 `processName · threadName [tid]`；Inspector 补 priority。
 
 - **上游**：`database/ui-worker/cpu/ProcedureWorkerCPU.ts:282-320` `CpuStruct.drawText` —— 上半行 `${processName} [${processId}]`，下半行 `${name} [${tid}] [Prio:${priority}]`，宽度不足时按字符宽度截断加省略号。
-- **ArkTrace**：`Sources/ArkTraceRendering/TimelineSnapshotLoader.swift:175` —— `label: $0.tid.map { "TID \($0)" }`。
-- **落地成本**：极低。`$0.processName` / `$0.threadName` / `$0.pid` / `$0.tid` 在同一闭包作用域内（`:186-190` 已塞进 inspector）。`CpuSlice.priority` 也已建模（`Sources/ArkTraceCore/Model/TraceEventModels.swift:38`，真库 211 万行全部非空），但 `TraceEventInspector`（`Sources/ArkTraceCore/Model/TraceViewerModels.swift:9-29`）无 priority 字段。→ P7-T03
+- **ArkTrace**：`sources/ArkTraceRendering/TimelineSnapshotLoader.swift:175` —— `label: $0.tid.map { "TID \($0)" }`。
+- **落地成本**：极低。`$0.processName` / `$0.threadName` / `$0.pid` / `$0.tid` 在同一闭包作用域内（`:186-190` 已塞进 inspector）。`CpuSlice.priority` 也已建模（`sources/ArkTraceCore/Model/TraceEventModels.swift:38`，真库 211 万行全部非空），但 `TraceEventInspector`（`sources/ArkTraceCore/Model/TraceViewerModels.swift:9-29`）无 priority 字段。→ P7-T03
 
 ### G06 — thread state 分布已算出但 App 不展示
 
 **已对齐（P7-T02，2026-08-18）。** 与 CLI `analyze` 的 `threadStateDistribution` 复用同一 reduction，有等价性断言。
 
 - **上游**：`component/trace/sheet/process/TabPaneThreadStates.ts` 列 `Process` / `PID` / `Thread` / `TID` / `State` / `Wall duration(ms)` / `Avg` / `Occurrences`；`TraceSheet.ts:330-332` 绑 `td-click` 可下钻。
-- **ArkTrace**：`Sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift:177-190` `TraceThreadStateDistribution` 与 `:765-800` `stateDistribution` **已实现**，并被 CLI `analyze` 输出（`Sources/ArkTraceCLI/MachineContract.swift:1412-1413`）。但 App 走另一个模型 `TraceRangeAnalysis`（`Sources/ArkTraceAnalysis/TraceViewerAnalysis.swift:310-320`），其中没有这一段。
+- **ArkTrace**：`sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift:177-190` `TraceThreadStateDistribution` 与 `:765-800` `stateDistribution` **已实现**，并被 CLI `analyze` 输出（`sources/ArkTraceCLI/MachineContract.swift:1412-1413`）。但 App 走另一个模型 `TraceRangeAnalysis`（`sources/ArkTraceAnalysis/TraceViewerAnalysis.swift:310-320`），其中没有这一段。
 - **用户可见后果**：CLI 能答「线程在 Running 还是在等 IO」，App 不能 —— 同一 Core 两条路径能力不一致。
 - **落地成本**：本清单性价比最高的一条，计算/模型/bounded 语义全在。→ P7-T02
 
@@ -129,7 +129,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 **已对齐（P7-T11，2026-08-18）。** 每个有帧的进程一条泳道，expect/actual 各占一行；jank 进 label/Inspector/accessibility 而非只靠颜色。
 
 - **上游**：`database/sql/Janks.sql.ts:40-42` `FROM frame_slice AS fs LEFT JOIN frame_slice AS sf ON fs.dst = sf.id`；`database/ui-worker/ProcedureWorkerJank.ts:85-120`；`component/trace/base/TraceRow.ts:147-151` `ROW_TYPE_JANK` / `ROW_TYPE_FRAME` / `ROW_TYPE_FRAME_DYNAMIC` / `ROW_TYPE_FRAME_SPACING`；sheet 侧 `box-frames` → `TabPaneFrames`。
-- **ArkTrace**：`Sources/ArkTraceStore/TraceSchemaAdapter.swift:93-118`/`:177-216` 只认 `sched_slice` / `thread_state` / `callstack` / `measure` + 两张 filter 表，`frame_slice` 从未出现。
+- **ArkTrace**：`sources/ArkTraceStore/TraceSchemaAdapter.swift:93-118`/`:177-216` 只认 `sched_slice` / `thread_state` / `callstack` / `measure` + 两张 filter 表，`frame_slice` 从未出现。
 - **数据可得**：真库 42 796–56 498 行，列 `id ts vsync ipid itid callstack_id dur src dst type type_desc flag depth frame_no`，`type_desc` 区分 `expect` / `actural`，`flag` 携带 jank 判定。
 - **落地成本**：本清单最大单项 —— 新表校验 + 新 capability + 新 repository 查询 + 新 domain 模型 + 新 track source + 渲染。→ P7-T11
 
@@ -138,7 +138,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 **已对齐（P7-T10，2026-08-18）。** 编码取自 pin 版 `args_view` 定义并在真机库逐行验证；不改 agent 面向的 Machine JSON。
 
 - **上游**：`database/sql/ProcessThread.sql.ts:874-876` `queryThreadStateArgs` —— `select args_view.* from args_view where argset = ${argset}`；`:451-461` `queryBinderArgsByArgset`；`database/sql/Func.sql.ts:158/602/629` 各处 SELECT `c.argsetid`。
-- **ArkTrace**：`TraceEventInspector`（`Sources/ArkTraceCore/Model/TraceViewerModels.swift:9-29`）无 args 字段；`grep -rn "args_view\|FROM args" Sources/` 无命中。
+- **ArkTrace**：`TraceEventInspector`（`sources/ArkTraceCore/Model/TraceViewerModels.swift:9-29`）无 args 字段；`grep -rn "args_view\|FROM args" sources/` 无命中。
 - **数据可得**：真库 `args` 162 万–213 万行；`SELECT COUNT(*) FROM callstack WHERE argsetid IS NOT NULL` = 228 006。`args` 表与 `args_view` 视图均存在（`sqlite_master` 核实）。`binder transaction` 之类 slice 靠 args 才知道对端是谁。
 - **风险**：`args.key` 是 `data_dict` 的整数索引需 join 解名，`args.datatype` 决定 value 解释方式 —— **这两处编码必须在 pin 版上游核准，不得猜测**。→ P7-T10
 
@@ -148,7 +148,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 
 - **上游 flag**：`component/trace/timer-shaft/SportRuler.ts:75` `flagList`；`:763-789` ruler 上点击即新建随机色 Flag；`:142-155` `modifyFlagList` 增删改；`component/trace/timer-shaft/TabPaneFlag.ts` 表格列 `TimeStamp` / `Color` / `Remarks` / `Operate(Remove)`，可改名改色删除；`component/SpSystemTrace.event.ts:945/950` `Ctrl+,` / `Ctrl+.` 经 `MarkJump` 跳上/下一个 flag；`RangeRuler.ts:773-774` 裸 `,` / `.` 走 `scrollFlagIntoView` 把当前 flag 滚回视野。
 - **上游 A/B mark**：`SpSystemTrace.event.ts:656-670` `m` 键调 `setSLiceMark(ev.shiftKey)`；`SpSystemTrace.ts:1093-1115` 从当前选中 struct（含 `TraceRow.rangeSelectObject`）取时间；`component/SpKeyboard.html.ts` 说明 `m` = 临时、`Shift+m` = 持久；`component/trace/sheet/TabPaneCurrent.html.ts` 列 `StartTime` / `EndTime` / `Color` / `Remarks` / `Operate`；`SpSystemTrace.event.ts:942/947` `Ctrl+[` / `Ctrl+]` 在标记间跳转。
-- **ArkTrace**：不存在。`grep -rni "bookmark|flagList|marker" Sources/ArkTraceRendering Sources/ArkTraceAppSupport apple/Apps/` 只命中 `TraceRecentDocuments.swift` 的 macOS security-scoped bookmark（文件书签，与时间轴无关）；`TimelineNSView.swift:286-323` keyDown 无 `,`/`.`/`m` 分支；`TimelineSnapshot`（`TimelineModels.swift:354`）无 annotation 层；`selection` 是单一 transient `TraceTimeRange?`（`:230`），`Escape` 即清（`:380-393`）。
+- **ArkTrace**：不存在。`grep -rni "bookmark|flagList|marker" sources/ArkTraceRendering sources/ArkTraceAppSupport apple/Apps/` 只命中 `TraceRecentDocuments.swift` 的 macOS security-scoped bookmark（文件书签，与时间轴无关）；`TimelineNSView.swift:286-323` keyDown 无 `,`/`.`/`m` 分支；`TimelineSnapshot`（`TimelineModels.swift:354`）无 annotation 层；`selection` 是单一 transient `TraceTimeRange?`（`:230`），`Escape` 即清（`:380-393`）。
 - **用户可见后果**：看长 trace 无法标记「这里有问题」再跳回；无法留住多个关注区间做对比。→ P7-T07
 
 ### G10 — 无泳道收藏 / 置顶
@@ -156,7 +156,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 **已对齐（P7-T08，2026-08-18）。** 置顶区与标注共用同一 sidecar。
 
 - **上游**：`component/trace/base/TraceRow.ts:451-459` `get/set collect`；`:1306-1321` 点收藏图标派发 `collect` 事件；`:1336-1367` 收藏区内拖拽重排；`:129` `ROW_TYPE_COLLECT_GROUP`；`:45` 模块级 `collectList`；`component/trace/SpChartList.ts:146` 裸 `b` 键折叠/展开收藏区（`SpKeyboard.html.ts` 记为 "Expand/Fold Collection Area"）。
-- **ArkTrace**：不存在。`grep -rni "favorite|collect" Sources/ArkTraceRendering Sources/ArkTraceAppSupport apple/Apps/` 无相关命中。
+- **ArkTrace**：不存在。`grep -rni "favorite|collect" sources/ArkTraceRendering sources/ArkTraceAppSupport apple/Apps/` 无相关命中。
 - **用户可见后果**：199 线程下想把「这 4 条泳道」并排盯着看，只能靠关掉其他所有泳道近似。→ P7-T08
 
 ### G11 — 无 canvas hover tooltip
@@ -164,7 +164,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 **已对齐（P7-T09，2026-08-18）。** tooltip 内容取自已挂在 primitive 上的 inspector，hover 不发起查询。
 
 - **上游**：`component/trace/base/TraceRow.ts:193` `tipEL`；`:821-824` `set tip(value)`；`:1409-1421` `setTipLeft` 跟随鼠标并在右边界翻转；`:1402` `onMouseHover`。
-- **ArkTrace**：`Sources/ArkTraceRendering/TimelineNSView.swift:247-251` `mouseMoved` 只 `onHoverEvent?(...)`，信息送 Inspector（`ArkTraceApp.swift:462-464`）；canvas 上无 tooltip 绘制。
+- **ArkTrace**：`sources/ArkTraceRendering/TimelineNSView.swift:247-251` `mouseMoved` 只 `onHoverEvent?(...)`，信息送 Inspector（`ArkTraceApp.swift:462-464`）；canvas 上无 tooltip 绘制。
 - **注**：Inspector 已提供更完整、可复制、可访问的语义（AT-APP-005/010），tooltip 是效率改进而非能力缺失。→ P7-T09
 
 ### G12 — hover 时无同名 slice 联动高亮
@@ -209,7 +209,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 
 | 项 | 上游 | ArkTrace | 核对方式 |
 |---|---|---|---|
-| Event 填充**分配**（不含色值） | `ProcedureWorkerFunc.ts:254`、`cpu/ProcedureWorkerCPU.ts:271`、`ProcedureWorkerThread.ts:120` | `Sources/ArkTraceRendering/TimelineColorPalette.swift` `hash` / `hashFunc` / `color(for*)` | **上游在 pin 处对 func slice 传的第二参是字面 `0` 而非真实 depth**，故 ArkTrace 用默认 depth 0 是逐位一致的。`TimelinePaletteTests` 的上游向量已锁定 |
+| Event 填充**分配**（不含色值） | `ProcedureWorkerFunc.ts:254`、`cpu/ProcedureWorkerCPU.ts:271`、`ProcedureWorkerThread.ts:120` | `sources/ArkTraceRendering/TimelineColorPalette.swift` `hash` / `hashFunc` / `color(for*)` | **上游在 pin 处对 func slice 传的第二参是字面 `0` 而非真实 depth**，故 ArkTrace 用默认 depth 0 是逐位一致的。`TimelinePaletteTests` 的上游向量已锁定 |
 | `F` / `[` / `]` zoom to selection | `RangeRuler.ts:770-772` | `TimelineNSView.swift:316` | 三键应产生同一 viewport |
 | 单击选中 / 拖拽框选 | `SpKeyboard.html.ts` Mouse Controls | `TimelineNSView.swift:202-232` | — |
 | Time ruler | `TimeRuler.ts`、`SportRuler.ts:203` | `TimelineNSView.swift:417` | — |
@@ -262,7 +262,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 4. **`instant` / `raw` 表**（真库各 117 万行）—— 确认存在且非空，但**未查清上游用它们画什么用户可见的东西**；
 5. `component/trace/sheet/` 另约 140 个 TabPane —— 按数据源缺失整体判定（依据是真库行数实证，不是看名字），若 ArkDeck 打开新采集插件需重新过一遍。
 
-**方法学限制（审计当时）**：`swift test` 未跑（`third_party/TraceStreamer/macx/trace_streamer` 未构建，且审计约束禁止跑需要网络的 `hack/build_trace_streamer.sh`），因此所有 ArkTrace 侧结论来自源码与真库 SQL，**没有一条来自运行中的 App**。
+**方法学限制（审计当时）**：`swift test` 未跑（`third_party/trace-streamer/macx/trace_streamer` 未构建，且审计约束禁止跑需要网络的 `hack/build_trace_streamer.sh`），因此所有 ArkTrace 侧结论来自源码与真库 SQL，**没有一条来自运行中的 App**。
 
 **该限制已在 Phase 7 执行期解除**：P7-T01～P7-T13 全程有构建过的 pin 版 parser，逐条验收在真机 DAYU 200 库（524 MB）与 pin 版上游 `pbreader.htrace`（265 MB）上实测，G01 的「Sidebar 显示 Not available in this trace」也已在 App 中眼见为实。真机实测因此推翻了本文档两处推断，两处都已就地修正：`frame_slice.dst` 并不指向配对行（真库 42 796 行全为 NULL，配对键是 `vsync` + `ipid`），以及 §3 的 counter capability 探针「反过来写会撞穿预算」只对一半的真实数据成立（见下）。
 

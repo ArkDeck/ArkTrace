@@ -47,7 +47,7 @@ def build_swift_oracle():
         destination = source / "Sources" / name
         if destination.exists():
             shutil.rmtree(destination)
-        shutil.copytree(ROOT / "Sources" / name, destination)
+        shutil.copytree(ROOT / "sources" / name, destination)
     shutil.copytree(ROOT / "hack", source / "hack", dirs_exist_ok=True)
     target = source / "Sources/CounterOracle"
     target.mkdir(parents=True, exist_ok=True)
@@ -86,7 +86,7 @@ def main():
         raise SystemExit("native macOS arm64 required; no simulated PASS")
     xcode = subprocess.check_output(["/usr/bin/xcodebuild", "-version"], text=True)
     assert xcode.startswith("Xcode 27.")
-    parser = ROOT / "third_party/TraceStreamer/macx/trace_streamer"
+    parser = ROOT / "third_party/trace-streamer/macx/trace_streamer"
     manifest = json.loads(parser.with_name("manifest.json").read_text())
     oracle = json.loads((ROOT / "docs/migration-runs/AT-RUST-001-2026-10-02-small-oracle.json").read_text())
     assert digest(parser) == manifest["binarySHA256"] == oracle["parser"]["binarySHA256"]
@@ -162,7 +162,7 @@ def main():
         assert digest(parser) == manifest["binarySHA256"] and digest(tools / "host-process") == helper_pin and digest(installed) == installed_pin
         for source in oracle["corpus"]:
             assert digest(ROOT / source["path"]) == source["sha256"]
-        source_paths = sorted(path for name in ("ArkTraceCore", "ArkTraceStore", "ArkTraceAnalysis") for path in (ROOT / "Sources" / name).rglob("*.swift"))
+        source_paths = sorted(path for name in ("ArkTraceCore", "ArkTraceStore", "ArkTraceAnalysis") for path in (ROOT / "sources" / name).rglob("*.swift"))
         report.update(swiftRecords=records, helperExecutableSHA256=helper_pin, swiftExecutableSHA256=installed_pin,
             swiftOracleExecutableSHA256=swift_probe_pin, swiftOracleBuildLogSHA256=digest(swift_build_log),
             swiftOracleSources=[{"path": str(p.relative_to(ROOT)), "sha256": digest(p), "byteCount": p.stat().st_size} for p in source_paths],

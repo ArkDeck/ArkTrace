@@ -74,9 +74,9 @@ fi
     || fail "Xcode project is unavailable or non-physical"
 for candidate_input in \
     "$repository_root/apple/Apps/ArkTraceApp/ArkTraceApp.entitlements" \
-    "$repository_root/third_party/TraceStreamer/macx/trace_streamer" \
-    "$repository_root/third_party/TraceStreamer/macx/manifest.json" \
-    "$repository_root/third_party/TraceStreamer/license-inventory.json" \
+    "$repository_root/third_party/trace-streamer/macx/trace_streamer" \
+    "$repository_root/third_party/trace-streamer/macx/manifest.json" \
+    "$repository_root/third_party/trace-streamer/license-inventory.json" \
     "$repository_root/LICENSE" \
     "$repository_root/THIRD_PARTY_NOTICES.md"
 do
@@ -85,12 +85,12 @@ do
 done
 arktrace_assert_physical_file_within "$repository_root" \
     "$script_directory/prepare_macos_native_app.py" "native App preparation"
-[ -d "$repository_root/third_party/TraceStreamer/LICENSES" ] \
-    && [ ! -L "$repository_root/third_party/TraceStreamer/LICENSES" ] \
+[ -d "$repository_root/third_party/trace-streamer/LICENSES" ] \
+    && [ ! -L "$repository_root/third_party/trace-streamer/LICENSES" ] \
     && arktrace_assert_physical_directory_chain \
-        "$repository_root" "$repository_root/third_party/TraceStreamer/LICENSES" \
+        "$repository_root" "$repository_root/third_party/trace-streamer/LICENSES" \
     || fail "candidate license directory is unavailable or non-physical"
-[ -z "$(find "$repository_root/third_party/TraceStreamer/LICENSES" \
+[ -z "$(find "$repository_root/third_party/trace-streamer/LICENSES" \
     -type l -print -quit)" ] \
     || fail "candidate license directory contains a symlink"
 arktrace_create_reviewed_build_root
@@ -200,7 +200,7 @@ helper_certificate_sha1=$(signature_certificate_sha1 "$helper" helper)
     || fail "nested helper was signed by an unexpected certificate"
 signed_helper_sha=$(shasum -a 256 "$helper" | awk '{print $1}')
 unsigned_helper_sha=$(jq -er '.binarySHA256' \
-    "$repository_root/third_party/TraceStreamer/macx/manifest.json")
+    "$repository_root/third_party/trace-streamer/macx/manifest.json")
 distribution_record="$app/Contents/Resources/TraceStreamer/distribution-signing.json"
 arktrace_require_absent_leaf "$distribution_record" "distribution signing record"
 jq -n \
@@ -285,11 +285,11 @@ cmp "$repository_root/THIRD_PARTY_NOTICES.md" \
     "$app/Contents/Resources/THIRD_PARTY_NOTICES.md" \
     >/dev/null 2>&1 \
     || fail "candidate third-party notice drifted"
-cmp "$repository_root/third_party/TraceStreamer/license-inventory.json" \
+cmp "$repository_root/third_party/trace-streamer/license-inventory.json" \
     "$app/Contents/Resources/license-inventory.json" \
     >/dev/null 2>&1 \
     || fail "candidate license inventory drifted"
-diff -qr "$repository_root/third_party/TraceStreamer/LICENSES" \
+diff -qr "$repository_root/third_party/trace-streamer/LICENSES" \
     "$app/Contents/Resources/Licenses" >/dev/null 2>&1 \
     || fail "candidate license files drifted"
 

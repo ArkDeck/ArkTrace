@@ -45,7 +45,7 @@ TraceStreamer 二进制是本机构建产物，已被 `.gitignore` 排除——�
 hack/build_trace_streamer.sh
 ```
 
-该脚本生成 `third_party/TraceStreamer/macx/trace_streamer` 及其 identity manifest。pinned revision 与构建配方见 [docs/design/TRACE_STREAMER.md](docs/design/TRACE_STREAMER.md)。
+该脚本生成 `third_party/trace-streamer/macx/trace_streamer` 及其 identity manifest。pinned revision 与构建配方见 [docs/design/TRACE_STREAMER.md](docs/design/TRACE_STREAMER.md)。
 
 ### 2. 构建与测试
 
@@ -68,7 +68,7 @@ sh hack/run-xcodebuild.sh
 仓库自带一个小型示例 Trace，以下命令开箱即用：
 
 ```bash
-PARSER="$PWD/third_party/TraceStreamer/macx/trace_streamer"
+PARSER="$PWD/third_party/trace-streamer/macx/trace_streamer"
 .build/release/arktrace --trace-streamer "$PARSER" inspect test/fixtures/traces/zlib.htrace
 .build/release/arktrace --trace-streamer "$PARSER" --json summary test/fixtures/traces/zlib.htrace
 .build/release/arktrace --trace-streamer "$PARSER" --json processes test/fixtures/traces/zlib.htrace --limit 100
@@ -184,4 +184,4 @@ ArkTrace 不重写 parser，而是复用 pinned 的上游 TraceStreamer：[openh
 
 ArkTrace 以 [MIT License](LICENSE) 发布。
 
-捆绑 TraceStreamer 的 14 个 source components、2 个 build tools、许可证表达式与 exact license bytes 记录于 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 与 `third_party/TraceStreamer/license-inventory.json`；`hack/verify_licenses.sh` 对清单、source lock 与文件 SHA fail-closed 校验。App 内 **Settings → Licenses** 展示的与 `arktrace licenses` 输出的是同一组经锁定的资源。
+捆绑 TraceStreamer 的 14 个 source components、2 个 build tools、许可证表达式与 exact license bytes 记录于 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 与 `third_party/trace-streamer/license-inventory.json`；`hack/verify_licenses.sh` 对清单、source lock 与文件 SHA fail-closed 校验。App 内 **Settings → Licenses** 展示的与 `arktrace licenses` 输出的是同一组经锁定的资源。

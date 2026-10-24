@@ -73,7 +73,7 @@ flowchart LR
 ### P1-T01 — 构建可工作的原生 TraceStreamer
 
 **状态：完成。**
-**证据：e710e78、third_party/TraceStreamer/macx/manifest.json。**
+**证据：e710e78、third_party/trace-streamer/macx/manifest.json。**
 
 已验证：
 
@@ -340,14 +340,14 @@ Phase 1 要完成结构化取消实现；发布门 6 仍需后续 large trace + 
 以下工作重要，但按当前 reviewed DESIGN 不重新阻塞已关闭的发布门 2：
 
 - ~~将 manifest 中记录的所有 floating third-party SHA 转成普通 build 会消费的 source lock~~——已完成：
-  `third_party/TraceStreamer/source-lock.json` 锁定 upstream 与 13 个 source dependency；
+  `third_party/trace-streamer/source-lock.json` 锁定 upstream 与 13 个 source dependency；
 - ~~固定 GN/Ninja 下载 URL 与 archive SHA~~——已完成：同一 lock 的 `tools` 段固定两者的 URL、SHA-256
   与 byte count，构建脚本按值校验；
 - ~~用两个 clean work directory 验证 byte-identical binary~~——已完成：
   `hack/test_trace_streamer_reproducibility.sh` 实跑通过，两个独立 fresh worktree 的产物彼此、且与
   仓库 binary 逐字节相同（`e0167fbb…`）；
 - ~~将 faultloggerd inline edit 改为独立 patch~~——已完成：
-  `third_party/TraceStreamer/patches/faultloggerd-apple-clang.patch`；
+  `third_party/trace-streamer/patches/faultloggerd-apple-clang.patch`；
 - ~~增加 ssh://git@gitee.com/ 形式的 HTTPS rewrite~~——已完成：构建脚本同时 rewrite
   `git@gitee.com:openharmony/` 与 `ssh://git@gitee.com/openharmony/`；
 - ~~为 build recipe 引入基于输入内容的稳定版本~~——已完成：`BUILD_RECIPE_VERSION` 由 build script、

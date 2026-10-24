@@ -8,10 +8,10 @@ fail() {
 
 script_directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 repository_root=$(CDPATH= cd -- "$script_directory/.." && pwd)
-lock="$repository_root/third_party/TraceStreamer/source-lock.json"
-manifest="$repository_root/third_party/TraceStreamer/macx/manifest.json"
-faultloggerd_patch="$repository_root/third_party/TraceStreamer/patches/faultloggerd-apple-clang.patch"
-proto_reader_patch="$repository_root/third_party/TraceStreamer/patches/proto-reader-sparse-validity.patch"
+lock="$repository_root/third_party/trace-streamer/source-lock.json"
+manifest="$repository_root/third_party/trace-streamer/macx/manifest.json"
+faultloggerd_patch="$repository_root/third_party/trace-streamer/patches/faultloggerd-apple-clang.patch"
+proto_reader_patch="$repository_root/third_party/trace-streamer/patches/proto-reader-sparse-validity.patch"
 build_script="$repository_root/hack/build_trace_streamer.sh"
 safety_helper="$repository_root/hack/phase3_shell_safety.sh"
 

@@ -31,8 +31,8 @@ def main():
     if not xcode.startswith("Xcode 27."):
         raise SystemExit("Xcode 27 required")
     SOURCE.mkdir(parents=True, exist_ok=True)
-    for directory in ("Sources/ArkTraceCore", "Sources/ArkTraceAnalysis", "Tests/ArkTraceAnalysisTests", "hack"):
-        shutil.copytree(ROOT / directory, SOURCE / directory, dirs_exist_ok=True)
+    for directory in ("sources/ArkTraceCore", "sources/ArkTraceAnalysis", "tests/ArkTraceAnalysisTests", "hack"):
+        shutil.copytree(ROOT / directory, SOURCE / directory.replace("sources/", "Sources/", 1).replace("tests/", "Tests/", 1), dirs_exist_ok=True)
     (SOURCE / "Package.swift").write_text('''// swift-tools-version: 6.3
 import PackageDescription
 let package = Package(name: "ArkTrace", platforms: [.macOS(.v26)], targets: [
@@ -58,9 +58,9 @@ let package = Package(name: "ArkTrace", platforms: [.macOS(.v26)], targets: [
     def digest(path):
         data = path.read_bytes()
         return {"path": str(path.relative_to(ROOT)), "sha256": hashlib.sha256(data).hexdigest(), "byteCount": len(data)}
-    paths = sorted((ROOT / "Sources/ArkTraceAnalysis").glob("*.swift"))
-    paths += sorted((ROOT / "Sources/ArkTraceCore").rglob("*.swift"))
-    paths += [ROOT / "Tests/ArkTraceAnalysisTests/TraceAgentBatchTests.swift", harness, INPUT, OUTPUT]
+    paths = sorted((ROOT / "sources/ArkTraceAnalysis").glob("*.swift"))
+    paths += sorted((ROOT / "sources/ArkTraceCore").rglob("*.swift"))
+    paths += [ROOT / "tests/ArkTraceAnalysisTests/TraceAgentBatchTests.swift", harness, INPUT, OUTPUT]
     receipt = {"oracle": "actual Swift TraceDeterministicAnalysisEngine + retainingRows", "xcode": xcode.strip(),
         "swift": subprocess.check_output(["swift", "--version"], text=True, cwd=ROOT).strip(),
         "scope": "six pure section projections; longSlices excluded before Swift global row projection", "vectors": len(json.loads(OUTPUT.read_text())),

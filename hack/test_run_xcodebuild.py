@@ -58,14 +58,14 @@ class RunXcodebuildTests(unittest.TestCase):
         source = root / "apple/Apps/ArkTraceApp/App.swift"
         source.parent.mkdir(parents=True)
         source.write_text(source_contents, encoding="utf-8")
-        parser = root / "third_party/TraceStreamer/macx/trace_streamer"
+        parser = root / "third_party/trace-streamer/macx/trace_streamer"
         parser.parent.mkdir(parents=True)
         parser.write_bytes(b"approved parser")
         parser.chmod(0o700)
         manifest = {"binarySHA256": hashlib.sha256(parser.read_bytes()).hexdigest()}
         (parser.parent / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
         (root / ".gitignore").write_text(
-            "third_party/TraceStreamer/macx/trace_streamer\n.arktrace-native/\n", encoding="utf-8"
+            "third_party/trace-streamer/macx/trace_streamer\n.arktrace-native/\n", encoding="utf-8"
         )
         subprocess.run(["git", "init", "-q", str(root)], check=True)
         subprocess.run(["git", "-C", str(root), "add", "."], check=True)
@@ -132,7 +132,7 @@ class RunXcodebuildTests(unittest.TestCase):
         self.assertIn("ARKTRACE_RUST_XCFRAMEWORK=.arktrace-native/test/CArkTrace.xcframework", lines)
         self.assertIn("ARKTRACE_RUST_SDK_FIXTURES=unset", lines)
         self.assertEqual(
-            (canonical / "workspace/third_party/TraceStreamer/macx/trace_streamer").read_bytes(),
+            (canonical / "workspace/third_party/trace-streamer/macx/trace_streamer").read_bytes(),
             b"approved parser",
         )
 
@@ -178,7 +178,7 @@ class RunXcodebuildTests(unittest.TestCase):
     def test_changed_or_missing_parser_is_rejected_before_xcodebuild(self) -> None:
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         script, _ = self.make_repo(temporary / "repo", "let value = 1\n", 1_700_000_000)
-        parser = temporary / "repo/third_party/TraceStreamer/macx/trace_streamer"
+        parser = temporary / "repo/third_party/trace-streamer/macx/trace_streamer"
         parser.write_bytes(b"drifted")
         marker = temporary / "called"
         executable = temporary / "xcodebuild"

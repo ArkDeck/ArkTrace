@@ -86,8 +86,8 @@ done
 
 make_fake_repository() {
     destination=$1
-    mkdir -p "$destination/scripts" "$destination/third_party/TraceStreamer/patches" \
-        "$destination/third_party/TraceStreamer/macx" "$destination/Fixtures"
+    mkdir -p "$destination/scripts" "$destination/third_party/trace-streamer/patches" \
+        "$destination/third_party/trace-streamer/macx" "$destination/Fixtures"
     cp "$script_directory/phase3_shell_safety.sh" \
         "$script_directory/build_trace_streamer.sh" \
         "$script_directory/fetch_phase3_fixtures.sh" \
@@ -96,12 +96,12 @@ make_fake_repository() {
         "$script_directory/benchmark_phase3.sh" "$destination/hack/"
     chmod +x "$destination/hack/"*.sh
     printf 'reviewed patch\n' \
-        >"$destination/third_party/TraceStreamer/patches/faultloggerd-apple-clang.patch"
+        >"$destination/third_party/trace-streamer/patches/faultloggerd-apple-clang.patch"
     printf 'reviewed parser patch\n' \
-        >"$destination/third_party/TraceStreamer/patches/proto-reader-sparse-validity.patch"
+        >"$destination/third_party/trace-streamer/patches/proto-reader-sparse-validity.patch"
     jq -n '
       {upstream:{repository:"https://invalid.example/upstream.git",revision:"0000000000000000000000000000000000000000"},tools:{},sources:[]}
-    ' >"$destination/third_party/TraceStreamer/source-lock.json"
+    ' >"$destination/third_party/trace-streamer/source-lock.json"
     jq -n '
       {formatVersion:1,upstream:{repository:"https://invalid.example/upstream.git",revision:"0000000000000000000000000000000000000000",license:"Apache-2.0",licensePath:"LICENSE",licenseBlob:"0000000000000000000000000000000000000000",licenseSHA256:"0000000000000000000000000000000000000000000000000000000000000000",licenseByteCount:1},medium:{path:"trace",blob:"0000000000000000000000000000000000000000",sha256:"0000000000000000000000000000000000000000000000000000000000000000",byteCount:52428801},large:{minimumByteCount:524288001,maximumByteCount:2147483648}}
     ' >"$destination/test/fixtures/phase3-performance-fixtures.json"
@@ -161,26 +161,26 @@ make_fake_repository "$stage_repository"
 stage_escape="$temporary_root/stage-escape"
 mkdir "$stage_escape"
 printf 'foreign stage sentinel\n' >"$stage_escape/sentinel"
-rm -rf "$stage_repository/third_party/TraceStreamer/macx"
-ln -s "$stage_escape" "$stage_repository/third_party/TraceStreamer/macx"
+rm -rf "$stage_repository/third_party/trace-streamer/macx"
+ln -s "$stage_escape" "$stage_repository/third_party/trace-streamer/macx"
 if "$stage_repository/hack/build_trace_streamer.sh" >/dev/null 2>&1; then
     fail "default repository stage symlink was accepted"
 fi
 [ "$(cat "$stage_escape/sentinel")" = 'foreign stage sentinel' ] \
     || fail "default stage symlink target was modified"
-rm "$stage_repository/third_party/TraceStreamer/macx"
-mkdir "$stage_repository/third_party/TraceStreamer/macx"
+rm "$stage_repository/third_party/trace-streamer/macx"
+mkdir "$stage_repository/third_party/trace-streamer/macx"
 for output_name in trace_streamer manifest.json; do
     output_sentinel="$temporary_root/$output_name-sentinel"
     printf 'output sentinel\n' >"$output_sentinel"
     ln -s "$output_sentinel" \
-        "$stage_repository/third_party/TraceStreamer/macx/$output_name"
+        "$stage_repository/third_party/trace-streamer/macx/$output_name"
     if "$stage_repository/hack/build_trace_streamer.sh" >/dev/null 2>&1; then
         fail "default stage output symlink was accepted"
     fi
     [ "$(cat "$output_sentinel")" = 'output sentinel' ] \
         || fail "default stage output symlink target was modified"
-    rm "$stage_repository/third_party/TraceStreamer/macx/$output_name"
+    rm "$stage_repository/third_party/trace-streamer/macx/$output_name"
 done
 
 checkout_repository="$temporary_root/checkout-repository"

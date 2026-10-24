@@ -29,9 +29,9 @@ repository_root=$(CDPATH= cd -- "$script_directory/.." && pwd -P)
 fixture_lock="$repository_root/test/fixtures/phase3-performance-fixtures.json"
 fixture_class=${1:-medium}
 warmup_only=${ARKTRACE_PHASE3_WARMUP_ONLY:-0}
-parser=${ARKTRACE_TRACE_STREAMER:-$repository_root/third_party/TraceStreamer/macx/trace_streamer}
-locked_parser="$repository_root/third_party/TraceStreamer/macx/trace_streamer"
-locked_manifest="$repository_root/third_party/TraceStreamer/macx/manifest.json"
+parser=${ARKTRACE_TRACE_STREAMER:-$repository_root/third_party/trace-streamer/macx/trace_streamer}
+locked_parser="$repository_root/third_party/trace-streamer/macx/trace_streamer"
+locked_manifest="$repository_root/third_party/trace-streamer/macx/manifest.json"
 default_evidence_directory="$repository_root/.build/phase3-evidence"
 requested_evidence=${ARKTRACE_PHASE3_EVIDENCE_OUTPUT:-$default_evidence_directory/arktrace-phase3-$fixture_class-$(date -u +%Y%m%dT%H%M%SZ)-$$.json}
 arktrace_validate_reviewed_roots "$repository_root"

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Reproducibly builds the pinned TraceStreamer as a PE x64 executable on a
 # Windows 11 x64 host and stages it plus a provenance manifest into
-# third_party/TraceStreamer/windows-x86_64/ (or ARKTRACE_TS_STAGE_DIR).
+# third_party/trace-streamer/windows-x86_64/ (or ARKTRACE_TS_STAGE_DIR).
 #
 # Run from an MSYS2 shell (MSYSTEM=MSYS). MSYS2 supplies only the POSIX tools
 # (pacman: git patch unzip jq p7zip diffutils). The compiler is the
@@ -24,7 +24,7 @@ esac
 [ "$(uname -m)" = "x86_64" ] || fail "host must be x86_64"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-TS_ROOT="$REPO_ROOT/third_party/TraceStreamer"
+TS_ROOT="$REPO_ROOT/third_party/trace-streamer"
 SOURCE_LOCK="$TS_ROOT/source-lock.json"
 WINDOWS_LOCK="$TS_ROOT/windows-toolchain-lock.json"
 PROTO_READER_PATCH="$TS_ROOT/patches/proto-reader-sparse-validity.patch"

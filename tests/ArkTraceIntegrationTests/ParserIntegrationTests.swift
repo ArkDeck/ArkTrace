@@ -18,7 +18,7 @@ private func arkTraceTestFlock(_ descriptor: Int32, _ operation: Int32) -> Int32
 /// TraceStreamer process → SQLite → schema validation → typed queries.
 ///
 /// The test resolves TraceStreamer from `ARKTRACE_TRACE_STREAMER` or the
-/// default `third_party/TraceStreamer/macx` layout. A custom binary must carry
+/// default `third_party/trace-streamer/macx` layout. A custom binary must carry
 /// its sibling pinned `manifest.json`.
 final class ParserIntegrationTests: XCTestCase {
     private final class PerformanceMetricRecorder: @unchecked Sendable {
@@ -567,14 +567,14 @@ final class ParserIntegrationTests: XCTestCase {
         URL(filePath: #filePath)
             .deletingLastPathComponent()  // ParserIntegrationTests.swift
             .deletingLastPathComponent()  // ArkTraceIntegrationTests
-            .deletingLastPathComponent()  // Tests
+            .deletingLastPathComponent()  // tests
     }
 
     private static func traceStreamerURL() -> URL? {
         let environment = ProcessInfo.processInfo.environment
         let candidates = [
             environment["ARKTRACE_TRACE_STREAMER"].map { URL(filePath: $0) },
-            repoRoot.appending(path: "third_party/TraceStreamer/macx/trace_streamer"),
+            repoRoot.appending(path: "third_party/trace-streamer/macx/trace_streamer"),
         ]
         return candidates.compactMap { $0 }
             .first { FileManager.default.isExecutableFile(atPath: $0.path) }

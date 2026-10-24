@@ -34,7 +34,7 @@ class RunSwiftPMTests(unittest.TestCase):
         script = root / "hack/run-swiftpm.sh"
         script.parent.mkdir(parents=True)
         shutil.copy2(SCRIPT, script)
-        source = root / "Sources/Example/Example.swift"
+        source = root / "sources/Example/Example.swift"
         source.parent.mkdir(parents=True)
         source.write_text(source_contents, encoding="utf-8")
         (root / "Package.swift").write_text(
@@ -109,7 +109,7 @@ class RunSwiftPMTests(unittest.TestCase):
         swift = self.make_fake_swift(temporary)
 
         self.assertEqual(self.invoke(first, cache_root, swift, "build").returncode, 0)
-        mirror = cache_root / "workspace/Sources/Example/Example.swift"
+        mirror = cache_root / "workspace/sources/Example/Example.swift"
         first_stat = mirror.stat()
         self.assertEqual(self.invoke(second, cache_root, swift, "build").returncode, 0)
         second_stat = mirror.stat()
@@ -133,7 +133,7 @@ class RunSwiftPMTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 23)
         self.assertEqual(
-            (cache_root / "workspace/Sources/Example/Example.swift").read_text(),
+            (cache_root / "workspace/sources/Example/Example.swift").read_text(),
             "public let value = 2\n",
         )
 
@@ -188,7 +188,7 @@ class RunSwiftPMTests(unittest.TestCase):
         self.assertFalse((cache_root / "workspace/.arktrace-native/alien").exists())
         self.assertFalse(stale.exists())
         self.assertEqual(
-            (cache_root / "workspace/Sources/Example/Example.swift").read_text(),
+            (cache_root / "workspace/sources/Example/Example.swift").read_text(),
             "public let value = 2\n",
         )
 

@@ -46,15 +46,15 @@ final class TraceStreamerIdentityTests: XCTestCase {
         URL(filePath: #filePath)
             .deletingLastPathComponent()  // TraceStreamerIdentityTests.swift
             .deletingLastPathComponent()  // ArkTraceParserTests
-            .deletingLastPathComponent()  // Tests
+            .deletingLastPathComponent()  // tests
     }
 
     private static var binaryURL: URL {
-        repoRoot.appending(path: "third_party/TraceStreamer/macx/trace_streamer")
+        repoRoot.appending(path: "third_party/trace-streamer/macx/trace_streamer")
     }
 
     private static var manifestURL: URL {
-        repoRoot.appending(path: "third_party/TraceStreamer/macx/manifest.json")
+        repoRoot.appending(path: "third_party/trace-streamer/macx/manifest.json")
     }
 
     private static var fixtureURL: URL {

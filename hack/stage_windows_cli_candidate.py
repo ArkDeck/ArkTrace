@@ -13,7 +13,7 @@ layout documented in docs/guides/CLI.md:
     <output>/resources/zlib.htrace                (doctor --self-test trace)
 
 The parser must be the locally rebuilt recipe binary whose SHA-256 equals
-third_party/TraceStreamer/windows-x86_64/manifest.json; it is never committed.
+third_party/trace-streamer/windows-x86_64/manifest.json; it is never committed.
 """
 import argparse
 import hashlib
@@ -26,7 +26,7 @@ from pathlib import Path
 from windows_cli_distribution import stage_attribution
 
 ROOT = Path(__file__).resolve().parent.parent
-MANIFEST = ROOT / "third_party/TraceStreamer/windows-x86_64/manifest.json"
+MANIFEST = ROOT / "third_party/trace-streamer/windows-x86_64/manifest.json"
 SELF_TEST_SHA256 = "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe"
 IDENTITY_KEYS = ["name", "reportedVersion", "binarySHA256", "upstreamRepository", "upstreamRevision",
                  "architecture", "adapterVersion", "buildRecipeVersion"]

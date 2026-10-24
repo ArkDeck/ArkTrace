@@ -145,7 +145,7 @@ flowchart LR
   AT-JSON-*、AT-ERR-*、AT-PERF-*；清单范围覆盖 AT-APP-*、AT-RENDER-*、AT-AD-*。
 - 路径：拟新增 `api/`、`rust/tests/fixtures/`、`docs/migration-runs/`；现有 CLI/Core/
   Store/Rendering tests、`hack/api-baseline/`；只为 recorder 增加最小 test seam；
-  交付 6 修改 `Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift` 及其测试。
+  交付 6 修改 `sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift` 及其测试。
 
 交付：
 
@@ -219,7 +219,7 @@ flowchart LR
 - 平台/输入：Windows 11 x64 构建主机、上游源码、真实 Trace；无设备操作。
 - 需求：AT-SYS-005、AT-PARSE-002/003/004/010、AT-DB-*、AT-SEC-002/005、AT-CLI-011（许可清单）；
   AT-PARSE-001/007 的调用与成功判定由 006 接入。
-- 路径：`third_party/TraceStreamer/`、拟新增 Windows build/verify 脚本；
+- 路径：`third_party/trace-streamer/`、拟新增 Windows build/verify 脚本；
   `docs/design/TRACE_STREAMER.md`、`THIRD_PARTY_NOTICES.md`、许可/fixture 检查。
 
 交付：
@@ -892,7 +892,7 @@ repository/App 接线与完整 macOS 验收仍待办，见
 - 平台/输入：macOS 26+ arm64 图形会话、真实 medium/large；Capture 此时可保留 Swift。
 - 需求：AT-APP-*、AT-RENDER-*、AT-LOD-005/006、AT-SYS-004、AT-SEC-008、AT-CACHE-006、
   AT-PERF-002/007；现有功能不回退。
-- 路径：`apple/Apps/ArkTraceApp/`、`Sources/ArkTraceAppSupport/`、`ArkTraceRendering/`、
+- 路径：`apple/Apps/ArkTraceApp/`、`sources/ArkTraceAppSupport/`、`ArkTraceRendering/`、
   Swift compatibility targets、Xcode project 与原生 tests。
 
 交付：

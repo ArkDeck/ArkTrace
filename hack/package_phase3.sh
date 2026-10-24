@@ -285,17 +285,17 @@ cmp "$repository_root/THIRD_PARTY_NOTICES.md" \
     "$app/Contents/Resources/THIRD_PARTY_NOTICES.md" \
     >/dev/null 2>&1 \
     || fail "bundled third-party notice drifted"
-cmp "$repository_root/third_party/TraceStreamer/license-inventory.json" \
+cmp "$repository_root/third_party/trace-streamer/license-inventory.json" \
     "$app/Contents/Resources/license-inventory.json" \
     >/dev/null 2>&1 \
     || fail "bundled license inventory drifted"
-diff -qr "$repository_root/third_party/TraceStreamer/LICENSES" \
+diff -qr "$repository_root/third_party/trace-streamer/LICENSES" \
     "$app/Contents/Resources/Licenses" >/dev/null 2>&1 \
     || fail "bundled license directory drifted"
 [ "$(shasum -a 256 "$helper" | awk '{print $1}')" = \
     "$(jq -er '.binarySHA256' "$manifest")" ] \
     || fail "signed helper bytes do not match the bundled manifest"
-repository_manifest="$repository_root/third_party/TraceStreamer/macx/manifest.json"
+repository_manifest="$repository_root/third_party/trace-streamer/macx/manifest.json"
 jq -e \
     --arg unsigned "$(jq -er '.binarySHA256' "$repository_manifest")" \
     --arg signed "$(shasum -a 256 "$helper" | awk '{print $1}')" \

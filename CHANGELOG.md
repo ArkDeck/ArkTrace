@@ -17,3 +17,12 @@ GitHub Releases. History before this file is the git log on `main`.
   `CODE_OF_CONDUCT.md`, GitHub issue and pull request templates,
   `.github/CODEOWNERS`, and a root `justfile` that wraps the existing build,
   test, lint, and CI-plan commands.
+
+### Changed
+
+- Repository roots are lowercase: `Sources/` is now `sources/`, `Tests/` is
+  now `tests/`, and `third_party/TraceStreamer/` is now
+  `third_party/trace-streamer/`. `Package.swift` sets an explicit `path:` for
+  every target; target and module names are unchanged. The macOS
+  TraceStreamer `buildRecipeVersion` is re-pinned because the build script's
+  bytes changed; the pinned binary SHA-256 is unchanged and was not rebuilt.

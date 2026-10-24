@@ -46,7 +46,7 @@ def load(name):
 verifier = load("verify_windows_cli_distribution")
 # One module instance, so one ContractError class.
 contract = verifier.contract
-PARSER_MANIFEST = ROOT / "third_party/TraceStreamer/windows-x86_64/manifest.json"
+PARSER_MANIFEST = ROOT / "third_party/trace-streamer/windows-x86_64/manifest.json"
 SIGNTOOL = Path(r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe")
 IDENTITY_KEYS = ["name", "reportedVersion", "binarySHA256", "upstreamRepository", "upstreamRevision",
                  "architecture", "adapterVersion", "buildRecipeVersion"]

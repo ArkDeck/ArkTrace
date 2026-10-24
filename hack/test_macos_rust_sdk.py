@@ -118,8 +118,8 @@ def main():
     finally:os.environ['ARKTRACE_RUST_XCFRAMEWORK']=native_override
     cargo('build','-p','arktrace-platform','--bin','arktrace-host-process')
     target=Path(json.loads(cargo('metadata','--format-version','1','--no-deps'))['target_directory'])/'debug'
-    manifest=json.loads((ROOT/'third_party/TraceStreamer/macx/manifest.json').read_text())
-    parser=ROOT/'third_party/TraceStreamer/macx/trace_streamer';assert sha(parser)==manifest['binarySHA256']
+    manifest=json.loads((ROOT/'third_party/trace-streamer/macx/manifest.json').read_text())
+    parser=ROOT/'third_party/trace-streamer/macx/trace_streamer';assert sha(parser)==manifest['binarySHA256']
     parser_identity={k:manifest[k] for k in ('name','reportedVersion','binarySHA256','upstreamRepository','upstreamRevision','architecture','adapterVersion','buildRecipeVersion')}
     corpus=json.loads((ROOT/'docs/migration-runs/AT-RUST-001-2026-10-02-small-oracle.json').read_text())['corpus']
     vectors=json.loads((ROOT/'docs/migration-runs/AT-RUST-011-2026-10-04-viewport-owner.json').read_text())['nativeRuntime']['sources']

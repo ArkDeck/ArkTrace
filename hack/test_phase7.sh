@@ -36,7 +36,7 @@ for command_name in swift jq shasum git python3; do
         || fail "$command_name is unavailable"
 done
 
-parser="$repository_root/third_party/TraceStreamer/macx/trace_streamer"
+parser="$repository_root/third_party/trace-streamer/macx/trace_streamer"
 [ -x "$parser" ] && [ ! -L "$parser" ] \
     || fail "pinned trace_streamer is unavailable; run hack/build_trace_streamer.sh"
 
@@ -163,11 +163,11 @@ assert_literal() {
     description=$3
     grep -Fq "$pattern" "$file" || fail "$description drifted"
 }
-assert_literal "Sources/ArkTraceStore/TraceSchemaAdapter.swift" \
+assert_literal "sources/ArkTraceStore/TraceSchemaAdapter.swift" \
     'static let version = "2"' "schemaAdapterVersion"
-assert_literal "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift" \
+assert_literal "sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift" \
     'public static let indexVersion = 3' "indexSchemaVersion"
-assert_literal "Sources/ArkTraceParser/TraceStreamerProcessParser.swift" \
+assert_literal "sources/ArkTraceParser/TraceStreamerProcessParser.swift" \
     'public static let adapterVersion = "1"' "parserAdapterVersion"
 pass "ArkDeck-pinned contract literals unchanged (schema=2 index=3 parser=1)"
 
@@ -222,7 +222,7 @@ fixture_sha=$(jq -er '.medium.sha256' \
 jq -n \
     --arg parserSHA "$parser_sha" \
     --arg parserRevision "$(jq -er '.upstreamRevision' \
-        "$repository_root/third_party/TraceStreamer/macx/manifest.json")" \
+        "$repository_root/third_party/trace-streamer/macx/manifest.json")" \
     --arg schemaFingerprint "$schema_fingerprint" \
     --arg mediumFixtureSHA "$fixture_sha" \
     --argjson alignmentAssertions "$alignment_count" \

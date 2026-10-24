@@ -207,7 +207,7 @@ def main():
         assert human.startswith(b"Trace SHA-256: ") and b"Cache hit: no\n" in human and len(human) <= 1024
         pretty = run(["processes", first_trace, "--json", "--pretty", "--no-cache", "--limit", "1"]).stdout
         assert pretty.startswith(b"{\n") and len(json.loads(pretty)["result"]["items"]) == 1
-        installed_swift = install_swift(args.swift_cli.resolve(strict=True), base, ROOT / "third_party/TraceStreamer/macx/trace_streamer") if args.swift_cli else None
+        installed_swift = install_swift(args.swift_cli.resolve(strict=True), base, ROOT / "third_party/trace-streamer/macx/trace_streamer") if args.swift_cli else None
         report["freshHumanSwiftComparison"] = installed_swift is not None
         if installed_swift:
             report["humanSwiftExecutableSHA256"] = digest(installed_swift)
@@ -221,7 +221,7 @@ def main():
             assert human_query.endswith("… result truncated\n".encode())
             assert {"cpu-slices":b"event=sched_slice:0", "thread-states":b"event=thread_state:0", "slices":b"event=callstack:0", "counters":b"event=process_measure:"}[view] in human_query
             if installed_swift:
-                actual_swift = subprocess.run([str(installed_swift), "--trace-streamer", str(ROOT / "third_party/TraceStreamer/macx/trace_streamer"), *map(str,query_args)],cwd=ROOT,capture_output=True,timeout=45)
+                actual_swift = subprocess.run([str(installed_swift), "--trace-streamer", str(ROOT / "third_party/trace-streamer/macx/trace_streamer"), *map(str,query_args)],cwd=ROOT,capture_output=True,timeout=45)
                 assert actual_swift.returncode==0 and not actual_swift.stderr and actual_swift.stdout==human_query
             machine_query = run([*query_args, "--json", "--pretty"]).stdout
             assert machine_query.startswith(b"{\n") and len(json.loads(machine_query)["result"][result_key]) == 1
@@ -235,7 +235,7 @@ def main():
         assert json.loads(literal)["trace"]["sha256"] == digest(first_trace)
         empty = json.loads(run(["processes", first_trace, "--json", "--no-cache", "--name", "no-such-process-迁移"]).stdout)
         assert empty["result"] == {"items": []} and empty["truncation"]["truncated"] is False
-        override = ROOT / "third_party/TraceStreamer/macx/trace_streamer"
+        override = ROOT / "third_party/trace-streamer/macx/trace_streamer"
         assert json.loads(run(["inspect", first_trace, "--json", "--no-cache", "--trace-streamer", override]).stdout)["trace"]["parser"]["binarySha256"] == digest(override)
         fake = base / "wrong-parser"
         fake.write_bytes(b"not the fixed parser")

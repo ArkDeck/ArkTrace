@@ -24,13 +24,13 @@
 `hashFunc` 会剥掉数字，所以只在数字上不同的名字**故意**同色）。
 
 **Parser 缺失的处理**：新 worktree 不携带被 Git 忽略的
-`third_party/TraceStreamer/macx/trace_streamer`。需要真实 parser 时按
+`third_party/trace-streamer/macx/trace_streamer`。需要真实 parser 时按
 [TRACE_STREAMER.md](../design/TRACE_STREAMER.md) 构建并校验；无法取得时记录受影响检查。
 只有 `.github/workflows/ci.yml` 明列的 parser-dependent 排除和 skip 可用于 hosted CI；
 不要按历史失败数量或整个测试类豁免，其他失败仍需排查。App 构建和 Phase 7 gate 需要真实 parser。
 
 **移植上游代码即触发 Apache-2.0 署名义务**：需在 `THIRD_PARTY_NOTICES.md` 记录，而这会连带触发三处
-digest re-pin（`Sources/ArkTraceCLI/CLILicenseResources.swift`、`hack/verify_licenses.sh`、
+digest re-pin（`sources/ArkTraceCLI/CLILicenseResources.swift`、`hack/verify_licenses.sh`、
 `hack/verify_phase5_cli_distribution.py`，整数字面量格式还各不相同），否则 fail-closed 的
 `licenses` 命令会拒绝出输出。**逐字移植上游算法的任务必须把这三处 re-pin 写进自己的验收。**
 
@@ -101,9 +101,9 @@ ArkTrace 从 `measure` 读。四个真机库 `measure` 全为 0 行、`process_m
 
 **⚠ 决策约束：schemaAdapterVersion 是跨仓库耦合，不得自行 bump**
 
-`TraceSchemaAdapter.version`（`Sources/ArkTraceStore/TraceSchemaAdapter.swift:10`，当前 `"2"`）：
+`TraceSchemaAdapter.version`（`sources/ArkTraceStore/TraceSchemaAdapter.swift:10`，当前 `"2"`）：
 
-- 进入 cache parser key（`Sources/ArkTraceRuntime/TraceCache.swift:70-88`），bump 即整体失效重解析；
+- 进入 cache parser key（`sources/ArkTraceRuntime/TraceCache.swift:70-88`），bump 即整体失效重解析；
 - **被 ArkDeck 作为源码字面量断言**在 `ArkTraceSummaryInvocationContract` 里，其 envelope validator
   要求与我们 `provenance` 块精确相等（[ARKDECK_INTEGRATION.md](../guides/ARKDECK_INTEGRATION.md):27-40）。
   bump 之后、匹配的 ArkDeck release 落地之前，**每个 analyzer Job 都会在 admission 之后**失败于
@@ -129,10 +129,10 @@ ArkTrace 从 `measure` 读。四个真机库 `measure` 全为 0 行、`process_m
 
 **交付**
 
-1. `Sources/ArkTraceStore/TraceSchemaAdapter.swift` capability 探针按 scope 选表：
+1. `sources/ArkTraceStore/TraceSchemaAdapter.swift` capability 探针按 scope 选表：
    `:303` `hasCompatibleTable("measure", ...)` 与 `:317` `CROSS JOIN measure AS sampled_measure`
    在 `filterTable == "process_measure_filter"` 时改用 `process_measure`，cpu scope 保持 `measure`；
-2. `Sources/ArkTraceStore/SQLiteTraceRepository.swift` **四处 `FROM measure AS m` 逐一处置**，
+2. `sources/ArkTraceStore/SQLiteTraceRepository.swift` **四处 `FROM measure AS m` 逐一处置**，
    不要只改一处：
    - `:1977`（`counterRows`，两个 scope 共用，`filterTable` 是参数）→ 按 scope 选表；
    - `:1533`（`density(_:)` 的 process 分支，`INNER JOIN process_measure_filter`）→ 改 `process_measure`；
@@ -201,9 +201,9 @@ limit 取页 —— 两条路径不是「实现得一样」，而是**同一份�
 **问题陈述**
 
 `TraceThreadStateDistribution` 与其计算 `stateDistribution` 已实现
-（`Sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift:177-190`、`:765-800`）并被 CLI `analyze`
-输出（`Sources/ArkTraceCLI/MachineContract.swift:1412-1413`），但 App 用的 `TraceRangeAnalysis`
-（`Sources/ArkTraceAnalysis/TraceViewerAnalysis.swift:310-320`）里没有这一段，所以
+（`sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift:177-190`、`:765-800`）并被 CLI `analyze`
+输出（`sources/ArkTraceCLI/MachineContract.swift:1412-1413`），但 App 用的 `TraceRangeAnalysis`
+（`sources/ArkTraceAnalysis/TraceViewerAnalysis.swift:310-320`）里没有这一段，所以
 `RangeInspectorView` 看不到。CLI 能答的问题 App 答不了。
 
 **交付**
@@ -252,7 +252,7 @@ limit 取页 —— 两条路径不是「实现得一样」，而是**同一份�
 上游 CPU slice 画两行文字：`${processName} [${processId}]` 与
 `${name} [${tid}] [Prio:${priority}]`（`database/ui-worker/cpu/ProcedureWorkerCPU.ts:282-320`，
 宽度不足时按字符宽度截断加省略号）。ArkTrace 只有
-`label: $0.tid.map { "TID \($0)" }`（`Sources/ArkTraceRendering/TimelineSnapshotLoader.swift:175`）。
+`label: $0.tid.map { "TID \($0)" }`（`sources/ArkTraceRendering/TimelineSnapshotLoader.swift:175`）。
 
 **交付**
 
@@ -264,8 +264,8 @@ limit 取页 —— 两条路径不是「实现得一样」，而是**同一份�
    （`TimelineNSView.swift:568-570`）仍满足 AT-RENDER-005「只在可用宽度满足最小阈值时绘制、
    必须 clip 在 primitive 内」；
 3. 名称缺失时的回退链要确定：`processName` 为 nil → 线程名 → `TID n`，不得出现空标签；
-4. `TraceEventInspector`（`Sources/ArkTraceCore/Model/TraceViewerModels.swift:9-29`）增加
-   `priority: Int64?`，由 `CpuSlice.priority`（`Sources/ArkTraceCore/Model/TraceEventModels.swift:38`，
+4. `TraceEventInspector`（`sources/ArkTraceCore/Model/TraceViewerModels.swift:9-29`）增加
+   `priority: Int64?`，由 `CpuSlice.priority`（`sources/ArkTraceCore/Model/TraceEventModels.swift:38`，
    真库 211 万行全部非空）填充，并在 `EventInspectorView` 中显示；
 5. 该字段是 optional 且只对 cpu slice 有值，不得让其他 event type 出现空行。
 
@@ -307,9 +307,9 @@ limit 取页 —— 两条路径不是「实现得一样」，而是**同一份�
 上游每层调用深度占一条独立 18px 泳道（`database/ui-worker/ProcedureWorkerFunc.ts:237`
 `funcNode.frame.y = funcNode.depth! * 18 + 3`），折叠态只画 `depth === 0`（`:100`），选中判定含
 depth（`:269`）。ArkTrace 的 `TimelineDetailPrimitive` 无 depth 字段
-（`Sources/ArkTraceRendering/TimelineModels.swift:290-313`），`TimelineGeometry.frame`
-恒把 primitive 放进 track 的单一带（`Sources/ArkTraceRendering/TimelineGeometry.swift:72-77`），
-loader 也没传 depth（`Sources/ArkTraceRendering/TimelineSnapshotLoader.swift:266-271`）。
+（`sources/ArkTraceRendering/TimelineModels.swift:290-313`），`TimelineGeometry.frame`
+恒把 primitive 放进 track 的单一带（`sources/ArkTraceRendering/TimelineGeometry.swift:72-77`），
+loader 也没传 depth（`sources/ArkTraceRendering/TimelineSnapshotLoader.swift:266-271`）。
 结果：嵌套调用栈全部叠画，深层覆盖浅层。
 
 **⚠ 硬约束**
@@ -328,7 +328,7 @@ loader 也没传 depth（`Sources/ArkTraceRendering/TimelineSnapshotLoader.swift
 
 1. `TimelineDetailPrimitive` 增加 `depth: Int` 字段（named slice 之外的 event 取 0）；
 2. `TimelineSnapshotLoader` 的 `.namedSlice` 分支（`:266-271`）透传 `$0.depth`；
-   `TraceSlice.depth` 已建模（`Sources/ArkTraceCore/Model/TraceEventModels.swift:185`）、repository 已
+   `TraceSlice.depth` 已建模（`sources/ArkTraceCore/Model/TraceEventModels.swift:185`）、repository 已
    SELECT、`callstackHasDepth` capability 已存在（`SQLiteTraceRepository.swift:1023-1031`）；
 3. schema 不支持 depth 时（`callstackHasDepth == false`）退回单带渲染，不报错、不留空隙；
 4. `TimelineGeometry.frame(for:in:viewport:backingScale:)` 按 depth 计算 y 与 height；hit-test 使用
@@ -385,14 +385,14 @@ loader 也没传 depth（`Sources/ArkTraceRendering/TimelineSnapshotLoader.swift
 `Name` / `Wall duration(ms)` / `Avg Wall duration(ms)` / `Occurrences` / `selfTime(ms)`，
 并可从 Occurrences 列下钻到该名字的全部 occurrence（`component/trace/base/TraceSheet.ts:334-336`
 绑 `td-click`、`:1673-1697` `tdSliceClickHandler`）。ArkTrace 的 Range Inspector 只有 `longSlices`
-（单条最长 slice 列表，`Sources/ArkTraceAnalysis/TraceViewerAnalysis.swift:271-281`），
+（单条最长 slice 列表，`sources/ArkTraceAnalysis/TraceViewerAnalysis.swift:271-281`），
 答不了「调 1 万次、每次很短、总和最贵」这类真正热点。
 
 **实现路径选择（本任务需给出结论）**
 
 ArkTrace 的 repository 只有一处 `GROUP BY`（`SQLiteTraceRepository.swift:1550`，density 用），
 其余分析都是 Swift 侧对 bounded page 做 reduction，范式见
-`Sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift:765-800` `stateDistribution`。
+`sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift:765-800` `stateDistribution`。
 
 - **先做 reduction 版**：与现有 bounded 契约一致、无新 SQL、truncation 有现成表达机制。
   代价是聚合范围受 page limit 约束，超限时**只能报告「基于前 N 条」而不能报告精确总量**；
@@ -407,14 +407,14 @@ ArkTrace 的 repository 只有一处 `GROUP BY`（`SQLiteTraceRepository.swift:1
 1. `TraceRangeAnalysis` 增加 slice-name 聚合段：name、总 wall duration、平均 duration、occurrences，
    以及**是否为受限聚合的标记**；
 2. selfTime（上游 `TabPaneSlices.ts:197-234`）需要父子关系。`callstack` 有 `depth` 与 `parent_id`
-   （`Sources/ArkTraceStore/TraceSchemaAdapter.swift:675-679` 已声明这两列的语义），**但在 bounded page
+   （`sources/ArkTraceStore/TraceSchemaAdapter.swift:675-679` 已声明这两列的语义），**但在 bounded page
    内计算 selfTime 会因缺失子 slice 而偏大**。要么与 P7-T04 的 depth 数据一起在同一页内计算并标注
    受限，要么本任务先不做 selfTime 并在验收里说明 —— **不允许给出无标注的错误 selfTime**；
 3. 所有时间聚合用 clipped overlap（DESIGN §12.2），与区间边界语义一致（AT-TIME-003/004）；
    instant（`dur = 0`）计入 occurrences 但不贡献时长（AT-TIME-006）；
 4. `apple/Apps/ArkTraceApp/ArkTraceApp.swift` `RangeInspectorView` 新增该表，列可排序，默认按总时长降序；
 5. 从表格行跳回时间轴：点击一行选中该名字在区间内的第一个 occurrence 并 reveal，复用
-   `TraceDocumentController.reveal(_:)`（`Sources/ArkTraceAppSupport/TraceDocumentController.swift:534-553`）
+   `TraceDocumentController.reveal(_:)`（`sources/ArkTraceAppSupport/TraceDocumentController.swift:534-553`）
    的既有路径，不要新写一条 reveal；
 6. 更新 `docs/design/SPECIFICATION.md` AT-APP-006。
 
@@ -461,14 +461,14 @@ ArkTrace 的 repository 只有一处 `GROUP BY`（`SQLiteTraceRepository.swift:1
 
 上游时间轴是 process → thread 层级树（`component/chart/SpProcessChart.ts:857` `processRow.folder = true`、
 `:579` `addChildTraceRow`），一个进程的泳道物理相邻。ArkTrace 的
-`TraceTrackGroupKind`（`Sources/ArkTraceAppSupport/TraceDocumentController.swift:234-240`）只有
+`TraceTrackGroupKind`（`sources/ArkTraceAppSupport/TraceDocumentController.swift:234-240`）只有
 `cpu / threadState / namedSlice / cpuCounter / processCounter` 五种，**按种类分组、无 process 维度**；
 "Thread State" 组是全部线程的扁平列表且 title 只有 `thread.name ?? "TID n"`，**不含进程名**
 （`:1106-1121`），而 "Processes & Named Slices" 的 title 才带进程名（`:1122-1143`）。
 真机 trace 199 个线程，同名线程无法区分。
 
 DESIGN §13.3 把 "Process" 列为 MVP track 类型但实现中无对应 group kind 或 `TimelineTrackSource` case
-（`Sources/ArkTraceRendering/TimelineModels.swift:16-21`）—— 本任务需消除这处文档与实现的漂移。
+（`sources/ArkTraceRendering/TimelineModels.swift:16-21`）—— 本任务需消除这处文档与实现的漂移。
 
 **分两步降低风险，两步都在本任务内**
 
@@ -620,7 +620,7 @@ entry 目录内**，而不是 trace 级。原因：eviction 只对 trace 目录�
 
 **⚠ 硬约束**
 
-ArkTrace 的绘制走 `DetailPaintKey` 批处理缓存（`Sources/ArkTraceRendering/TimelineNSView.swift:546-585`）。
+ArkTrace 的绘制走 `DetailPaintKey` 批处理缓存（`sources/ArkTraceRendering/TimelineNSView.swift:546-585`）。
 加一个随 hover 变化的批次**必须避免每帧失效 `detailPathCache`** —— DESIGN §13.5 与 AT-RENDER-008 要求
 「一次 snapshot 内的填充批次数由调色板规模约束，不随事件数增长」，AT-RENDER-006 要求 pan/zoom 不同步
 等待查询。正确做法是把 hover 高亮做成叠加层，而不是重建基础批次。
@@ -630,7 +630,7 @@ AT-APP-010 明确「高频 pan/hover 不得逐帧播报」—— tooltip 与高�
 **交付**
 
 1. canvas 上跟随指针的 tooltip，内容取已挂在 primitive 上的 `TraceEventInspector`
-   （`Sources/ArkTraceRendering/TimelineModels.swift:296`），不新增查询；到右边界时翻转方向
+   （`sources/ArkTraceRendering/TimelineModels.swift:296`），不新增查询；到右边界时翻转方向
    （上游 `component/trace/base/TraceRow.ts:1409-1421`）；
 2. Inspector 的 hover 分支保持不变 —— tooltip 是补充而非替代，Inspector 仍是完整、可复制、
    可访问的语义来源（AT-APP-005/010）；
@@ -838,7 +838,7 @@ docs-only、跳过 SwiftPM lane —— 也就是「只改 README」这个断言�
 
 **交付**
 
-1. **滚轮缩放**（G14）：`Sources/ArkTraceRendering/TimelineNSView.swift:276-284` `scrollWheel(with:)`
+1. **滚轮缩放**（G14）：`sources/ArkTraceRendering/TimelineNSView.swift:276-284` `scrollWheel(with:)`
    在带 ⌥ 或 ⌃ 修饰时转 `.zoom` intent，复用 `magnify(with:)`（`:263-274`）的同一 anchor 计算。
    保持无修饰时的横向平移与纵向滚动穿透不变；
 2. **框选端点可拖拽**（G13）：`selection` 保留端点身份，`mouseDragged`（`:216-232`）先做端点命中判定，

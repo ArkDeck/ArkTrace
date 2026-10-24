@@ -42,7 +42,7 @@ def main():
         if current:
             modules = ("ArkTraceCore", "ArkTraceStore", "ArkTraceRendering") if inputs.startswith("scoped-") else ("ArkTraceCore", "ArkTraceRendering")
             for name in modules:
-                assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "Sources" / name).rglob("*.swift")} == {p for p in seen if p.startswith(f"Sources/{name}/")}
+                assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "sources" / name).rglob("*.swift")} == {p for p in seen if p.startswith(f"sources/{name}/")}
             if inputs.startswith("scoped-"):
                 assert {"rust/crates/arktrace-viewer/oracle/ScopedSliceOracle.swift", "rust/crates/arktrace-viewer/oracle/run_scoped_slice_oracle.py"} <= seen
                 assert receipt["database"]["bytesUnchanged"]
@@ -65,14 +65,14 @@ def main():
         assert len(data) == entry["byteCount"] and hashlib.sha256(data).hexdigest() == entry["sha256"], relative
     assert {
         viewer + "presentation-inputs.json", viewer + "presentation-swift-oracle.json",
-        "Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
+        "tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
         "rust/crates/arktrace-viewer/oracle/presentation_harness.swift",
         "rust/crates/arktrace-viewer/oracle/presentation_renderer_access.swift",
         "rust/crates/arktrace-viewer/oracle/presentation_palette_access.swift",
         "rust/crates/arktrace-viewer/oracle/presentation_swift.py",
     } <= presentation_seen
     for name in ("ArkTraceCore", "ArkTraceRendering"):
-        assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "Sources" / name).rglob("*.swift")} == {p for p in presentation_seen if p.startswith(f"Sources/{name}/")}
+        assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "sources" / name).rglob("*.swift")} == {p for p in presentation_seen if p.startswith(f"sources/{name}/")}
     presentation_inputs = json.loads((ROOT / viewer / "presentation-inputs.json").read_text(encoding="utf-8"))
     presentation_outputs = json.loads((ROOT / viewer / "presentation-swift-oracle.json").read_text(encoding="utf-8"))
     for section, count in (("palette", 1068), ("genericDetails", 38), ("dto", 62)):
@@ -93,7 +93,7 @@ def main():
         assert len(data) == entry["byteCount"] and hashlib.sha256(data).hexdigest() == entry["sha256"], relative
     assert navigation_receipt["sourceModules"] == ["ArkTraceCore", "ArkTraceStore", "ArkTraceRendering", "ArkTraceAppSupport"]
     for name in navigation_receipt["sourceModules"]:
-        assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "Sources" / name).rglob("*.swift")} == {p for p in navigation_seen if p.startswith(f"Sources/{name}/")}
+        assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "sources" / name).rglob("*.swift")} == {p for p in navigation_seen if p.startswith(f"sources/{name}/")}
     assert {"rust/crates/arktrace-viewer/oracle/" + name for name in (
         "navigation_controller_seam.swift", "navigation_rendering_seam.swift",
         "navigation_harness.swift", "navigation_run_swift.py",
@@ -133,7 +133,7 @@ def main():
         assert len(data) == entry["byteCount"] and hashlib.sha256(data).hexdigest() == entry["sha256"], relative
     assert counter_receipt["sourceModules"] == ["ArkTraceCore", "ArkTraceStore", "ArkTraceRendering", "ArkTraceAppSupport"]
     for name in counter_receipt["sourceModules"]:
-        assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "Sources" / name).rglob("*.swift")} == {p for p in counter_seen if p.startswith(f"Sources/{name}/")}
+        assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "sources" / name).rglob("*.swift")} == {p for p in counter_seen if p.startswith(f"sources/{name}/")}
     detail_tool = "docs/migration-runs/archived-tool-evidence/parallel-counter-detail-presentation-compat-20261004/"
     navigation_tool = "docs/migration-runs/archived-tool-evidence/parallel-counter-reveal-compat-20261004/"
     for local, inherited in (
@@ -167,7 +167,7 @@ def main():
         assert len(data) == entry["byteCount"] and hashlib.sha256(data).hexdigest() == entry["sha256"], relative
     assert annotation_receipt["sourceModules"] == ["ArkTraceCore", "ArkTraceParser", "ArkTraceStore", "ArkTraceRuntime", "ArkTraceAnalysis", "ArkTraceRendering", "ArkTraceAppSupport"]
     for name in annotation_receipt["sourceModules"]:
-        assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "Sources" / name).rglob("*.swift")} == {p for p in annotation_seen if p.startswith(f"Sources/{name}/")}
+        assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "sources" / name).rglob("*.swift")} == {p for p in annotation_seen if p.startswith(f"sources/{name}/")}
     assert {
         viewer + "annotation-inputs.json", viewer + "annotation-swift-oracle.json",
         "rust/crates/arktrace-viewer/oracle/annotation_access.swift",
@@ -175,10 +175,10 @@ def main():
         "rust/crates/arktrace-viewer/oracle/annotation_swift.py",
         "apple/Apps/ArkTraceApp/Viewer/TraceTimelinePane.swift",
         "apple/Apps/ArkTraceApp/Inspector/AnnotationInspectorView.swift",
-        "Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
-        "Tests/ArkTraceAppSupportTests/TraceViewStateStoreTests.swift",
-        "Tests/ArkTraceRenderingTests/TimelineAnnotationKeyTests.swift",
-        "Tests/ArkTraceRenderingTests/TimelineFlagSelectionTests.swift",
+        "tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
+        "tests/ArkTraceAppSupportTests/TraceViewStateStoreTests.swift",
+        "tests/ArkTraceRenderingTests/TimelineAnnotationKeyTests.swift",
+        "tests/ArkTraceRenderingTests/TimelineFlagSelectionTests.swift",
     } <= annotation_seen
     annotation_inputs = json.loads((ROOT / viewer / "annotation-inputs.json").read_text(encoding="utf-8"))["cases"]
     annotation_outputs = json.loads((ROOT / viewer / "annotation-swift-oracle.json").read_text(encoding="utf-8"))["cases"]
@@ -193,7 +193,7 @@ def main():
     body = re.search(r'rename: \{ label in\n(.*?)\n\s*\},', (ROOT / rename["source"]).read_text(encoding="utf-8"), re.S)[1]
     assert body == rename["utf8"] and hashlib.sha256(body.encode("utf-8")).hexdigest() == rename["sha256"]
     print("Annotation oracle: 74 scenarios, 674 actions and 748 actual Swift states with source/output and deferred editor identities")
-    source = (ROOT / "Sources/ArkTraceCore/Model/TraceModels.swift").read_text(encoding="utf-8")
+    source = (ROOT / "sources/ArkTraceCore/Model/TraceModels.swift").read_text(encoding="utf-8")
     scope_block = source.split("machineAllowed: Set<String> = [", 1)[1].split("\n    ]", 1)[0]
     scopes = sorted(re.findall(r'"([^"\n]+)"', scope_block))
     assert scopes == json.loads((ROOT / "api/quality-scopes.json").read_text(encoding="utf-8")), "quality scope drift"
@@ -215,7 +215,7 @@ def main():
     assert protocol["lockOrder"] == ["keyLock", "exclusiveEntryLease", "ownerLock"]
     definitions = json.loads((ROOT / "api/index-definitions.json").read_text(encoding="utf-8"))
     assert definitions["version"] == 1 and definitions["indexSchemaVersion"] == 4
-    preparer = (ROOT / "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift").read_text(encoding="utf-8")
+    preparer = (ROOT / "sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift").read_text(encoding="utf-8")
     block = preparer.split("private static let indexes = [", 1)[1].split("\n    ]", 1)[0]
     frozen = []
     for definition in re.findall(r"IndexDefinition\((.*?)\n        \)", block, re.S):
@@ -259,13 +259,13 @@ def main():
     ], "medium benchmark must require the schema-4 optional indexes"
     assert "length <= 72" in benchmark, "benchmark metric cap drifted"
     metadata = json.loads((ROOT / "api/ready-metadata.json").read_text(encoding="utf-8"))
-    runtime = (ROOT / "Sources/ArkTraceRuntime/TraceCache.swift").read_text(encoding="utf-8")
+    runtime = (ROOT / "sources/ArkTraceRuntime/TraceCache.swift").read_text(encoding="utf-8")
     keys = runtime.split("private enum CodingKeys: String, CodingKey, CaseIterable {", 1)[1].split("\n    }", 1)[0]
     expected = {key.strip() for line in keys.splitlines() if "case " in line for key in line.split("case ", 1)[1].split(",")}
     assert set(metadata) == expected and metadata["formatVersion"] == 1, "metadata root fields drift"
     parser = source.split("public struct TraceParserIdentity", 1)[1].split("/// Capability", 1)[0]
     assert set(metadata["parser"]) == set(re.findall(r"public let (\w+):", parser)), "parser identity fields drift"
-    parser_api = (ROOT / "Sources/ArkTraceCore/Parser/TraceParser.swift").read_text(encoding="utf-8")
+    parser_api = (ROOT / "sources/ArkTraceCore/Parser/TraceParser.swift").read_text(encoding="utf-8")
     preparation = parser_api.split("package struct TraceDatabasePreparationResult", 1)[1].split("package struct TraceDatabaseMetadataSidecar", 1)[0]
     assert set(metadata["databasePreparation"]) == set(re.findall(r"public let (\w+):", preparation)), "preparation metadata fields drift"
     assert len((ROOT / "api/ready-metadata.json").read_bytes()) <= 16384

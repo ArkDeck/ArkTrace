@@ -13,7 +13,7 @@ cleanup() { rm -rf -- "$temporary_root"; }
 trap cleanup EXIT HUP INT TERM
 repository="$temporary_root/repository"
 mkdir -p "$repository/scripts" "$repository/test/fixtures/release-evidence" \
-    "$repository/third_party/TraceStreamer/macx"
+    "$repository/third_party/trace-streamer/macx"
 cp "$source_hack/benchmark_phase3.sh" \
     "$source_hack/verify_htrace_integrity.py" \
     "$source_hack/source_tree_identity.py" \
@@ -278,12 +278,12 @@ for mutation in missing-format extra-self-attestation trace-drift; do
     fi
 done
 printf '#!/bin/sh\nexit 0\n' \
-    >"$repository/third_party/TraceStreamer/macx/trace_streamer"
-chmod +x "$repository/third_party/TraceStreamer/macx/trace_streamer"
+    >"$repository/third_party/trace-streamer/macx/trace_streamer"
+chmod +x "$repository/third_party/trace-streamer/macx/trace_streamer"
 locked_parser_sha=$(shasum -a 256 \
-    "$repository/third_party/TraceStreamer/macx/trace_streamer" | awk '{print $1}')
+    "$repository/third_party/trace-streamer/macx/trace_streamer" | awk '{print $1}')
 jq -n --arg sha "$locked_parser_sha" '{binarySHA256:$sha}' \
-    >"$repository/third_party/TraceStreamer/macx/manifest.json"
+    >"$repository/third_party/trace-streamer/macx/manifest.json"
 trace="$temporary_root/caller-large.htrace"
 printf 'not a real large trace\n' >"$trace"
 
@@ -426,7 +426,7 @@ fi
 
 alternate="$temporary_root/alternate-parser"
 mkdir -p "$alternate"
-cp "$repository/third_party/TraceStreamer/macx/trace_streamer" "$alternate/trace_streamer"
+cp "$repository/third_party/trace-streamer/macx/trace_streamer" "$alternate/trace_streamer"
 printf '# alternate bytes\n' >>"$alternate/trace_streamer"
 chmod +x "$alternate/trace_streamer"
 alternate_sha=$(shasum -a 256 "$alternate/trace_streamer" | awk '{print $1}')

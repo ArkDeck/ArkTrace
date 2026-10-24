@@ -42,7 +42,7 @@ def main():
             (args.executable, tools / 'consumer', 0o500), (args.helper, tools / 'helper', 0o500),
             (args.parser, tools / 'parser', 0o500), (args.source, base / 'source.htrace', 0o400),
             (args.sdk_receipt, base / 'sdk-build-receipt.json', 0o400),
-            (ROOT / 'third_party/TraceStreamer/macx/manifest.json', tools / 'source-manifest.json', 0o400)]:
+            (ROOT / 'third_party/trace-streamer/macx/manifest.json', tools / 'source-manifest.json', 0o400)]:
         shutil.copyfile(original, destination); destination.chmod(mode)
         assert sha(original) == sha(destination)
         inputs.append(dict(sourcePath=str(original.resolve()), frozenPath=str(destination),

@@ -17,12 +17,12 @@
 /docs/migration-runs/archived-tool-evidence/parallel-summary-facts-canonical-20261004/verification/construction-seam-oracle-build.log whitespace=-blank-at-eol
 
 # Windows resource inputs participate in the recipe hash as exact bytes.
-third_party/TraceStreamer/windows/** -text
+third_party/trace-streamer/windows/** -text
 
-third_party/TraceStreamer/LICENSES/hiperf-Apache-2.0.txt text eol=crlf
-third_party/TraceStreamer/LICENSES/sqlite-Public-Domain.txt text eol=crlf
+third_party/trace-streamer/LICENSES/hiperf-Apache-2.0.txt text eol=crlf
+third_party/trace-streamer/LICENSES/sqlite-Public-Domain.txt text eol=crlf
 # Windows license texts keep the exact bytes (CRLF for the mingw-builds archive copies).
-third_party/TraceStreamer/LICENSES-windows/** -text
+third_party/trace-streamer/LICENSES-windows/** -text
 
 # License hashes bind the exact upstream bytes, including line endings.
 rust/licenses/** -text

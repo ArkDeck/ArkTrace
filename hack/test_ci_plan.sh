@@ -55,24 +55,24 @@ expect "app-linked source selects SwiftPM and app lanes" \
     'lane_swiftpm=true
 lane_app=true
 lane_contracts=false' \
-    'Sources/ArkTraceCore/Model/TraceModels.swift'
+    'sources/ArkTraceCore/Model/TraceModels.swift'
 
 expect "test change selects only the SwiftPM lane" \
     'lane_swiftpm=true
 lane_app=false
 lane_contracts=false' \
-    'Tests/ArkTraceCoreTests/TraceTimeTests.swift'
+    'tests/ArkTraceCoreTests/TraceTimeTests.swift'
 
 expect "CLI-only source selects only the SwiftPM lane" \
     'lane_swiftpm=true
 lane_app=false
 lane_contracts=false' \
-    'Sources/ArkTraceCLI/CLIApplication.swift
-Sources/ArkTraceSignalShim/SignalShim.c
-Sources/arktrace/main.swift'
+    'sources/ArkTraceCLI/CLIApplication.swift
+sources/ArkTraceSignalShim/SignalShim.c
+sources/arktrace/main.swift'
 
 expect "new source module fails closed to every lane" "$all_lanes" \
-    'Sources/NewProductModule/Feature.swift'
+    'sources/NewProductModule/Feature.swift'
 
 expect "manifest change selects SwiftPM and app lanes" \
     'lane_swiftpm=true
@@ -100,15 +100,15 @@ expect "the palette table selects the contract lane too (verify_palette.py reads
     'lane_swiftpm=true
 lane_app=true
 lane_contracts=true' \
-    'Sources/ArkTraceRendering/TimelineColorPalette.swift'
+    'sources/ArkTraceRendering/TimelineColorPalette.swift'
 
 expect "ArkDeck version sources also run the contract lane" \
     'lane_swiftpm=true
 lane_app=true
 lane_contracts=true' \
-    'Sources/ArkTraceParser/TraceStreamerProcessParser.swift
-Sources/ArkTraceStore/TraceSchemaAdapter.swift
-Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift'
+    'sources/ArkTraceParser/TraceStreamerProcessParser.swift
+sources/ArkTraceStore/TraceSchemaAdapter.swift
+sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift'
 
 expect "Rust ArkDeck constants select both hosts and the contract lane" \
     'lane_swiftpm=false
@@ -122,7 +122,7 @@ expect "another rendering source keeps the compile lanes only" \
     'lane_swiftpm=true
 lane_app=true
 lane_contracts=false' \
-    'Sources/ArkTraceRendering/TimelineNSView.swift'
+    'sources/ArkTraceRendering/TimelineNSView.swift'
 
 expect "API baseline change selects the SwiftPM lane" \
     'lane_swiftpm=true
@@ -170,7 +170,7 @@ expect "mixed docs and source keeps the compile lanes" \
 lane_app=true
 lane_contracts=false' \
     'README.md
-Sources/ArkTraceCore/Model/TraceModels.swift'
+sources/ArkTraceCore/Model/TraceModels.swift'
 
 expect "shared Rust source runs on both native platforms" \
     'lane_swiftpm=false
@@ -220,7 +220,7 @@ expect "Swift native SDK selects macOS artifact and contract gates" \
 lane_app=false
 lane_contracts=true
 lane_rust_macos=true
-lane_rust_windows=false' 'Sources/ArkTraceRustRuntime/RustEngine.swift
+lane_rust_windows=false' 'sources/ArkTraceRustRuntime/RustEngine.swift
 hack/swift-sdk-conformance/Consumer.swift
 hack/swift-sdk-lifecycle/Lifecycle.swift
 hack/test_macos_rust_sdk.py
@@ -231,7 +231,7 @@ expect "typed directory SDK tests use the artifact-enabled macOS lane" \
 lane_app=false
 lane_contracts=true
 lane_rust_macos=true
-lane_rust_windows=false' 'Tests/ArkTraceRustRuntimeTests/DirectoryPageTests.swift'
+lane_rust_windows=false' 'tests/ArkTraceRustRuntimeTests/DirectoryPageTests.swift'
 
 expect "package-external directory owner selects the native SDK compile gate" \
     'lane_swiftpm=false
@@ -279,7 +279,7 @@ lane_contracts=true
 lane_rust_macos=true
 lane_rust_windows=false' 'hack/test_macos_directory_commands.py'
 
-for path in hack/test_macos_event_queries.py hack/test_macos_slice_queries.py hack/test_macos_counter_queries.py hack/test_macos_frame_queries.py hack/test_macos_argument_queries.py hack/test_macos_search.py hack/test_macos_density_queries.py hack/test_macos_batch_queries.py hack/test_macos_async_runtime.py hack/test_macos_viewer_owner.py hack/test_macos_viewport_owner.py hack/test_macos_ffi_owner.py hack/test_macos_bounded_analysis.py hack/test_macos_rust_cli.py hack/build_macos_rust_cli_candidate.py third_party/TraceStreamer/macx/manifest.json; do
+for path in hack/test_macos_event_queries.py hack/test_macos_slice_queries.py hack/test_macos_counter_queries.py hack/test_macos_frame_queries.py hack/test_macos_argument_queries.py hack/test_macos_search.py hack/test_macos_density_queries.py hack/test_macos_batch_queries.py hack/test_macos_async_runtime.py hack/test_macos_viewer_owner.py hack/test_macos_viewport_owner.py hack/test_macos_ffi_owner.py hack/test_macos_bounded_analysis.py hack/test_macos_rust_cli.py hack/build_macos_rust_cli_candidate.py third_party/trace-streamer/macx/manifest.json; do
     expect "native packaged CLI inputs select the macOS Rust lane" \
         'lane_swiftpm=false
 lane_app=false
@@ -297,7 +297,7 @@ lane_rust_macos=true
 lane_rust_windows=true' "$path"
 done
 
-for path in hack/stage_windows_cli_candidate.py hack/package_windows_cli_distribution.py hack/verify_windows_cli_distribution.py hack/windows_cli_distribution.py hack/smoke_windows_cli_distribution.py hack/test_windows_cli_distribution_contract.py third_party/TraceStreamer/windows-x86_64/manifest.json third_party/TraceStreamer/license-inventory.json third_party/TraceStreamer/windows-license-inventory.json third_party/TraceStreamer/LICENSES/zlib-Zlib.txt third_party/TraceStreamer/LICENSES-windows/gcc-COPYING.RUNTIME; do
+for path in hack/stage_windows_cli_candidate.py hack/package_windows_cli_distribution.py hack/verify_windows_cli_distribution.py hack/windows_cli_distribution.py hack/smoke_windows_cli_distribution.py hack/test_windows_cli_distribution_contract.py third_party/trace-streamer/windows-x86_64/manifest.json third_party/trace-streamer/license-inventory.json third_party/trace-streamer/windows-license-inventory.json third_party/trace-streamer/LICENSES/zlib-Zlib.txt third_party/trace-streamer/LICENSES-windows/gcc-COPYING.RUNTIME; do
     expect "Windows distribution inputs select its Rust consumer and contract checks" \
         'lane_swiftpm=false
 lane_app=false

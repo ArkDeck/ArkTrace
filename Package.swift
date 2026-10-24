@@ -55,11 +55,11 @@ let nativeProducts: [Product] = nativeSDKPath == nil ? [] : [
 let nativeTargets: [Target] = if let nativeSDKPath {
     [
         .binaryTarget(name: "CArkTrace", path: nativeSDKPath),
-        .target(name: "ArkTraceRustRuntime", dependencies: ["ArkTraceCore", "CArkTrace"],
+        .target(name: "ArkTraceRustRuntime", dependencies: ["ArkTraceCore", "CArkTrace"], path: "sources/ArkTraceRustRuntime",
             cSettings: nativeSDKCSettings,
             swiftSettings: firstPartySwiftSettings + nativeSDKSwiftSettings + (nativeSDKFixtures ? [.define("ARKTRACE_RUST_PROCESS_FIXTURES")] : []),
             linkerSettings: [.linkedFramework("Security"), .linkedFramework("CoreFoundation")]),
-        .testTarget(name: "ArkTraceRustRuntimeTests", dependencies: ["ArkTraceRustRuntime"],
+        .testTarget(name: "ArkTraceRustRuntimeTests", dependencies: ["ArkTraceRustRuntime"], path: "tests/ArkTraceRustRuntimeTests",
             cSettings: nativeSDKCSettings, swiftSettings: firstPartySwiftSettings + nativeSDKSwiftSettings),
     ] + (nativeSDKFixtures ? [
         // Package-scoped Core DTOs are intentionally not promoted for tests.
@@ -88,30 +88,35 @@ let package = Package(
         .executable(name: "arktrace", targets: ["arktrace"]),
     ] + nativeProducts,
     targets: [
-        .target(name: "ArkTraceCore", swiftSettings: firstPartySwiftSettings),
+        .target(name: "ArkTraceCore", path: "sources/ArkTraceCore", swiftSettings: firstPartySwiftSettings),
         .target(
             name: "ArkTraceParser",
             dependencies: ["ArkTraceCore"],
+            path: "sources/ArkTraceParser",
             swiftSettings: firstPartySwiftSettings
         ),
         .target(
             name: "ArkTraceStore",
             dependencies: ["ArkTraceCore"],
+            path: "sources/ArkTraceStore",
             swiftSettings: firstPartySwiftSettings
         ),
         .target(
             name: "ArkTraceRuntime",
             dependencies: ["ArkTraceCore", "ArkTraceParser", "ArkTraceStore"],
+            path: "sources/ArkTraceRuntime",
             swiftSettings: firstPartySwiftSettings
         ),
         .target(
             name: "ArkTraceAnalysis",
             dependencies: ["ArkTraceCore"],
+            path: "sources/ArkTraceAnalysis",
             swiftSettings: firstPartySwiftSettings
         ),
         .target(
             name: "ArkTraceRendering",
             dependencies: ["ArkTraceCore"] + nativeAppSupportDependencies + (nativeSDKPath == nil ? [] : ["CArkTrace"]),
+            path: "sources/ArkTraceRendering",
             cSettings: nativeSDKCSettings,
             swiftSettings: firstPartySwiftSettings + nativeSDKSwiftSettings + (nativeSDKPath == nil ? [] : [.define("ARKTRACE_NATIVE_RUNTIME")])
         ),
@@ -121,6 +126,7 @@ let package = Package(
                 "ArkTraceCore", "ArkTraceParser", "ArkTraceRuntime",
                 "ArkTraceAnalysis", "ArkTraceRendering",
             ] + nativeAppSupportDependencies,
+            path: "sources/ArkTraceAppSupport",
             cSettings: nativeSDKCSettings,
             swiftSettings: firstPartySwiftSettings
                 + nativeSDKSwiftSettings
@@ -132,12 +138,14 @@ let package = Package(
         // acquire an HDC dependency by transitivity.
         .target(
             name: "ArkTraceCapture",
+            path: "sources/ArkTraceCapture",
             swiftSettings: firstPartySwiftSettings
         ),
         // C target: Swift settings (strict memory safety, warning groups) do
         // not apply. The shim stays deliberately tiny and reviewed by hand.
         .target(
             name: "ArkTraceSignalShim",
+            path: "sources/ArkTraceSignalShim",
             publicHeadersPath: "include"
         ),
         .target(
@@ -146,6 +154,7 @@ let package = Package(
                 "ArkTraceCore", "ArkTraceParser", "ArkTraceStore", "ArkTraceRuntime",
                 "ArkTraceAnalysis", "ArkTraceSignalShim",
             ],
+            path: "sources/ArkTraceCLI",
             swiftSettings: firstPartySwiftSettings
         ),
         // Test-only resource target. Keeping it outside the production CLI
@@ -153,29 +162,33 @@ let package = Package(
         // from embedding the build-machine path in the distributable binary.
         .target(
             name: "ArkTraceCLIResourceFixtures",
+            path: "sources/ArkTraceCLIResourceFixtures",
             resources: [
                 .copy("../../test/fixtures/traces/zlib.htrace"),
                 .copy("../../LICENSE"),
                 .copy("../../THIRD_PARTY_NOTICES.md"),
-                .copy("../../third_party/TraceStreamer/license-inventory.json"),
-                .copy("../../third_party/TraceStreamer/LICENSES"),
+                .copy("../../third_party/trace-streamer/license-inventory.json"),
+                .copy("../../third_party/trace-streamer/LICENSES"),
             ]
         ),
         .executableTarget(
             name: "arktrace",
             dependencies: ["ArkTraceCLI"],
+            path: "sources/arktrace",
             swiftSettings: firstPartySwiftSettings
         ),
-        .testTarget(name: "ArkTraceCoreTests", dependencies: ["ArkTraceCore"]),
-        .testTarget(name: "ArkTraceParserTests", dependencies: ["ArkTraceCore", "ArkTraceParser"]),
+        .testTarget(name: "ArkTraceCoreTests", dependencies: ["ArkTraceCore"], path: "tests/ArkTraceCoreTests"),
+        .testTarget(name: "ArkTraceParserTests", dependencies: ["ArkTraceCore", "ArkTraceParser"], path: "tests/ArkTraceParserTests"),
         .testTarget(
             name: "ArkTraceStoreTests",
-            dependencies: ["ArkTraceStore", "ArkTraceCLI"]
+            dependencies: ["ArkTraceStore", "ArkTraceCLI"],
+            path: "tests/ArkTraceStoreTests"
         ),
-        .testTarget(name: "ArkTraceAnalysisTests", dependencies: ["ArkTraceAnalysis"]),
+        .testTarget(name: "ArkTraceAnalysisTests", dependencies: ["ArkTraceAnalysis"], path: "tests/ArkTraceAnalysisTests"),
         .testTarget(
             name: "ArkTraceRenderingTests",
             dependencies: ["ArkTraceRendering"] + nativeAppSupportDependencies + (nativeSDKPath == nil ? [] : ["CArkTrace"]),
+            path: "tests/ArkTraceRenderingTests",
             cSettings: nativeSDKCSettings,
             swiftSettings: nativeSDKSwiftSettings + (nativeSDKPath == nil ? [] : [.define("ARKTRACE_NATIVE_RUNTIME")])
                 + (nativeSDKFixtures ? [.define("ARKTRACE_RUST_PROCESS_FIXTURES")] : [])
@@ -185,11 +198,13 @@ let package = Package(
             dependencies: [
                 "ArkTraceAppSupport", "ArkTraceCore", "ArkTraceParser",
                 "ArkTraceRuntime", "ArkTraceAnalysis", "ArkTraceRendering",
-            ] + nativeAppSupportDependencies
+            ] + nativeAppSupportDependencies,
+            path: "tests/ArkTraceAppSupportTests"
         ),
         .testTarget(
             name: "ArkTraceCaptureTests",
-            dependencies: ["ArkTraceCapture"]
+            dependencies: ["ArkTraceCapture"],
+            path: "tests/ArkTraceCaptureTests"
         ),
         .testTarget(
             name: "ArkTraceCLITests",
@@ -197,6 +212,7 @@ let package = Package(
                 "ArkTraceCLI", "ArkTraceCore", "ArkTraceParser", "ArkTraceStore",
                 "ArkTraceRuntime", "ArkTraceCLIResourceFixtures",
             ],
+            path: "tests/ArkTraceCLITests",
             resources: [.copy("Fixtures")]
         ),
         .testTarget(
@@ -204,7 +220,8 @@ let package = Package(
             dependencies: [
                 "ArkTraceCore", "ArkTraceParser", "ArkTraceStore", "ArkTraceRuntime",
                 "ArkTraceAnalysis", "ArkTraceRendering", "ArkTraceAppSupport",
-            ]
+            ],
+            path: "tests/ArkTraceIntegrationTests"
         ),
     ] + nativeTargets,
     swiftLanguageModes: [.v6]

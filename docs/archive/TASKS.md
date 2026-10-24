@@ -246,11 +246,11 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
 
 [Phase 1](PHASE_1_TASKS.md) §6 列出的分发前 hardening **已全部归零**，逐条证据见该节：
 
-- ~~third-party exact source lock~~ 与 ~~GN/Ninja URL 和 archive hash~~——`third_party/TraceStreamer/source-lock.json`
+- ~~third-party exact source lock~~ 与 ~~GN/Ninja URL 和 archive hash~~——`third_party/trace-streamer/source-lock.json`
   锁定 upstream、13 个 source dependency 与两个 tool archive 的 URL/SHA-256/byte count；
 - ~~clean workdir byte-identical build~~——`hack/test_trace_streamer_reproducibility.sh` 实跑通过，
   binary 保持 `e0167fbb…`；
-- ~~standalone local patch~~——`third_party/TraceStreamer/patches/faultloggerd-apple-clang.patch`；
+- ~~standalone local patch~~——`third_party/trace-streamer/patches/faultloggerd-apple-clang.patch`；
 - ~~SSH URL variants → HTTPS~~——`git@gitee.com:` 与 `ssh://git@gitee.com/` 两种形式均被 rewrite；
 - ~~content-derived build recipe version~~——`BUILD_RECIPE_VERSION` 由四个输入的 SHA-256 派生，当前 `e4fec8cc…`；
 - ~~large-trace gate 记录 source/staging filesystem~~ 与 ~~测试不改 process-global `PATH`~~——2026-08-16 完成。
