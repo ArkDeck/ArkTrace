@@ -144,7 +144,7 @@ final class AppDistributionTests: XCTestCase {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
         let configuration = try String(
-            contentsOf: root.appending(path: "Config/ArkTraceProduct.xcconfig"),
+            contentsOf: root.appending(path: "apple/Config/ArkTraceProduct.xcconfig"),
             encoding: .utf8
         )
         let values = Dictionary(uniqueKeysWithValues: configuration
@@ -164,7 +164,7 @@ final class AppDistributionTests: XCTestCase {
         )
 
         let data = try Data(
-            contentsOf: root.appending(path: "Apps/ArkTraceApp/Info.plist")
+            contentsOf: root.appending(path: "apple/Apps/ArkTraceApp/Info.plist")
         )
         let plist = try XCTUnwrap(
             PropertyListSerialization.propertyList(from: data, format: nil)
@@ -196,7 +196,7 @@ final class AppDistributionTests: XCTestCase {
             .deletingLastPathComponent()
         let catalog = try JSONSerialization.jsonObject(
             with: try Data(
-                contentsOf: root.appending(path: "Apps/ArkTraceApp/Localizable.xcstrings")
+                contentsOf: root.appending(path: "apple/Apps/ArkTraceApp/Localizable.xcstrings")
             )
         ) as? [String: Any]
         let strings = try XCTUnwrap(catalog?["strings"] as? [String: Any])
@@ -271,7 +271,7 @@ final class AppDistributionTests: XCTestCase {
             .deletingLastPathComponent()
         let catalog = try JSONSerialization.jsonObject(
             with: try Data(
-                contentsOf: root.appending(path: "Apps/ArkTraceApp/Localizable.xcstrings")
+                contentsOf: root.appending(path: "apple/Apps/ArkTraceApp/Localizable.xcstrings")
             )
         ) as? [String: Any]
         let strings = try XCTUnwrap(catalog?["strings"] as? [String: Any])
@@ -335,7 +335,7 @@ final class AppDistributionTests: XCTestCase {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        let source = root.appending(path: "ThirdParty/TraceStreamer/macx")
+        let source = root.appending(path: "third_party/TraceStreamer/macx")
         for missingName in ["trace_streamer", "manifest.json"] {
             let bundle = FileManager.default.temporaryDirectory.appending(path: "ArkTrace-missing-\(UUID().uuidString).app", directoryHint: .isDirectory)
             defer { try? FileManager.default.removeItem(at: bundle) }
@@ -365,7 +365,7 @@ final class AppDistributionTests: XCTestCase {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        let source = root.appending(path: "ThirdParty/TraceStreamer/macx")
+        let source = root.appending(path: "third_party/TraceStreamer/macx")
         enum InvalidShape { case directory, symlink, inaccessible }
 
         for targetName in ["trace_streamer", "manifest.json"] {
@@ -421,7 +421,7 @@ final class AppDistributionTests: XCTestCase {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        let source = repository.appending(path: "ThirdParty/TraceStreamer/macx")
+        let source = repository.appending(path: "third_party/TraceStreamer/macx")
         for ancestor in ["Helpers", "Resources/TraceStreamer"] {
             let root = FileManager.default.temporaryDirectory.resolvingSymlinksInPath()
                 .appending(path: "ArkTrace-ancestor-\(UUID().uuidString)", directoryHint: .isDirectory)
@@ -485,7 +485,7 @@ final class AppDistributionTests: XCTestCase {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        let sourceDirectory = root.appending(path: "ThirdParty/TraceStreamer/macx")
+        let sourceDirectory = root.appending(path: "third_party/TraceStreamer/macx")
         let bundle = FileManager.default.temporaryDirectory.appending(path: "ArkTrace-\(UUID().uuidString).app", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: bundle) }
         let executableURL = Self.bundleFile(named: "trace_streamer", in: bundle)
@@ -531,7 +531,7 @@ final class AppDistributionTests: XCTestCase {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        let sourceDirectory = root.appending(path: "ThirdParty/TraceStreamer/macx")
+        let sourceDirectory = root.appending(path: "third_party/TraceStreamer/macx")
         let bundle = FileManager.default.temporaryDirectory.appending(path: "ArkTrace-signed-helper-\(UUID().uuidString).app", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: bundle) }
         let executable = Self.bundleFile(named: "trace_streamer", in: bundle)

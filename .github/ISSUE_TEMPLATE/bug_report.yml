@@ -1,0 +1,49 @@
+name: Bug report
+description: A defect in the app, CLI, capture flow, or a published contract
+title: "bug: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include device serial numbers, account names, machine names,
+        home-directory paths, signing material, or raw trace contents.
+        Security reports go to a private advisory, not this form.
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Before filing
+      options:
+        - label: I searched existing issues and this is not a security report.
+          required: true
+        - label: I removed secrets and device identifiers from the description and logs.
+          required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you observed.
+    validations:
+      required: true
+  - type: textarea
+    id: surface
+    attributes:
+      label: Surface
+      description: macOS app, arktrace CLI, Windows CLI, capture, or a contract file.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Commit
+      description: Full git commit you ran.
+      placeholder: "git rev-parse HEAD"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Redacted logs
+      description: Optional. Paste only the lines needed to reproduce the bug.
+    validations:
+      required: false

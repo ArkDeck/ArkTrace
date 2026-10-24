@@ -63,7 +63,7 @@ impl Fixture {
     ) -> (CacheMetadata, String, HeldDirectory) {
         let mut m = CacheMetadata::decode(include_bytes!(concat!(
             env!("CARGO_MANIFEST_DIR"),
-            "/../../../contracts/ready-metadata.json"
+            "/../../../api/ready-metadata.json"
         )))
         .unwrap();
         m.source_sha256 = digit.to_string().repeat(64);
@@ -553,7 +553,7 @@ mod async_tests {
     fn configuration(f: &Fixture) -> RuntimeConfiguration {
         let metadata = CacheMetadata::decode(include_bytes!(concat!(
             env!("CARGO_MANIFEST_DIR"),
-            "/../../../contracts/ready-metadata.json"
+            "/../../../api/ready-metadata.json"
         )))
         .unwrap();
         let mut config = RuntimeConfiguration::new(

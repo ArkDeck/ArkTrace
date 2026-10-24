@@ -1,4 +1,4 @@
-/// Checked Swift mirror of `Config/ArkTraceProduct.xcconfig`, shared by SPM and
+/// Checked Swift mirror of `apple/Config/ArkTraceProduct.xcconfig`, shared by SPM and
 /// the CLI. AppDistributionTests bind these values to the canonical Xcode
 /// configuration so the App/CLI contract cannot drift silently.
 package enum ArkTraceProduct {

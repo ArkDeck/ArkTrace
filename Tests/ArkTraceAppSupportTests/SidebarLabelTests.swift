@@ -10,7 +10,7 @@ import XCTest
 /// names no lane at all. The title must wrap instead, which in SwiftUI means an
 /// unbounded line limit plus a vertical `fixedSize`; one without the other still
 /// truncates. There is no UI harness for these views, so this parses
-/// the feature files in `Apps/ArkTraceApp`, as `ObservationBoundaryTests` does.
+/// the feature files in `apple/Apps/ArkTraceApp`, as `ObservationBoundaryTests` does.
 final class SidebarLabelTests: XCTestCase {
     /// The source that renders `title`, from its `Text(...)` to the end of the
     /// modifier chain — the next line whose indentation returns to the `Text`'s.

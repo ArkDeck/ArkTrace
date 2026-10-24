@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "command": [
     "sh",
-    "scripts/run-swiftpm.sh",
+    "hack/run-swiftpm.sh",
     "test",
     "--disable-sandbox",
     "--config-path",
@@ -48,7 +48,7 @@
     "exitCode": 0,
     "command": [
       "python3",
-      "scripts/run-cargo.py",
+      "hack/run-cargo.py",
       "metadata",
       "--format-version",
       "1"

@@ -50,15 +50,15 @@ final class TraceStreamerIdentityTests: XCTestCase {
     }
 
     private static var binaryURL: URL {
-        repoRoot.appending(path: "ThirdParty/TraceStreamer/macx/trace_streamer")
+        repoRoot.appending(path: "third_party/TraceStreamer/macx/trace_streamer")
     }
 
     private static var manifestURL: URL {
-        repoRoot.appending(path: "ThirdParty/TraceStreamer/macx/manifest.json")
+        repoRoot.appending(path: "third_party/TraceStreamer/macx/manifest.json")
     }
 
     private static var fixtureURL: URL {
-        repoRoot.appending(path: "Fixtures/traces/hiprofiler_data_ability.htrace")
+        repoRoot.appending(path: "test/fixtures/traces/hiprofiler_data_ability.htrace")
     }
 
     private func requirePinnedFiles() throws {

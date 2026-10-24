@@ -18,7 +18,7 @@ private func arkTraceTestFlock(_ descriptor: Int32, _ operation: Int32) -> Int32
 /// TraceStreamer process → SQLite → schema validation → typed queries.
 ///
 /// The test resolves TraceStreamer from `ARKTRACE_TRACE_STREAMER` or the
-/// default `ThirdParty/TraceStreamer/macx` layout. A custom binary must carry
+/// default `third_party/TraceStreamer/macx` layout. A custom binary must carry
 /// its sibling pinned `manifest.json`.
 final class ParserIntegrationTests: XCTestCase {
     private final class PerformanceMetricRecorder: @unchecked Sendable {
@@ -574,7 +574,7 @@ final class ParserIntegrationTests: XCTestCase {
         let environment = ProcessInfo.processInfo.environment
         let candidates = [
             environment["ARKTRACE_TRACE_STREAMER"].map { URL(filePath: $0) },
-            repoRoot.appending(path: "ThirdParty/TraceStreamer/macx/trace_streamer"),
+            repoRoot.appending(path: "third_party/TraceStreamer/macx/trace_streamer"),
         ]
         return candidates.compactMap { $0 }
             .first { FileManager.default.isExecutableFile(atPath: $0.path) }
@@ -584,14 +584,14 @@ final class ParserIntegrationTests: XCTestCase {
         let environment = ProcessInfo.processInfo.environment
         let candidates = [
             environment["ARKTRACE_TEST_TRACE"].map { URL(filePath: $0) },
-            repoRoot.appending(path: "Fixtures/traces/hiprofiler_data_ability.htrace"),
+            repoRoot.appending(path: "test/fixtures/traces/hiprofiler_data_ability.htrace"),
         ]
         return candidates.compactMap { $0 }
             .first { FileManager.default.isReadableFile(atPath: $0.path) }
     }
 
     private static var evidenceURL: URL {
-        repoRoot.appending(path: "Fixtures/databases/trace_streamer_4.3.7.schema-evidence.json")
+        repoRoot.appending(path: "test/fixtures/databases/trace_streamer_4.3.7.schema-evidence.json")
     }
 
     private static let lockedFixtureProvenance: [
@@ -610,7 +610,7 @@ final class ParserIntegrationTests: XCTestCase {
         "trace_range", "process", "thread", "sched_slice", "thread_state", "callstack",
     ]
     private static let lockedLicenseProvenance = (
-        path: "Fixtures/traces/LICENSE.Apache-2.0.txt",
+        path: "test/fixtures/traces/LICENSE.Apache-2.0.txt",
         blob: "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
         sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
         byteCount: Int64(11_357)
@@ -649,7 +649,7 @@ final class ParserIntegrationTests: XCTestCase {
     }
 
     private static func lockedFixtureURL(named name: String) -> URL {
-        repoRoot.appending(path: "Fixtures/traces/\(name)")
+        repoRoot.appending(path: "test/fixtures/traces/\(name)")
     }
 
     private func sha256AndSize(
@@ -5050,7 +5050,7 @@ final class ParserIntegrationTests: XCTestCase {
 
     func testCacheMaintenanceEvictsLeastRecentlyAccessedReadyEntryFirst() async throws {
         let (binary, oldFixture) = try requireCacheEnvironment()
-        let newFixture = Self.repoRoot.appending(path: "Fixtures/traces/hiprofiler_data_ability.htrace")
+        let newFixture = Self.repoRoot.appending(path: "test/fixtures/traces/hiprofiler_data_ability.htrace")
         guard FileManager.default.isReadableFile(atPath: newFixture.path) else {
             throw XCTSkip("second LRU fixture is unavailable")
         }

@@ -17,12 +17,12 @@
 /docs/migration-runs/archived-tool-evidence/parallel-summary-facts-canonical-20261004/verification/construction-seam-oracle-build.log whitespace=-blank-at-eol
 
 # Windows resource inputs participate in the recipe hash as exact bytes.
-ThirdParty/TraceStreamer/windows/** -text
+third_party/TraceStreamer/windows/** -text
 
-ThirdParty/TraceStreamer/LICENSES/hiperf-Apache-2.0.txt text eol=crlf
-ThirdParty/TraceStreamer/LICENSES/sqlite-Public-Domain.txt text eol=crlf
+third_party/TraceStreamer/LICENSES/hiperf-Apache-2.0.txt text eol=crlf
+third_party/TraceStreamer/LICENSES/sqlite-Public-Domain.txt text eol=crlf
 # Windows license texts keep the exact bytes (CRLF for the mingw-builds archive copies).
-ThirdParty/TraceStreamer/LICENSES-windows/** -text
+third_party/TraceStreamer/LICENSES-windows/** -text
 
 # License hashes bind the exact upstream bytes, including line endings.
 rust/licenses/** -text
@@ -32,16 +32,16 @@ rust/licenses/** -text
 docs/migration-runs/** linguist-generated
 tools/**/fixtures/** linguist-vendored
 **/*-oracle.json linguist-generated
-contracts/*.json linguist-generated
+api/*.json linguist-generated
 rust/licenses/** linguist-vendored
-ThirdParty/** linguist-vendored
+third_party/** linguist-vendored
 
 # Files larger than 500 KiB. CI checkouts set lfs: true so receipt hashes see the bytes.
-Apps/ArkTraceApp/Assets.xcassets/AppIcon.appiconset/icon_512x512@2x.png filter=lfs diff=lfs merge=lfs -text
-Fixtures/release-evidence/accessibility/minimum-targets-2fef7556.png filter=lfs diff=lfs merge=lfs -text
-Fixtures/release-evidence/accessibility/minimum-window-2fef7556.png filter=lfs diff=lfs merge=lfs -text
-Fixtures/traces/hiprofiler_data_ability.htrace filter=lfs diff=lfs merge=lfs -text
-Fixtures/traces/trace_small_10.systrace filter=lfs diff=lfs merge=lfs -text
+apple/Apps/ArkTraceApp/Assets.xcassets/AppIcon.appiconset/icon_512x512@2x.png filter=lfs diff=lfs merge=lfs -text
+test/fixtures/release-evidence/accessibility/minimum-targets-2fef7556.png filter=lfs diff=lfs merge=lfs -text
+test/fixtures/release-evidence/accessibility/minimum-window-2fef7556.png filter=lfs diff=lfs merge=lfs -text
+test/fixtures/traces/hiprofiler_data_ability.htrace filter=lfs diff=lfs merge=lfs -text
+test/fixtures/traces/trace_small_10.systrace filter=lfs diff=lfs merge=lfs -text
 docs/migration-runs/AT-RUST-001-2026-10-02-small-oracle.json filter=lfs diff=lfs merge=lfs -text
 docs/migration-runs/AT-RUST-007-009-2026-10-03-named-hot.json filter=lfs diff=lfs merge=lfs -text
 docs/migration-runs/AT-RUST-007-010-2026-10-03-counters.json filter=lfs diff=lfs merge=lfs -text

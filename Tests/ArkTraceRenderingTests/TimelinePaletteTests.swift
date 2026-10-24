@@ -7,7 +7,7 @@ import XCTest
 /// Every expectation in this file was produced by running the upstream
 /// `ColorUtils.hash` / `hashFunc` / `funcTextColor` implementations from
 /// `openharmony/developtools_smartperf_host` at the revision pinned in
-/// `ThirdParty/TraceStreamer/source-lock.json`
+/// `third_party/TraceStreamer/source-lock.json`
 /// (`447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6`) under Node, then transcribing
 /// the output. The names below deliberately include the cases where a textbook
 /// 32-bit FNV-1a diverges from upstream's JavaScript `Number` arithmetic, so a
@@ -21,7 +21,7 @@ final class TimelinePaletteTests: XCTestCase {
     ///
     /// The perceptual properties of these values -- tiering by slot
     /// occupancy, chroma, lightness spread, pairwise ΔE and contrast against
-    /// both canvases -- are measured by `scripts/verify_palette.py`, not here.
+    /// both canvases -- are measured by `hack/verify_palette.py`, not here.
     /// This assertion only stops the table drifting silently.
     private static let palette: [String] = [
         "#377ea7", "#a5698f", "#7388cc", "#419a83", "#22858c",
@@ -221,7 +221,7 @@ final class TimelinePaletteTests: XCTestCase {
     /// fall through to the catch-all. Break the grouping and this fails.
     /// The values are ArkTrace's, restated for the reasons on
     /// `TimelinePalette.stateColors`, and their perceptual properties are
-    /// measured by `scripts/verify_palette.py`.
+    /// measured by `hack/verify_palette.py`.
     func testStateColorsMatchUpstreamChain() {
         let vectors: [(String, String)] = [
             ("D-NIO", "#a47c74"),

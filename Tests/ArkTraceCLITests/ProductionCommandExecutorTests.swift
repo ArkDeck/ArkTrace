@@ -49,9 +49,9 @@ final class ProductionCommandExecutorTests: XCTestCase {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
         let parserURL = repositoryRoot
-            .appending(path: "ThirdParty/TraceStreamer/macx/trace_streamer")
+            .appending(path: "third_party/TraceStreamer/macx/trace_streamer")
         let fixtureURL = repositoryRoot
-            .appending(path: "Fixtures/traces/zlib.htrace")
+            .appending(path: "test/fixtures/traces/zlib.htrace")
         let root = FileManager.default.temporaryDirectory
             .appending(path: "arktrace-cli-timeout-\(UUID().uuidString)", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
@@ -195,9 +195,9 @@ final class ProductionCommandExecutorTests: XCTestCase {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
         let parserURL = repositoryRoot
-            .appending(path: "ThirdParty/TraceStreamer/macx/trace_streamer")
+            .appending(path: "third_party/TraceStreamer/macx/trace_streamer")
         let fixtureURL = repositoryRoot
-            .appending(path: "Fixtures/traces/zlib.htrace")
+            .appending(path: "test/fixtures/traces/zlib.htrace")
         XCTAssertTrue(FileManager.default.isExecutableFile(atPath: parserURL.path))
         XCTAssertTrue(FileManager.default.isReadableFile(atPath: fixtureURL.path))
         let bundledFixtureURL = try CLIResourceLocator.$testingRootPath.withValue(

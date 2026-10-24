@@ -23,7 +23,7 @@ final class MigrationTimeContractTests: XCTestCase {
             .deletingLastPathComponent().deletingLastPathComponent()
         let corpus = try JSONDecoder().decode(
             Corpus.self,
-            from: Data(contentsOf: root.appending(path: "contracts/time-range-vectors.json"))
+            from: Data(contentsOf: root.appending(path: "api/time-range-vectors.json"))
         )
         XCTAssertEqual(corpus.version, 1)
         XCTAssertFalse(corpus.vectors.isEmpty)

@@ -46,7 +46,7 @@ final class LocalizationCatalogTests: XCTestCase {
     ]
 
     private func loadCatalogStrings() throws -> [String: [String: Any]] {
-        let url = Self.repositoryRoot.appending(path: "Apps/ArkTraceApp/Localizable.xcstrings")
+        let url = Self.repositoryRoot.appending(path: "apple/Apps/ArkTraceApp/Localizable.xcstrings")
         let catalog = try JSONSerialization.jsonObject(
             with: Data(contentsOf: url)
         ) as? [String: Any]

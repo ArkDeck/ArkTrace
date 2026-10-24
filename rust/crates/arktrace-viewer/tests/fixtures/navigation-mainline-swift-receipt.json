@@ -5,7 +5,7 @@
   "copiedAlgorithms": false,
   "command": [
     "sh",
-    "scripts/run-swiftpm.sh",
+    "hack/run-swiftpm.sh",
     "test",
     "--disable-sandbox",
     "--config-path",
@@ -105,8 +105,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
-      "byteCount": 375,
-      "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2"
+      "byteCount": 381,
+      "sha256": "10734224b0b15b736c7620623ef7a7591ec59913912097b951df4224eaa162ee"
     },
     {
       "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
@@ -195,8 +195,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
-      "byteCount": 29092,
-      "sha256": "f192c466dea365b053f35e1fd24413c1ef656abc00cdb07653821bb31cf89197"
+      "byteCount": 29086,
+      "sha256": "10d43f4808a4f02178618cba8cf7c660a668bc463cf2c9b688714b23a59f64cc"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
@@ -266,7 +266,7 @@
     {
       "path": "rust/crates/arktrace-viewer/oracle/navigation_run_swift.py",
       "byteCount": 6540,
-      "sha256": "f62b29c3456f3ebb1f7fb516f364be693de6acb8616f203f726f2ed4abdc687b"
+      "sha256": "d79fc058dbafcc6f041d6c23fc5228a3cfe629661c263174138f31a59555b1bd"
     },
     {
       "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-inputs.json",

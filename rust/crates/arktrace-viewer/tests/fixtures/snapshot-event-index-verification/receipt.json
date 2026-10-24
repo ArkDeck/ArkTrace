@@ -2,7 +2,7 @@
   {
     "command": [
       "python3",
-      "scripts/run-cargo.py",
+      "hack/run-cargo.py",
       "fmt",
       "--all"
     ],
@@ -21,7 +21,7 @@
   {
     "command": [
       "python3",
-      "scripts/run-cargo.py",
+      "hack/run-cargo.py",
       "fmt",
       "--all",
       "--check"
@@ -41,7 +41,7 @@
   {
     "command": [
       "python3",
-      "scripts/run-cargo.py",
+      "hack/run-cargo.py",
       "clippy",
       "--workspace",
       "--all-targets",
@@ -64,7 +64,7 @@
   {
     "command": [
       "python3",
-      "scripts/run-cargo.py",
+      "hack/run-cargo.py",
       "test",
       "-p",
       "arktrace-viewer",
@@ -86,7 +86,7 @@
   {
     "command": [
       "python3",
-      "scripts/verify_rust_workspace.py"
+      "hack/verify_rust_workspace.py"
     ],
     "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
     "exitCode": 0,
@@ -103,7 +103,7 @@
   {
     "command": [
       "sh",
-      "scripts/verify_licenses.sh"
+      "hack/verify_licenses.sh"
     ],
     "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
     "exitCode": 0,
