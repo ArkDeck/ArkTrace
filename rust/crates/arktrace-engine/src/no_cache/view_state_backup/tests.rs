@@ -87,7 +87,10 @@ fn format_one_backup_keeps_raw_order_duplicates_optional_favorites_and_signed_ti
         );
         assert_eq!(
             receipt.document_sha256,
-            format!("{:x}", Sha256::digest(&bytes))
+            Sha256::digest(&bytes)
+                .iter()
+                .map(|byte| format!("{byte:02x}"))
+                .collect::<String>()
         );
         assert_eq!(receipt.document_byte_count, bytes.len() as u64);
     }

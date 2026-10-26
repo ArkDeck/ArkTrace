@@ -564,7 +564,11 @@ fn fingerprint(catalog: &Catalog) -> String {
         digest.update((record.len() as u64).to_be_bytes());
         digest.update(record);
     }
-    format!("{:x}", digest.finalize())
+    digest
+        .finalize()
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>()
 }
 pub(crate) fn validate(db: &Database<'_>) -> Result<DatabaseInspection, StoreError> {
     let catalog = catalog(db)?;

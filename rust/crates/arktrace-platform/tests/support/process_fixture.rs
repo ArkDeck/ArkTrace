@@ -35,7 +35,10 @@ fn main() {
             let root = HeldDirectory::open_private(std::path::Path::new(&args[1])).unwrap();
             let trace = "a".repeat(64);
             let parser = "b".repeat(64);
-            let identifier = format!("{:x}", Sha256::digest(format!("{trace}:{parser}")));
+            let identifier = Sha256::digest(format!("{trace}:{parser}"))
+                .iter()
+                .map(|byte| format!("{byte:02x}"))
+                .collect::<String>();
             let entry = root
                 .open_private_child(&trace)
                 .unwrap()

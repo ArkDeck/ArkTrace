@@ -110,7 +110,12 @@ pub(super) fn verify_file(
             };
             TrustVerdict {
                 signer: Some(signer),
-                signer_certificate_sha256: Some(format!("{:x}", Sha256::digest(leaf))),
+                signer_certificate_sha256: Some(
+                    Sha256::digest(leaf)
+                        .iter()
+                        .map(|byte| format!("{byte:02x}"))
+                        .collect::<String>(),
+                ),
                 authenticode_publisher,
             }
         }
