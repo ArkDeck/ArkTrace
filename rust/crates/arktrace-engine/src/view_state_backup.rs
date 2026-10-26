@@ -54,5 +54,8 @@ pub(crate) fn identifier(trace: &str, parser: &str, document: &str) -> String {
         hash.update(value.as_bytes());
         hash.update([0]);
     }
-    format!("{:x}", hash.finalize())
+    hash.finalize()
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>()
 }

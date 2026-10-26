@@ -116,7 +116,7 @@ class WindowsDistributionContractTests(unittest.TestCase):
             manifest['attribution'].update({name: relative, name + 'SHA256': digest, name + 'ByteCount': count})
         count, digest = facts[contract.LAYOUT['selfTestFixture']]
         manifest['attribution'].update(licenseFileCount=18, windowsLicenseFileCount=6,
-                                       rustDependencyCount=37, rustLicenseFileCount=76,
+                                       rustDependencyCount=37, rustLicenseFileCount=77,
                                        selfTestFixtureSHA256=digest, selfTestFixtureByteCount=count)
         files = [{'path': path, 'byteCount': count, 'sha256': digest} for path, (count, digest) in sorted(facts.items())]
         manifest['integrity'].update(fileCount=len(files), files=files,

@@ -75,7 +75,10 @@ fn encode(
         }));
     }
     io.check()?;
-    let digest = format!("{:x}", Sha256::digest(&output.bytes));
+    let digest = Sha256::digest(&output.bytes)
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>();
     let receipt = Receipt {
         format_version: 1,
         backup_identifier: crate::view_state_backup::identifier(

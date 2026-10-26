@@ -63,7 +63,11 @@ impl TraceCacheKey {
             upstream_revision: upstream_revision.into(),
             schema_adapter_version: schema_adapter_version.into(),
             index_schema_version,
-            parser_key: format!("{:x}", preimage.finalize()),
+            parser_key: preimage
+                .finalize()
+                .iter()
+                .map(|byte| format!("{byte:02x}"))
+                .collect::<String>(),
         })
     }
 
@@ -74,10 +78,10 @@ impl TraceCacheKey {
         &self.parser_key
     }
     pub fn entry_identifier(&self) -> String {
-        format!(
-            "{:x}",
-            Sha256::digest(format!("{}:{}", self.trace_sha256, self.parser_key).as_bytes())
-        )
+        Sha256::digest(format!("{}:{}", self.trace_sha256, self.parser_key).as_bytes())
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect::<String>()
     }
     pub fn lock_relative_path(&self) -> String {
         format!(".locks/{}.lock", self.entry_identifier())

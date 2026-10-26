@@ -175,7 +175,7 @@ ArkTraceCLI-0.1.0-windows-x86_64/
         ├── LICENSES-windows/<6 inventory files>
         └── rust/
             ├── dependency-licenses.json
-            └── licenses/<37 dependency directories, 76 exact texts>
+            └── licenses/<37 dependency directories, 77 exact texts>
 ```
 
 The manifest binds every file's size and SHA-256, the source revision and dirty

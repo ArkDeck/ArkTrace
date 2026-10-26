@@ -225,10 +225,10 @@ impl SidecarStore {
         if parts.len() != 2 || !parts.iter().all(|v| digest_name(v)) {
             return Err(HostError::InvalidEvidence);
         }
-        let identifier = format!(
-            "{:x}",
-            Sha256::digest(format!("{}:{}", parts[0], parts[1]).as_bytes())
-        );
+        let identifier = Sha256::digest(format!("{}:{}", parts[0], parts[1]).as_bytes())
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect::<String>();
         if key.mode != LeaseMode::Exclusive
             || key.parent.identity() != self.cache.open_private_child(".locks")?.identity()
             || active.parent.identity() != self.cache.open_private_child(".leases")?.identity()
@@ -639,10 +639,10 @@ impl SidecarStore {
                 || !parts.iter().all(|v| digest_name(v))
                 || owner_name(&intent.owner_identifier).is_err()
                 || intent.key_identifier
-                    != format!(
-                        "{:x}",
-                        Sha256::digest(intent.entry_relative_path.replace('/', ":"))
-                    )
+                    != Sha256::digest(intent.entry_relative_path.replace('/', ":"))
+                        .iter()
+                        .map(|byte| format!("{byte:02x}"))
+                        .collect::<String>()
             {
                 return Ok(0);
             }
@@ -839,7 +839,10 @@ mod tests {
                 .unwrap();
             let locks = root.ensure_private_child(".locks").unwrap();
             let leases = root.ensure_private_child(".leases").unwrap();
-            let key_id = format!("{:x}", Sha256::digest(format!("{trace}:{parser}")));
+            let key_id = Sha256::digest(format!("{trace}:{parser}"))
+                .iter()
+                .map(|byte| format!("{byte:02x}"))
+                .collect::<String>();
             let key = Lease::acquire(
                 &locks,
                 &format!("{key_id}.lock"),

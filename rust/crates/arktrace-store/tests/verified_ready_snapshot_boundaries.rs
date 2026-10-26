@@ -42,7 +42,10 @@ fn bytes(path: &Path) -> Result<Bytes, Box<dyn Error>> {
     let data = fs::read(path)?;
     Ok(Bytes {
         byte_count: data.len() as u64,
-        sha256: format!("{:x}", Sha256::digest(data)),
+        sha256: Sha256::digest(data)
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect::<String>(),
     })
 }
 #[derive(Serialize)]
@@ -132,9 +135,12 @@ impl Group {
             drop(file);
         }
         println!(
-            "N20_OBSERVATION {} {:x} {}",
+            "N20_OBSERVATION {} {} {}",
             self.name,
-            Sha256::digest(&data),
+            Sha256::digest(&data)
+                .iter()
+                .map(|byte| format!("{byte:02x}"))
+                .collect::<String>(),
             data.len()
         );
         self.check();
