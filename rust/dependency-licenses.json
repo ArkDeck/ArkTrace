@@ -20,18 +20,18 @@
     },
     {
       "name": "block-buffer",
-      "version": "0.10.4",
+      "version": "0.12.1",
       "license": "MIT OR Apache-2.0",
       "licenseTexts": [
         {
-          "path": "rust/licenses/block-buffer-0.10.4/LICENSE-APACHE",
+          "path": "rust/licenses/block-buffer-0.12.1/LICENSE-APACHE",
           "byteCount": 10849,
           "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
         },
         {
-          "path": "rust/licenses/block-buffer-0.10.4/LICENSE-MIT",
+          "path": "rust/licenses/block-buffer-0.12.1/LICENSE-MIT",
           "byteCount": 1082,
-          "sha256": "d5c22aa3118d240e877ad41c5d9fa232f9c77d757d4aac0c2f943afc0a95e0ef"
+          "sha256": "98181e7249d0c01737645ec982499ce99a0f07eb8f7d625b8840d799d10dbc01"
         }
       ]
     },
@@ -70,53 +70,70 @@
       ]
     },
     {
-      "name": "cpufeatures",
-      "version": "0.2.17",
-      "license": "MIT OR Apache-2.0",
+      "name": "const-oid",
+      "version": "0.10.2",
+      "license": "Apache-2.0 OR MIT",
       "licenseTexts": [
         {
-          "path": "rust/licenses/cpufeatures-0.2.17/LICENSE-APACHE",
+          "path": "rust/licenses/const-oid-0.10.2/LICENSE-APACHE",
           "byteCount": 10849,
           "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
         },
         {
-          "path": "rust/licenses/cpufeatures-0.2.17/LICENSE-MIT",
+          "path": "rust/licenses/const-oid-0.10.2/LICENSE-MIT",
           "byteCount": 1082,
-          "sha256": "ae9baa7beea910273c2f384c2a6b721fb7bd02bda3436074a1072e4ee689f985"
+          "sha256": "73b9dc2e79c7308998dd30296e073aefaefb944a68fb89aa412c23c0edcabcaa"
+        }
+      ]
+    },
+    {
+      "name": "cpufeatures",
+      "version": "0.3.1",
+      "license": "MIT OR Apache-2.0",
+      "licenseTexts": [
+        {
+          "path": "rust/licenses/cpufeatures-0.3.1/LICENSE-APACHE",
+          "byteCount": 10849,
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "path": "rust/licenses/cpufeatures-0.3.1/LICENSE-MIT",
+          "byteCount": 1082,
+          "sha256": "73b9dc2e79c7308998dd30296e073aefaefb944a68fb89aa412c23c0edcabcaa"
         }
       ]
     },
     {
       "name": "crypto-common",
-      "version": "0.1.7",
+      "version": "0.2.2",
       "license": "MIT OR Apache-2.0",
       "licenseTexts": [
         {
-          "path": "rust/licenses/crypto-common-0.1.7/LICENSE-APACHE",
+          "path": "rust/licenses/crypto-common-0.2.2/LICENSE-APACHE",
           "byteCount": 10849,
           "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
         },
         {
-          "path": "rust/licenses/crypto-common-0.1.7/LICENSE-MIT",
-          "byteCount": 1065,
-          "sha256": "3521672491a3479422d5fe1aca6645dd2984090f85da6e5205abfb18fb7a6897"
+          "path": "rust/licenses/crypto-common-0.2.2/LICENSE-MIT",
+          "byteCount": 1070,
+          "sha256": "d2e7ec5355c96eeade56b09187ceb48a6a30299da3ce7531a66d3d11405ab963"
         }
       ]
     },
     {
       "name": "digest",
-      "version": "0.10.7",
+      "version": "0.11.3",
       "license": "MIT OR Apache-2.0",
       "licenseTexts": [
         {
-          "path": "rust/licenses/digest-0.10.7/LICENSE-APACHE",
+          "path": "rust/licenses/digest-0.11.3/LICENSE-APACHE",
           "byteCount": 10849,
           "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
         },
         {
-          "path": "rust/licenses/digest-0.10.7/LICENSE-MIT",
-          "byteCount": 1057,
-          "sha256": "9e0dfd2dd4173a530e238cb6adb37aa78c34c6bc7444e0e10c1ab5d8881f63ba"
+          "path": "rust/licenses/digest-0.11.3/LICENSE-MIT",
+          "byteCount": 1103,
+          "sha256": "af59cea35d7f5e2777a713b8d155d65efa2c339eb43f3c14e868c6ac8506edad"
         }
       ]
     },
@@ -172,14 +189,19 @@
       ]
     },
     {
-      "name": "generic-array",
-      "version": "0.14.7",
-      "license": "MIT",
+      "name": "hybrid-array",
+      "version": "0.4.15",
+      "license": "MIT OR Apache-2.0",
       "licenseTexts": [
         {
-          "path": "rust/licenses/generic-array-0.14.7/LICENSE",
-          "byteCount": 1107,
-          "sha256": "c09aae9d3c77b531f56351a9947bc7446511d6b025b3255312d3e3442a9a7583"
+          "path": "rust/licenses/hybrid-array-0.4.15/LICENSE-APACHE",
+          "byteCount": 10849,
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "path": "rust/licenses/hybrid-array-0.4.15/LICENSE-MIT",
+          "byteCount": 1082,
+          "sha256": "70c9d40f1f9545c3f133b8a67206e89da850f6468eed072281bb3701514114a9"
         }
       ]
     },
@@ -384,18 +406,18 @@
     },
     {
       "name": "sha2",
-      "version": "0.10.9",
+      "version": "0.11.1",
       "license": "MIT OR Apache-2.0",
       "licenseTexts": [
         {
-          "path": "rust/licenses/sha2-0.10.9/LICENSE-APACHE",
+          "path": "rust/licenses/sha2-0.11.1/LICENSE-APACHE",
           "byteCount": 10849,
           "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
         },
         {
-          "path": "rust/licenses/sha2-0.10.9/LICENSE-MIT",
-          "byteCount": 1138,
-          "sha256": "b4eb00df6e2a4d22518fcaa6a2b4646f249b3a3c9814509b22bd2091f1392ff1"
+          "path": "rust/licenses/sha2-0.11.1/LICENSE-MIT",
+          "byteCount": 1196,
+          "sha256": "831e0f43ad0bf014c1c4fec5767aae470434c1d66d6e671be2d823e729063e25"
         }
       ]
     },
@@ -574,23 +596,6 @@
           "path": "rust/licenses/vcpkg-0.2.15/LICENSE-MIT",
           "byteCount": 1082,
           "sha256": "016d20f335060a70e79d9fcf8dfaa6201114d65d592211f4bdfb8ae9ca2bc1dc"
-        }
-      ]
-    },
-    {
-      "name": "version_check",
-      "version": "0.9.5",
-      "license": "MIT/Apache-2.0",
-      "licenseTexts": [
-        {
-          "path": "rust/licenses/version_check-0.9.5/LICENSE-APACHE",
-          "byteCount": 10847,
-          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
-        },
-        {
-          "path": "rust/licenses/version_check-0.9.5/LICENSE-MIT",
-          "byteCount": 1085,
-          "sha256": "b7e650f3fce5c53249d1cdc608b54df156a97edd636cf9d23498d0cfe7aec63e"
         }
       ]
     },

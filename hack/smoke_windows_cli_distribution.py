@@ -117,8 +117,8 @@ def main():
           and len({f["resource"] for f in windows}) == 6 and document["result"]["componentCount"] == 14
           and document["result"]["buildToolCount"] == 2 and document["result"]["windows"]["buildToolCount"] == 3
           and document["result"]["windows"]["staticRuntimeCount"] == 3, results)
-    check('licenses includes the frozen 37 Rust dependencies and 76 texts',
-          rust.get('dependencyCount') == 37 and len(rust.get('licenseFiles', [])) == 76
+    check('licenses includes the frozen 37 Rust dependencies and 77 texts',
+          rust.get('dependencyCount') == 37 and len(rust.get('licenseFiles', [])) == 77
           and rust.get('inventory') == 'rust/dependency-licenses.json', results)
     code, _, human, _ = run(tree, "licenses")
     check("human licenses lists the GCC runtime exception", code == 0 and b"GCC-exception-3.1" in human, results)

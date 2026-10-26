@@ -124,10 +124,10 @@ impl CacheBinding {
             || !parts.iter().all(|part| digest_name(part))
             || self.lease_inode == 0
             || self.key_identifier
-                != format!(
-                    "{:x}",
-                    Sha256::digest(format!("{}:{}", parts[0], parts[1]).as_bytes())
-                )
+                != Sha256::digest(format!("{}:{}", parts[0], parts[1]).as_bytes())
+                    .iter()
+                    .map(|byte| format!("{byte:02x}"))
+                    .collect::<String>()
         {
             return Err(HostError::InvalidEvidence);
         }

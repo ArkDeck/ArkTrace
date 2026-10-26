@@ -17,7 +17,7 @@ package enum CLILicenseResources {
     package static let licenseFileCount = 18
     static let noticeByteCount = 3_092
     static let noticeSHA256 =
-        "1a32aec7c425b173ffcda1229d297b8befc5866ca7d7f3ea20c0d1acf435d216"
+        "580c55efcd20e197a59e343e9ab232a47df7dce614408f19bfcdbb032e401cd0"
 
     package static func noticeData() throws -> Data {
         let url = try resourceURL(named: "THIRD_PARTY_NOTICES", extension: "md")

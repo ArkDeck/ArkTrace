@@ -1243,7 +1243,11 @@ impl HeldFile {
             return Err(HostError::Changed);
         }
         Ok(SourceFacts {
-            sha256: format!("{:x}", hash.finalize()),
+            sha256: hash
+                .finalize()
+                .iter()
+                .map(|byte| format!("{byte:02x}"))
+                .collect::<String>(),
             byte_count: offset,
         })
     }

@@ -85,7 +85,10 @@ fn cache_authority(
     use sha2::{Digest, Sha256};
     let trace = "a".repeat(64);
     let parser = "b".repeat(64);
-    let key = format!("{:x}", Sha256::digest(format!("{trace}:{parser}")));
+    let key = Sha256::digest(format!("{trace}:{parser}"))
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>();
     let locks = fixture.root.ensure_private_child(".locks").unwrap();
     let leases = fixture.root.ensure_private_child(".leases").unwrap();
     let key_lock = Lease::acquire(
@@ -146,7 +149,10 @@ fn cached_ready_requires_fixed_exclusive_authority_and_quarantine_preserves_side
     entry.downgrade_shared().unwrap();
     let leases = f.root.open_private_child(".leases").unwrap();
     use sha2::{Digest, Sha256};
-    let key_id = format!("{:x}", Sha256::digest(format!("{trace}:{parser}")));
+    let key_id = Sha256::digest(format!("{trace}:{parser}"))
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>();
     let another = Lease::acquire(
         &leases,
         &format!("{key_id}.lease"),
@@ -788,7 +794,10 @@ fn native_sidecar_sigkill_recovers_create_replace_delete_and_every_owner_cleanup
                 let window: serde_json::Value = serde_json::from_slice(&marker_bytes).unwrap();
                 assert_eq!(window["point"], point);
                 assert_eq!(window["pid"], child.0.id());
-                let identifier = format!("{:x}", sha2::Sha256::digest(format!("{trace}:{parser}")));
+                let identifier = sha2::Sha256::digest(format!("{trace}:{parser}"))
+                    .iter()
+                    .map(|byte| format!("{byte:02x}"))
+                    .collect::<String>();
                 let blocked = IoBudget {
                     deadline: Instant::now() + Duration::from_millis(20),
                     ..budget()
