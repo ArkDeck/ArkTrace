@@ -596,9 +596,13 @@ impl SQLiteDiskFixture {
             NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
         ));
         std::fs::create_dir(&directory).unwrap();
-        let connection = Connection::open(directory.join("unit.db")).unwrap();
-        connection.execute_batch(SCHEMA).unwrap();
-        connection.execute_batch(extra).unwrap();
+        let mut connection = Connection::open(directory.join("unit.db")).unwrap();
+        // Fixture setup is not the operation under test. One transaction avoids
+        // a synchronous disk commit per statement on busy Windows CI runners.
+        let transaction = connection.transaction().unwrap();
+        transaction.execute_batch(SCHEMA).unwrap();
+        transaction.execute_batch(extra).unwrap();
+        transaction.commit().unwrap();
         Self {
             connection: Some(connection),
             directory,
@@ -613,9 +617,23 @@ impl Drop for SQLiteDiskFixture {
 }
 
 #[test]
+fn disk_fixture_commits_schema_and_rows_before_index_transactions() {
+    let disk = SQLiteDiskFixture::new("INSERT INTO process VALUES(1,2,'process',100)");
+    assert!(disk.connection.as_ref().unwrap().is_autocommit());
+    let reader = Connection::open(disk.directory.join("unit.db")).unwrap();
+    let row = reader
+        .query_row("SELECT ipid,pid FROM process", [], |row| {
+            Ok((row.get::<_, i64>(0)?, row.get::<_, i64>(1)?))
+        })
+        .unwrap();
+    assert_eq!(row, (1, 2));
+}
+
+#[test]
 fn index_preparation_creates_complete_applicable_closure_and_keeps_fingerprint() {
-    let request = budget();
     let disk = SQLiteDiskFixture::new("");
+    // Start the operation deadline after the unrelated fixture IO has finished.
+    let request = budget();
     let connection = disk.connection.as_ref().unwrap();
     let db = Database::borrow_writable(connection, &request).unwrap();
     let before = db.inspect().unwrap();
@@ -653,8 +671,8 @@ fn ready_index_validation_rejects_partial_unique_collated_descending_and_wrong_c
         "CREATE INDEX arktrace_v1_process_pid ON process(pid COLLATE NOCASE)",
         "CREATE INDEX arktrace_v1_process_pid ON process(pid+1)",
     ] {
-        let request = budget();
         let disk = SQLiteDiskFixture::new("");
+        let request = budget();
         let connection = disk.connection.as_ref().unwrap();
         let db = Database::borrow_writable(connection, &request).unwrap();
         crate::indexes::prepare(&db, |_| {}).unwrap();
@@ -680,8 +698,8 @@ fn optional_index_inputs_enable_full_closure_and_missing_required_inputs_fail() 
         CREATE TABLE args(id INTEGER,key INTEGER,datatype INTEGER,value INTEGER,argset INTEGER);
         CREATE TABLE data_dict(id INTEGER,data TEXT);
         CREATE TABLE data_type(typeId INTEGER,desc TEXT);";
-    let request = budget();
     let disk = SQLiteDiskFixture::new(extra);
+    let request = budget();
     let connection = disk.connection.as_ref().unwrap();
     let db = Database::borrow_writable(connection, &request).unwrap();
     let (_, names) = crate::indexes::prepare(&db, |_| {}).unwrap();
@@ -689,6 +707,7 @@ fn optional_index_inputs_enable_full_closure_and_missing_required_inputs_fail() 
     let bad = SQLiteDiskFixture::new(
         "DROP TABLE sched_slice;CREATE TABLE sched_slice(id INTEGER,ts INTEGER,dur INTEGER,cpu INTEGER,itid INTEGER)",
     );
+    let request = budget();
     let db = Database::borrow_writable(bad.connection.as_ref().unwrap(), &request).unwrap();
     assert_eq!(
         crate::indexes::prepare(&db, |_| {}),
@@ -697,8 +716,8 @@ fn optional_index_inputs_enable_full_closure_and_missing_required_inputs_fail() 
 }
 #[test]
 fn index_transaction_rolls_back_before_returning_cancellation() {
-    let request = budget();
     let disk = SQLiteDiskFixture::new("");
+    let request = budget();
     let connection = disk.connection.as_ref().unwrap();
     let db = Database::borrow_writable(connection, &request).unwrap();
     let result = crate::indexes::prepare(&db, |event| {
