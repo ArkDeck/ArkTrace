@@ -294,8 +294,8 @@
     },
     {
       "path": "sources/ArkTraceAppSupport/TraceBundledRustRuntime.swift",
-      "byteCount": 9614,
-      "sha256": "1a4ac9004681ef3d0f72b9f1c5221e36d4e7845cb4dedf930600c5abd613c097"
+      "byteCount": 11603,
+      "sha256": "28d6a5355f2a55e549c8a2192537058821d7dfd5d7fb2b8292817b43149eb9b2"
     },
     {
       "path": "sources/ArkTraceAppSupport/TraceDocumentController.swift",
@@ -599,8 +599,8 @@
     },
     {
       "path": "test/swift/ArkTraceAppSupportTests/TraceBundledRustRuntimeTests.swift",
-      "byteCount": 6622,
-      "sha256": "10378cbf9628ae1edeb109c86186869995637f57824c05c239dd5090bf1b7b7e"
+      "byteCount": 10089,
+      "sha256": "45c1d6c0edaca17726d7e6b9f22aa934b5b92e58b6940337005c7ecf110ca0f9"
     },
     {
       "path": "test/swift/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
@@ -1125,6 +1125,29 @@
       "exitCode": 0,
       "scope": "Four actual canonical producers refreshed after final live-context source guard; expectedJSON unchanged",
       "receiptSHA256": "5dd79429f580781f81201f762ef613029782d9099233dafe6b22cf98ea6e7f22"
+    },
+    {
+      "argv": [
+        "sh",
+        "hack/run-swiftpm.sh",
+        "test",
+        "--filter",
+        "InspectorProjectionOracleTests|SnapshotEventIndexCanonicalOracleTests|ActionCatalogDisplayOracleTests|TimelineNavigationKeyTests.testActualActionCatalogKeyboardOracle"
+      ],
+      "cwd": "/private/tmp/arktrace-native-consumer-oracle-source",
+      "environmentOverrides": {
+        "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-rust-sdk-artifacts/5f829a85ed796bc2dbaa92d959dfed499abea36ee898e97b58069822771fe221/CArkTrace.xcframework",
+        "ARKTRACE_INSPECTOR_PROJECTION_INPUT": "/Users/fuhanfeng/.codex/worktrees/arktrace-arkdeck-consumer/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-inputs.json",
+        "ARKTRACE_SNAPSHOT_EVENT_INDEX_INPUT": "/Users/fuhanfeng/.codex/worktrees/arktrace-arkdeck-consumer/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
+        "ARKTRACE_ACTION_CATALOG_INPUT": "/Users/fuhanfeng/.codex/worktrees/arktrace-arkdeck-consumer/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/action-catalog-inputs.json",
+        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/private/tmp/arkdeck-main-sync-20261029/current-viewer-facts/inspector-projection-swift.json",
+        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/private/tmp/arkdeck-main-sync-20261029/current-viewer-facts/snapshot-event-index-swift-oracle.json",
+        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/private/tmp/arkdeck-main-sync-20261029/current-viewer-facts/action-catalog-keyboard-swift.json",
+        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/private/tmp/arkdeck-main-sync-20261029/current-viewer-facts/action-catalog-display-swift.json"
+      },
+      "exitCode": 0,
+      "scope": "Four current canonical producers; expected fixtures unchanged, only platform metadata differs; prior forty related algorithm checks reused.",
+      "receiptSHA256": "f089eef97950814316063f5de9ea32b7bf7396537df270f0927aa2061c5aaaab"
     }
   ],
   "augmentedSources": [
@@ -1272,5 +1295,54 @@
     "wholeMacOSAcceptance": false,
     "previousActualRefreshReceiptSHA256": "958949da0c80836a8920504071c8fdc38ed2f3e3dd355fe3e860397822617872",
     "actualDesktopFocusVerified": false
+  },
+  "nativeProductConsumerRefresh": {
+    "atUtc": "2026-10-29T13:30:44.439006+00:00",
+    "sourceCommit": "c05674874b1e573b5ecd98d81cb55b5207e87a27",
+    "sourceDelta": [
+      "sources/ArkTraceAppSupport/TraceBundledRustRuntime.swift",
+      "test/swift/ArkTraceAppSupportTests/TraceBundledRustRuntimeTests.swift"
+    ],
+    "previousReceiptSHA256": "a33a2a9e4c810169b02f4e19f3c7091afeb881e15517860aba39860e174e100d",
+    "canonicalTests": 4,
+    "fourFreshOutputs": [
+      {
+        "actual": "inspector-projection-swift.json",
+        "expected": "inspector-projection-swift.json",
+        "actualSHA256": "b3ae927a32c21141a06c9b760d5c5390640c06eb4a412156a799553554434eb9",
+        "expectedSHA256": "b3ae927a32c21141a06c9b760d5c5390640c06eb4a412156a799553554434eb9",
+        "exactByteEqual": true,
+        "canonicalFactsEqual": true
+      },
+      {
+        "actual": "snapshot-event-index-swift-oracle.json",
+        "expected": "snapshot-event-index-swift-oracle.json",
+        "actualSHA256": "57860aea197df84e8c5d2e8a3eaa4bd30826921815c8ff44d1765aa9306ec23f",
+        "expectedSHA256": "4f7d52ce125ef36400f81076da6345e2aef580453bb97ab917da07617874401c",
+        "exactByteEqual": false,
+        "canonicalFactsEqual": true,
+        "actualPlatform": "版本27.0.1（版号26A434）",
+        "expectedPlatform": "版本27.0（版号26A428）"
+      },
+      {
+        "actual": "action-catalog-keyboard-swift.json",
+        "expected": "action-catalog-keyboard-swift.json",
+        "actualSHA256": "fa6834cfe19163031a1b46712b1529aab60bc4b91be87a2744902bd9a70e9d76",
+        "expectedSHA256": "fa6834cfe19163031a1b46712b1529aab60bc4b91be87a2744902bd9a70e9d76",
+        "exactByteEqual": true,
+        "canonicalFactsEqual": true
+      },
+      {
+        "actual": "action-catalog-display-swift.json",
+        "expected": "action-catalog-display-swift.json",
+        "actualSHA256": "a2f2e9cf07e28fd1fad5d6a90984604a13848fe0665f8dd1fc722bee50d83975",
+        "expectedSHA256": "a2f2e9cf07e28fd1fad5d6a90984604a13848fe0665f8dd1fc722bee50d83975",
+        "exactByteEqual": true,
+        "canonicalFactsEqual": true
+      }
+    ],
+    "logSHA256": "a94090c935371877d6f14cf79e3dfe935b2f3256a824b1225e0ef131ab21a71e",
+    "related40PriorProofReusedWithUnchangedAlgorithmSources": true,
+    "wholeMacOSAcceptance": false
   }
 }

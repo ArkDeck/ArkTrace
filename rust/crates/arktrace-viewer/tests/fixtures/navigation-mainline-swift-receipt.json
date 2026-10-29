@@ -40,8 +40,8 @@
     },
     {
       "path": "sources/ArkTraceAppSupport/TraceBundledRustRuntime.swift",
-      "byteCount": 9614,
-      "sha256": "1a4ac9004681ef3d0f72b9f1c5221e36d4e7845cb4dedf930600c5abd613c097"
+      "byteCount": 11603,
+      "sha256": "28d6a5355f2a55e549c8a2192537058821d7dfd5d7fb2b8292817b43149eb9b2"
     },
     {
       "path": "sources/ArkTraceAppSupport/TraceDocumentController.swift",
@@ -449,5 +449,15 @@
       "byteCount": 717,
       "sha256": "50f2b41f78900577215d828a9fd44b8ef3a7120417b3156fa2956121df21ca8a"
     }
+  },
+  "nativeProductCompositionSourceRefresh": {
+    "previousReceiptSHA256": "335e408f8ce1f67b6d8e8422150efc3a2cdec5cb5a32eee436178056c5dc1519",
+    "sourceDelta": [
+      "sources/ArkTraceAppSupport/TraceBundledRustRuntime.swift"
+    ],
+    "validation": "Six TraceBundledRustRuntimeTests plus four canonical Viewer producer tests passed. Product composition changed; the navigation, annotation and counter algorithms and expected fixtures are unchanged. Their recorded prior algorithm runs are reused, not claimed as freshly replayed.",
+    "runtimeTestsLogSHA256": "59f06c0014046b1c13f02c04c5559727cbc6793a1a766cd04c50b0341349f72e",
+    "viewerReceipt": "viewer-facts-mainline-swift-receipt.json",
+    "freshFullAlgorithmReplay": false
   }
 }

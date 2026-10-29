@@ -24,11 +24,17 @@ signed distribution, sandboxed App acceptance or hardware result is claimed.
   the same normal SDK: exit 0, no compiler warnings.
   Log: `/private/tmp/arkdeck-main-sync-20261029/upstream-api-baseline.log`.
 
-The existing native App CI gate also runs this baseline after staging its
-normal SDK. Standalone
-Debug/Release App builds are left to the selected CI App lane; the dependent
+The native SDK CI consumer also compiles this API baseline. The hosted App
+lane skips App builds when the optional pinned parser binary is absent; its
+job success is not an App build result. The dependent
 ArkDeck PR separately validates its own App graph. Rust source and contracts
 are unchanged, so no full local Rust test matrix was run.
+
+- Four canonical Viewer producer tests replayed on current source: exit 0.
+  All business JSON matches the existing fixtures; one platform metadata field
+  reports macOS 27.0.1 instead of 27.0. Expected fixture bytes remain unchanged.
+  Log: `/private/tmp/arkdeck-main-sync-20261029/current-viewer-facts/canonical-tests.log`.
+  The receipt refresh explicitly reuses the prior forty unrelated algorithm checks.
 
 ## CI
 
