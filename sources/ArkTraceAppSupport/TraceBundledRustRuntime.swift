@@ -11,13 +11,37 @@ public extension TraceRustProductRuntime {
     static func createBundled(bundleURL: URL = Bundle.main.bundleURL) async throws -> TraceRustProductRuntime {
         let bundleURL = try TraceBundledRustRuntime.physicalBundleURL(bundleURL)
         let profile = try TraceBundledRustRuntime.profile(bundleURL: bundleURL)
-        guard let backup = profile.viewStateBackup else { throw TraceBundledRustRuntime.unavailable() }
-        let manifest = try TraceBundledRustRuntime.manifest(in: bundleURL)
+        return try await createBundled(configuration: profile,
+            publisherCodeIdentifierPrefix: ArkTraceAppDistribution.bundleIdentifier)
+    }
+
+    /// Starts a consuming App from its fixed product profile and sealed bundle
+    /// manifest. The product supplies its publisher prefix at composition time;
+    /// a document request cannot replace tools, storage or publisher policy.
+    /// Missing or drifted inputs fail startup without selecting another backend.
+    @concurrent
+    static func createBundled(
+        configuration: TraceProductConfiguration,
+        publisherCodeIdentifierPrefix: String
+    ) async throws -> TraceRustProductRuntime {
+        guard configuration.bundledParserExecutionPolicy == .signedBundleInPlace else {
+            throw TraceBundledRustRuntime.unavailable()
+        }
+        let bundleURL = try TraceBundledRustRuntime.physicalBundleURL(configuration.bundleURL)
+        let profile = try TraceProductConfiguration(bundleURL: bundleURL,
+            cacheDirectory: configuration.cacheDirectory, stagingDirectory: configuration.stagingDirectory,
+            recentDocumentsKey: configuration.recentDocumentsKey, signpostSubsystem: configuration.signpostSubsystem,
+            bundledParser: configuration.bundledParser, bundledParserExecutionPolicy: .signedBundleInPlace,
+            viewStateBackup: configuration.viewStateBackup)
+        let manifest = try TraceBundledRustRuntime.manifest(in: bundleURL,
+            publisherCodeIdentifierPrefix: publisherCodeIdentifierPrefix)
         let parser = try TraceBundledParserResolver(configuration: profile).resolve()
         let identity = try await parser.identity()
         try Task.checkCancellation()
         do {
-            for root in [profile.cacheDirectory, profile.stagingDirectory, backup.backupDirectory] {
+            let roots = [profile.cacheDirectory, profile.stagingDirectory]
+                + (profile.viewStateBackup.map { [$0.backupDirectory] } ?? [])
+            for root in roots {
                 try TraceBundledRustRuntime.preparePrivateDirectory(root)
             }
         } catch { throw TraceBundledRustRuntime.unavailable() }
@@ -26,7 +50,7 @@ public extension TraceRustProductRuntime {
             parser: bundleURL.appending(path: profile.bundledParser.executableRelativePath), helperSHA256: manifest.helperSHA256,
             parserIdentity: identity, publisher: manifest.publisher,
             storagePolicy: .contentAddressed(cacheDirectory: profile.cacheDirectory),
-            viewStateBackup: .init(backupDirectory: backup.backupDirectory))
+            viewStateBackup: profile.viewStateBackup.map { .init(backupDirectory: $0.backupDirectory) })
         guard configuration.configuredContractDigest == manifest.contractSHA256 else {
             throw TraceBundledRustRuntime.unavailable()
         }
@@ -86,7 +110,13 @@ package enum TraceBundledRustRuntime {
             viewStateBackup: .init(backupDirectory: backup))
     }
 
-    static func manifest(in bundleURL: URL) throws -> Manifest {
+    static func manifest(in bundleURL: URL,
+                         publisherCodeIdentifierPrefix: String = ArkTraceAppDistribution.bundleIdentifier) throws -> Manifest {
+        let prefix = publisherCodeIdentifierPrefix
+        guard !prefix.isEmpty, prefix.utf8.count <= 240,
+              prefix.split(separator: ".", omittingEmptySubsequences: false).allSatisfy({ !$0.isEmpty }),
+              prefix.utf8.allSatisfy({ (48...57).contains($0) || (65...90).contains($0)
+                  || (97...122).contains($0) || [45, 46, 95].contains($0) }) else { throw unavailable() }
         let url = bundleURL.appending(path: "Contents/Resources/ArkTraceRuntime/manifest.json")
         let helper = bundleURL.appending(path: "Contents/Helpers/arktrace-host-process")
         guard TraceBundledParserResolver.isRegularReadableFile(url, inside: bundleURL, executable: false),
@@ -105,7 +135,6 @@ package enum TraceBundledRustRuntime {
                 throw unavailable()
             }
             let value = try JSONDecoder().decode(Manifest.self, from: data)
-            let prefix = ArkTraceAppDistribution.bundleIdentifier
             guard value.formatVersion == 1,
                   [value.contractSHA256, value.helperSHA256].allSatisfy({ $0.utf8.count == 64 && $0.utf8.allSatisfy { (48...57).contains($0) || (97...102).contains($0) } }),
                   value.publisher.teamIdentifier.utf8.count == 10,
@@ -122,7 +151,7 @@ package enum TraceBundledRustRuntime {
     static func preparePrivateDirectory(_ url: URL) throws {
         guard url.isFileURL, url.path.hasPrefix("/"), url.path != "/", !url.pathComponents.contains("..") else { throw unavailable() }
         let uid = Darwin.geteuid()
-        var descriptor = unsafe Darwin.open("/", O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
+        var descriptor = unsafe Darwin.open("/", O_SEARCH | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
         guard descriptor >= 0 else { throw unavailable() }
         defer { _ = Darwin.close(descriptor) }
         let components = url.pathComponents.dropFirst()
@@ -132,8 +161,9 @@ package enum TraceBundledRustRuntime {
             guard unsafe Darwin.fstat(descriptor, &parent) == 0,
                   parent.st_uid == 0 || parent.st_uid == uid,
                   parent.st_mode & 0o022 == 0 || (parent.st_uid == 0 && parent.st_mode & 0o1000 != 0) else { throw unavailable() }
+            let access = index == components.count - 1 ? O_RDONLY : O_SEARCH
             let opened = component.withCString {
-                let result = unsafe Darwin.openat(descriptor, $0, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
+                let result = unsafe Darwin.openat(descriptor, $0, access | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
                 return (result, result < 0 ? errno : 0)
             }
             var child = opened
@@ -146,7 +176,7 @@ package enum TraceBundledRustRuntime {
                     throw POSIXError(POSIXErrorCode(rawValue: made.1) ?? .EIO)
                 }
                 child = component.withCString {
-                    let result = unsafe Darwin.openat(descriptor, $0, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
+                    let result = unsafe Darwin.openat(descriptor, $0, access | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
                     return (result, result < 0 ? errno : 0)
                 }
             }

@@ -1,5 +1,10 @@
 // swift-tools-version: 6.3
 import PackageDescription
+import Foundation
+
+let nativeDependencies: [Target.Dependency] =
+    ProcessInfo.processInfo.environment["ARKTRACE_RUST_XCFRAMEWORK"] == nil
+    ? [] : [.product(name: "ArkTraceRustRuntime", package: "ArkTrace")]
 
 // Compile-only consumer that lives OUTSIDE the ArkTrace package boundary, the
 // way the Xcode app target does. It pins the promised public API: if an
@@ -25,7 +30,7 @@ let package = Package(
                 .product(name: "ArkTraceRendering", package: "ArkTrace"),
                 .product(name: "ArkTraceRuntime", package: "ArkTrace"),
                 .product(name: "ArkTraceAppSupport", package: "ArkTrace"),
-            ]
+            ] + nativeDependencies
         )
     ]
 )

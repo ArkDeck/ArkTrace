@@ -1,10 +1,12 @@
 #if canImport(ArkTraceRustRuntime)
 import ArkTraceCore
+import ArkTraceRustRuntime
 import Darwin
 import Foundation
 import XCTest
 @testable import ArkTraceAppSupport
 
+@MainActor
 final class TraceBundledRustRuntimeTests: XCTestCase {
     func testSystemAliasNormalizationPreservesUntrustedBundleComponents() throws {
         let root = try temporary()
@@ -46,6 +48,21 @@ final class TraceBundledRustRuntimeTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: storage.appending(path: "unexpected").path))
     }
 
+    func testPrivateRootCreationTraversesSearchOnlyAncestors() throws {
+        let root = try temporary(), ancestor = root.appending(path: "search-only")
+        let admittedParent = ancestor.appending(path: "owned")
+        try FileManager.default.createDirectory(at: admittedParent, withIntermediateDirectories: true,
+                                               attributes: [.posixPermissions: 0o700])
+        try FileManager.default.setAttributes([.posixPermissions: 0o100], ofItemAtPath: ancestor.path)
+        defer { try? FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: ancestor.path) }
+        let storage = admittedParent.appending(path: "native/staging")
+        try TraceBundledRustRuntime.preparePrivateDirectory(storage)
+        XCTAssertEqual(try FileManager.default.attributesOfItem(atPath: storage.path)[.posixPermissions] as? NSNumber,
+                       NSNumber(value: 0o700))
+        XCTAssertEqual(try FileManager.default.attributesOfItem(atPath: ancestor.path)[.posixPermissions] as? NSNumber,
+                       NSNumber(value: 0o100), "traversal must not widen ancestor permissions")
+    }
+
     func testBundleManifestIsClosedBoundedAndRequiresActualPublisher() throws {
         let bundle = try temporary().appending(path: "ArkTrace.app")
         let manifest = bundle.appending(path: "Contents/Resources/ArkTraceRuntime/manifest.json")
@@ -61,6 +78,19 @@ final class TraceBundledRustRuntimeTests: XCTestCase {
         func write(_ value: [String: Any]) throws { try JSONSerialization.data(withJSONObject: value).write(to: manifest) }
         try write(valid)
         XCTAssertEqual(try TraceBundledRustRuntime.manifest(in: bundle).publisher.teamIdentifier, "ABCDEFGHIJ")
+        XCTAssertThrowsError(try TraceBundledRustRuntime.manifest(in: bundle, publisherCodeIdentifierPrefix: "com.arkdeck.desktop"))
+        var consumer = valid, consumerPublisher = publisher
+        consumerPublisher["helperCodeIdentifier"] = "com.arkdeck.desktop.host-process"
+        consumerPublisher["parserCodeIdentifier"] = "com.arkdeck.desktop.trace-streamer"
+        consumer["publisher"] = consumerPublisher
+        try write(consumer)
+        XCTAssertEqual(try TraceBundledRustRuntime.manifest(in: bundle,
+            publisherCodeIdentifierPrefix: "com.arkdeck.desktop").publisher.helperCodeIdentifier,
+            "com.arkdeck.desktop.host-process")
+        XCTAssertThrowsError(try TraceBundledRustRuntime.manifest(in: bundle))
+        for invalidPrefix in ["", "com..arkdeck", "com/arkdeck", String(repeating: "a", count: 241)] {
+            XCTAssertThrowsError(try TraceBundledRustRuntime.manifest(in: bundle, publisherCodeIdentifierPrefix: invalidPrefix))
+        }
         var invalid = valid; invalid["publisher"] = NSNull(); try write(invalid)
         XCTAssertThrowsError(try TraceBundledRustRuntime.manifest(in: bundle))
         invalid = valid; invalid["fallback"] = true; try write(invalid)
@@ -83,6 +113,25 @@ final class TraceBundledRustRuntimeTests: XCTestCase {
         let backup = try XCTUnwrap(profile.viewStateBackup)
         XCTAssertFalse(backup.backupDirectory.path.hasPrefix(profile.cacheDirectory.deletingLastPathComponent().path))
         XCTAssertEqual(profile.bundledParserExecutionPolicy, .signedBundleInPlace)
+    }
+
+    func testExternalProductRejectsSnapshotExecutionBeforePreparingRoots() async throws {
+        let root = try temporary()
+        let profile = try TraceProductConfiguration(bundleURL: root.appending(path: "Consumer.app"),
+            cacheDirectory: root.appending(path: "native/traces"), stagingDirectory: root.appending(path: "native/staging"),
+            recentDocumentsKey: "Consumer.Recent", signpostSubsystem: "com.example.Consumer",
+            bundledParser: TraceBundledParserLocation(executableRelativePath: "Contents/MacOS/trace_streamer",
+                manifestRelativePath: "Contents/Resources/TraceStreamer/manifest.json"))
+        do {
+            _ = try await TraceRustProductRuntime.createBundled(configuration: profile,
+                publisherCodeIdentifierPrefix: "com.example.Consumer")
+            XCTFail("native bundle startup must require execution of the signed bundled parser in place")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .traceStreamerUnavailable)
+            XCTAssertEqual(error.stage, .preparing)
+        }
+        XCTAssertFalse(FileManager.default.fileExists(atPath: profile.cacheDirectory.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: profile.stagingDirectory.path))
     }
 }
 #endif
