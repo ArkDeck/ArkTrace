@@ -58,6 +58,14 @@ def consumer(artifact):
     assert not re.search(r'warning:|error:',core_log.read_text(encoding='utf-8'))
     relative='.arktrace-native/'+identity+'/CArkTrace.xcframework'
     env.update(ARKTRACE_RUST_XCFRAMEWORK=relative,CLANG_MODULE_CACHE_PATH=str(cache/'ModuleCache'),SWIFTPM_MODULECACHE_OVERRIDE=str(cache/'ModuleCache'))
+    # Pin the public product composition API from outside the package too.
+    # The normal App lane may lack the optional parser binary on hosted CI.
+    api_log=cache/'native-api-baseline.log'
+    with api_log.open('w') as output:
+        subprocess.run(['sh',str(mirror/'hack/test_api_baseline.sh'),'--scratch-path',str(cache/'api-baseline'),
+            '--disable-sandbox','--config-path',str(cache/'configuration'),'--security-path',str(cache/'security'),
+            '-Xswiftc','-warnings-as-errors'],cwd=ROOT,env=env,stdout=output,stderr=subprocess.STDOUT,check=True)
+    assert not re.search(r'warning:|error:',api_log.read_text(encoding='utf-8'))
     # Consume the complete actual root package, never a copied SDK source target.
     (package/'Package.swift').write_text('''// swift-tools-version: 6.3
 import PackageDescription
