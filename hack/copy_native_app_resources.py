@@ -4,7 +4,7 @@ import argparse
 import os
 from pathlib import Path
 import shutil
-from prepare_macos_native_app import regular, require, validate_inputs
+from prepare_macos_native_app import product_profile, regular, require, validate_inputs
 
 
 def physical_build_path(path):
@@ -20,13 +20,14 @@ def physical_build_path(path):
     return path
 
 
-def copy(inputs, bundle):
+def copy(inputs, bundle, product="arktrace"):
+    profile = product_profile(product)
     inputs, bundle = physical_build_path(inputs), physical_build_path(bundle)
-    validate_inputs(inputs)
+    validate_inputs(inputs, product)
     require(bundle.is_absolute() and bundle.suffix == ".app", "absolute App output required")
     require(not any(p.is_symlink() for p in (bundle, *bundle.parents)), "App output links forbidden")
     mapping = {"Helpers/arktrace-host-process": "Contents/Helpers/arktrace-host-process",
-               "Helpers/trace_streamer": "Contents/Helpers/trace_streamer",
+               "Helpers/trace_streamer": profile["parserDestination"],
                "TraceStreamer/manifest.json": "Contents/Resources/TraceStreamer/manifest.json",
                "ArkTraceRuntime/manifest.json": "Contents/Resources/ArkTraceRuntime/manifest.json"}
     for source, relative in mapping.items():
@@ -44,5 +45,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--inputs", type=Path, required=True)
     parser.add_argument("--bundle", type=Path, required=True)
+    parser.add_argument("--product", choices=("arktrace", "arkdeck"), default="arktrace")
     args = parser.parse_args()
-    copy(args.inputs, args.bundle)
+    copy(args.inputs, args.bundle, args.product)

@@ -6,6 +6,7 @@ import os
 from pathlib import Path, PurePosixPath
 import plistlib
 import shutil
+import subprocess
 import sys
 import tempfile
 
@@ -61,9 +62,19 @@ def verified_receipt(artifact, fixtures):
     return receipt, identity
 
 
-def stage(artifact, workspace, fixtures):
+def stage(artifact, workspace, fixtures, source_repository=None):
     receipt, identity = verified_receipt(artifact, fixtures)
-    require(workspace.is_absolute() and workspace.is_dir() and not workspace.is_symlink() and not workspace.resolve().is_relative_to(ROOT), "cache-owned external package required")
+    repository = ROOT if source_repository is None else source_repository
+    if source_repository is not None:
+        require(repository.is_absolute() and repository.is_dir()
+                and not any(p.is_symlink() for p in (repository, *repository.parents)), "physical source repository required")
+        try:
+            top = subprocess.check_output(["git", "rev-parse", "--show-toplevel"], cwd=repository,
+                                          text=True, stderr=subprocess.PIPE).strip()
+        except subprocess.CalledProcessError as error:
+            raise ValueError("source repository root required") from error
+        require(Path(top) == repository, "source repository root required")
+    require(workspace.is_absolute() and workspace.is_dir() and not workspace.is_symlink() and not workspace.resolve().is_relative_to(repository), "cache-owned external package required")
     managed = workspace / ".arktrace-native"
     require(not managed.is_symlink(), "native staging root must not be a link")
     managed.mkdir(mode=0o700, exist_ok=True)

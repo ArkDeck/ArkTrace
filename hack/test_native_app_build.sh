@@ -43,6 +43,14 @@ ARKTRACE_RUST_XCFRAMEWORK=$(jq -er '.relativeSDK' "$native_preparation")
 export ARKTRACE_RUST_XCFRAMEWORK
 unset ARKTRACE_RUST_SDK_FIXTURES
 
+# The external API baseline must compile the same native product surface a
+# downstream App imports, not only the default Swift dependency graph.
+if ! sh "$native_workspace/hack/test_api_baseline.sh" \
+    --scratch-path "$derived_data/api-baseline" >"$app_log" 2>&1; then
+    bounded_build_failure
+    fail "native package-external consumer build failed"
+fi
+
 if ! xcodebuild -quiet \
     -project "$native_workspace/apple/ArkTrace.xcodeproj" \
     -scheme ArkTraceApp \

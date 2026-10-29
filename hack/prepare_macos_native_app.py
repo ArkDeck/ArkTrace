@@ -10,6 +10,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import plistlib
 import re
 import shutil
 import subprocess
@@ -20,6 +21,22 @@ from stage_macos_rust_sdk import stage, verified_receipt
 
 ROOT = Path(__file__).resolve().parent.parent
 PREFIX = "com.arktrace.ArkTrace"
+PRODUCT_PROFILES = {
+    "arktrace": {"prefix": PREFIX, "sandboxInheritance": False, "parserDestination": "Contents/Helpers/trace_streamer"},
+    "arkdeck": {"prefix": "com.arkdeck.desktop", "sandboxInheritance": True, "parserDestination": "Contents/MacOS/trace_streamer"},
+}
+INHERITED_ENTITLEMENTS = {"com.apple.security.app-sandbox": True, "com.apple.security.inherit": True}
+# Xcode 27's version-1 DER encoding of this exact two-key dictionary. Compare
+# the complete effective payload: accepting just matching key substrings could
+# admit additional rights. A new encoding fails closed until reviewed.
+INHERITED_ENTITLEMENTS_DER = bytes.fromhex(
+    "704b020101b04630230c1e636f6d2e6170706c652e73656375726974792e6170702d73616e64626f780101ff"
+    "301f0c1a636f6d2e6170706c652e73656375726974792e696e68657269740101ff")
+
+
+def product_profile(product):
+    require(isinstance(product, str) and product in PRODUCT_PROFILES, "unknown native App product")
+    return PRODUCT_PROFILES[product]
 
 
 def require(condition, message):
@@ -35,12 +52,16 @@ def regular(path):
     require(path.is_file() and not any(p.is_symlink() for p in (path, *path.parents)), "physical regular input required")
 
 
-def signature(path, identifier, team):
+def signature(path, identifier, team, sandbox_inheritance=False):
     subprocess.run(["/usr/bin/codesign", "--verify", "--strict", str(path)], check=True, stdout=subprocess.DEVNULL)
     result = subprocess.run(["/usr/bin/codesign", "-dv", "--verbose=4", str(path)], check=True, capture_output=True, text=True)
     lines = result.stderr.splitlines()
     require("Identifier=" + identifier in lines and "TeamIdentifier=" + team in lines, "signed tool publisher mismatch")
     require(any("(runtime)" in line for line in lines if line.startswith("CodeDirectory ")), "signed tool hardened runtime required")
+    effective = subprocess.run(["/usr/bin/codesign", "--display", "--entitlements", "-", "--der", str(path)],
+                               check=True, capture_output=True).stdout
+    expected = INHERITED_ENTITLEMENTS_DER if sandbox_inheritance else b""
+    require(effective == expected, "signed tool effective entitlements mismatch")
 
 
 def build_helper():
@@ -59,7 +80,9 @@ def build_helper():
         return helper.read_bytes()
 
 
-def prepare(workspace, sdk=None, signing_identity=None):
+def prepare(workspace, sdk=None, signing_identity=None, product="arktrace", source_repository=None):
+    profile = product_profile(product)
+    prefix = profile["prefix"]
     workspace = workspace.absolute()
     require(workspace.is_dir() and not workspace.is_symlink(), "physical workspace required")
     if sdk is None:
@@ -82,10 +105,11 @@ def prepare(workspace, sdk=None, signing_identity=None):
         team = re.search(r"\(([A-Z0-9]{10})\)$", signing_identity)
         require(team is not None, "Developer ID team unavailable")
         certificate = matches[0].upper()
-        publisher = {"teamIdentifier": team[1], "helperCodeIdentifier": PREFIX + ".host-process", "parserCodeIdentifier": PREFIX + ".trace-streamer"}
+        publisher = {"teamIdentifier": team[1], "helperCodeIdentifier": prefix + ".host-process", "parserCodeIdentifier": prefix + ".trace-streamer"}
     inputs = {"contractSHA256": sdk_receipt["contractSHA256"], "unsignedHelperSHA256": hashlib.sha256(helper_bytes).hexdigest(),
               "unsignedParserSHA256": sha(parser), "parserManifestSHA256": sha(parser_manifest),
-              "publisher": publisher, "certificateSHA1": certificate, "signingPolicy": "developer-id-runtime-timestamp" if publisher else "unsigned-compile-only"}
+              "publisher": publisher, "certificateSHA1": certificate, "signingPolicy": "developer-id-runtime-timestamp" if publisher else "unsigned-compile-only",
+              "product": product, "sandboxInheritance": profile["sandboxInheritance"]}
     key = hashlib.sha256(json.dumps(inputs, sort_keys=True).encode()).hexdigest()
     artifacts = Path(os.environ.get("ARKTRACE_NATIVE_APP_INPUT_CACHE_ROOT", "/private/tmp/arktrace-native-app-inputs"))
     require(artifacts.is_absolute() and not artifacts.is_symlink() and not artifacts.resolve().is_relative_to(ROOT), "external input artifact cache required")
@@ -96,16 +120,24 @@ def prepare(workspace, sdk=None, signing_identity=None):
             temporary = Path(directory)
             for folder in ("Helpers", "TraceStreamer", "ArkTraceRuntime"):
                 (temporary / folder).mkdir(mode=0o700)
-            tools = [(helper_bytes, temporary / "Helpers/arktrace-host-process", PREFIX + ".host-process"),
-                     (parser.read_bytes(), temporary / "Helpers/trace_streamer", PREFIX + ".trace-streamer")]
+            entitlements = temporary / "child.entitlements"
+            if publisher and profile["sandboxInheritance"]:
+                entitlements.write_bytes(plistlib.dumps(INHERITED_ENTITLEMENTS))
+            tools = [(helper_bytes, temporary / "Helpers/arktrace-host-process", prefix + ".host-process"),
+                     (parser.read_bytes(), temporary / "Helpers/trace_streamer", prefix + ".trace-streamer")]
             for source, target, identifier in tools:
                 target.write_bytes(source)
                 target.chmod(0o700)
                 if publisher:
-                    subprocess.run(["/usr/bin/codesign", "--force", "--sign", certificate, "--identifier", identifier,
-                                    "--options", "runtime", "--timestamp", str(target)], check=True, stdout=subprocess.DEVNULL)
-                    signature(target, identifier, publisher["teamIdentifier"])
+                    arguments = ["/usr/bin/codesign", "--force", "--sign", certificate, "--identifier", identifier,
+                                 "--options", "runtime", "--timestamp"]
+                    if profile["sandboxInheritance"]:
+                        arguments += ["--entitlements", str(entitlements)]
+                    subprocess.run([*arguments, str(target)], check=True, stdout=subprocess.DEVNULL)
+                    signature(target, identifier, publisher["teamIdentifier"], profile["sandboxInheritance"])
                 target.chmod(0o555)
+            if entitlements.exists():
+                entitlements.unlink()
             manifest = dict(original_manifest)
             manifest["binarySHA256"] = sha(temporary / "Helpers/trace_streamer")
             (temporary / "TraceStreamer/manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
@@ -123,9 +155,9 @@ def prepare(workspace, sdk=None, signing_identity=None):
             (temporary / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
             (temporary / "receipt.json").chmod(0o444)
             temporary.rename(artifact)
-    validate_inputs(artifact)
+    validate_inputs(artifact, product)
     require(json.loads((artifact / "receipt.json").read_text())["inputs"] == inputs, "input artifact identity mismatch")
-    relative_sdk = stage(sdk, workspace, False)
+    relative_sdk = stage(sdk, workspace, False, source_repository)
     target = workspace / ".arktrace-native/AppInputs"
     require(not target.is_symlink(), "staged inputs must not be a link")
     if target.exists():
@@ -134,15 +166,19 @@ def prepare(workspace, sdk=None, signing_identity=None):
             shutil.rmtree(target)
     if not target.exists():
         shutil.copytree(artifact, target)
-    validate_inputs(target)
+    validate_inputs(target, product)
     return {"relativeSDK": relative_sdk, "inputs": str(artifact), "stagedInputs": str(target),
             "runtimeUsable": publisher is not None, "releaseAcceptance": False}
 
 
-def validate_inputs(directory):
+def validate_inputs(directory, product=None):
     regular(directory / "receipt.json")
     receipt = json.loads((directory / "receipt.json").read_text())
     require(receipt["formatVersion"] == 1, "input receipt version mismatch")
+    declared_product = receipt["inputs"].get("product", "arktrace")
+    profile = product_profile(declared_product)
+    require(product is None or declared_product == product, "input product mismatch")
+    require(receipt["inputs"].get("sandboxInheritance", False) is profile["sandboxInheritance"], "input inheritance policy mismatch")
     expected = {"Helpers/arktrace-host-process", "Helpers/trace_streamer", "TraceStreamer/manifest.json", "ArkTraceRuntime/manifest.json"}
     require({row["path"] for row in receipt["files"]} == expected and len(receipt["files"]) == 4, "input membership mismatch")
     actual = set()
@@ -167,8 +203,12 @@ def validate_inputs(directory):
     require(receipt["runtimeUsable"] == (receipt["inputs"]["publisher"] is not None), "unsigned inputs cannot be runtime usable")
     if receipt["runtimeUsable"]:
         publisher = receipt["inputs"]["publisher"]
-        signature(directory / "Helpers/arktrace-host-process", publisher["helperCodeIdentifier"], publisher["teamIdentifier"])
-        signature(directory / "Helpers/trace_streamer", publisher["parserCodeIdentifier"], publisher["teamIdentifier"])
+        require(isinstance(publisher, dict) and set(publisher) == {"helperCodeIdentifier", "parserCodeIdentifier", "teamIdentifier"}
+                and isinstance(publisher["teamIdentifier"], str) and re.fullmatch(r"[A-Z0-9]{10}", publisher["teamIdentifier"])
+                and publisher["helperCodeIdentifier"] == profile["prefix"] + ".host-process"
+                and publisher["parserCodeIdentifier"] == profile["prefix"] + ".trace-streamer", "input publisher profile mismatch")
+        signature(directory / "Helpers/arktrace-host-process", publisher["helperCodeIdentifier"], publisher["teamIdentifier"], profile["sandboxInheritance"])
+        signature(directory / "Helpers/trace_streamer", publisher["parserCodeIdentifier"], publisher["teamIdentifier"], profile["sandboxInheritance"])
     return receipt
 
 
@@ -177,8 +217,9 @@ if __name__ == "__main__":
     parser.add_argument("--workspace", type=Path, required=True)
     parser.add_argument("--sdk", type=Path)
     parser.add_argument("--signing-identity")
+    parser.add_argument("--product", choices=sorted(PRODUCT_PROFILES), default="arktrace")
     args = parser.parse_args()
     try:
-        print(json.dumps(prepare(args.workspace, args.sdk, args.signing_identity), indent=2))
+        print(json.dumps(prepare(args.workspace, args.sdk, args.signing_identity, args.product), indent=2))
     except (ValueError, KeyError, OSError, subprocess.CalledProcessError) as error:
         raise SystemExit("native App preparation: " + str(error))

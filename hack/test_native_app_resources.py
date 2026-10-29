@@ -5,8 +5,10 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
+import subprocess
 from copy_native_app_resources import copy
-from prepare_macos_native_app import ROOT, validate_inputs
+from prepare_macos_native_app import INHERITED_ENTITLEMENTS_DER, ROOT, signature, validate_inputs
 
 
 class NativeResourcesTests(unittest.TestCase):
@@ -73,6 +75,44 @@ class NativeResourcesTests(unittest.TestCase):
             copy(inputs, root / "ArkTrace.app")
         self.assertEqual(outside.read_bytes(), b"preserve")
         self.assertTrue(target.is_symlink())
+
+    def test_arkdeck_copy_uses_its_fixed_parser_location(self):
+        root, inputs, receipt = self.inputs()
+        receipt["inputs"].update(product="arkdeck", sandboxInheritance=True)
+        (inputs / "receipt.json").write_text(json.dumps(receipt))
+        copy(inputs, root / "ArkDeck.app", "arkdeck")
+        self.assertEqual((root / "ArkDeck.app/Contents/MacOS/trace_streamer").read_bytes(), b"synthetic parser")
+        self.assertTrue((root / "ArkDeck.app/Contents/Helpers/arktrace-host-process").is_file())
+        self.assertFalse((root / "ArkDeck.app/Contents/Helpers/trace_streamer").exists())
+        with self.assertRaisesRegex(ValueError, "product mismatch"):
+            copy(inputs, root / "ArkTrace.app")
+        self.assertFalse((root / "ArkTrace.app").exists())
+
+    def test_foreign_or_changed_inheritance_profile_fails_before_copy(self):
+        root, inputs, receipt = self.inputs()
+        for product, inheritance in (("arkdeck", False), ("arktrace", True), ("unknown", True), ("arkdeck", 1)):
+            with self.subTest(product=product, inheritance=inheritance):
+                receipt["inputs"].update(product=product, sandboxInheritance=inheritance)
+                (inputs / "receipt.json").write_text(json.dumps(receipt))
+                with self.assertRaises(ValueError):
+                    copy(inputs, root / "Candidate.app", "arkdeck")
+                self.assertFalse((root / "Candidate.app").exists())
+
+    def test_effective_signature_rights_must_match_the_entire_profile(self):
+        publisher = "Identifier=com.arkdeck.desktop.host-process\nTeamIdentifier=8AQTYW5FKR\nCodeDirectory v=20500 flags=0x10000(runtime)\n"
+        for inherit, payload, accepted in ((True, INHERITED_ENTITLEMENTS_DER, True),
+                                          (False, b"", True), (True, b"", False),
+                                          (False, INHERITED_ENTITLEMENTS_DER, False),
+                                          (True, INHERITED_ENTITLEMENTS_DER + b"extra", False)):
+            with self.subTest(inherit=inherit, payload=payload):
+                outputs = [subprocess.CompletedProcess([], 0), subprocess.CompletedProcess([], 0, stderr=publisher),
+                           subprocess.CompletedProcess([], 0, stdout=payload)]
+                with patch("prepare_macos_native_app.subprocess.run", side_effect=outputs):
+                    if accepted:
+                        signature(Path("synthetic"), "com.arkdeck.desktop.host-process", "8AQTYW5FKR", inherit)
+                    else:
+                        with self.assertRaisesRegex(ValueError, "effective entitlements"):
+                            signature(Path("synthetic"), "com.arkdeck.desktop.host-process", "8AQTYW5FKR", inherit)
 
 
 if __name__ == "__main__":

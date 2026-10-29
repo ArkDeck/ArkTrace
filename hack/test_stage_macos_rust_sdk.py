@@ -7,6 +7,9 @@ from pathlib import Path
 import plistlib
 import tempfile
 import unittest
+import shutil
+import subprocess
+from unittest.mock import patch
 from stage_macos_rust_sdk import ROOT, stage, verified_receipt
 
 class NativeStageTests(unittest.TestCase):
@@ -65,4 +68,22 @@ class NativeStageTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'slice path escapes'):verified_receipt(artifact,True)
             info['AvailableLibraries'][0][field]=original
             (artifact/'Info.plist').write_bytes(plistlib.dumps(info))
+    def test_consumer_repository_anchor_keeps_staging_external(self):
+        artifact,workspace,_=self.artifact()
+        repository=workspace.parent/'consumer';repository.mkdir()
+        subprocess.run(['git','init','-q',str(repository)],check=True)
+        for relative in ('api/ffi-v2.json','api/ffi-v2.sha256','api/bindings/c/arktrace_ffi.h','api/bindings/c/module.modulemap'):
+            target=workspace/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/relative,target)
+        # In a SwiftPM checkout the shared script's ROOT is the cache package,
+        # while the consuming repository remains a distinct protected root.
+        with patch('stage_macos_rust_sdk.ROOT',workspace):
+            with self.assertRaisesRegex(ValueError,'external package'):
+                stage(artifact,workspace,True)
+            relative=stage(artifact,workspace,True,repository)
+            self.assertTrue((workspace/relative).is_dir())
+            with self.assertRaisesRegex(ValueError,'external package'):
+                stage(artifact,repository,True,repository)
+            with self.assertRaisesRegex(ValueError,'repository root'):
+                stage(artifact,workspace,True,repository/'.git')
+        self.assertFalse((repository/'.arktrace-native').exists())
 if __name__=='__main__':unittest.main()

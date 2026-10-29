@@ -32,6 +32,23 @@ and bundle-relative parser/manifest locations before any trace is opened. The de
 the standalone ArkTrace profile. ArkDeck must construct its own reviewed profile at its app
 composition root; request inputs cannot select or widen any of these values.
 
+Native consumers start that profile with
+`TraceRustProductRuntime.createBundled(configuration:publisherCodeIdentifierPrefix:)`.
+The factory retains the shared manifest, parser, private-directory and SDK
+admission checks. A consumer's publisher cannot be substituted with the
+standalone App's identity. Controllers close before the owner shuts down.
+
+Build-time preparation accepts the explicit `arkdeck` product for the existing
+`com.arkdeck.desktop` identifiers and `Contents/MacOS/trace_streamer` location.
+Its helper and parser inherit the App sandbox with exactly the app-sandbox
+and inherit entitlements; standalone tools retain their empty entitlement set.
+Unsigned artifacts remain compile-only. SDK staging accepts the consuming
+repository as its source anchor, allowing a cache-owned dependency checkout
+outside that repository without writing SDK artifacts into source.
+
+These interfaces do not update ArkDeck's pins, daemon CLI distribution or
+schema profile. The downstream PR must validate its actual App composition.
+
 This source-dependency migration is incremental. Until ArkDeck deletes its migrated copies, a
 dependency bump is not proof of parity by itself; the downstream change must still run ArkTrace
 contract fixtures and ArkDeck's complete Trace/App lanes. Once the copies are removed, ArkDeck
