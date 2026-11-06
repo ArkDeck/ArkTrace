@@ -3,6 +3,7 @@ use crate::{DatabaseInspection, SQLITE_SOURCE_ID, SQLITE_VERSION, StoreError, Va
 use rusqlite::OpenFlags;
 use rusqlite::{Connection, Params, Row, config::DbConfig, limits::Limit, types::ValueRef};
 use std::{
+    cell::RefCell,
     sync::{
         Arc,
         atomic::{AtomicU8, AtomicU64, Ordering},
@@ -65,16 +66,21 @@ pub(crate) struct Database<'a> {
     writable: Option<Arc<arktrace_platform::WritableFile>>,
 }
 enum ConnectionOwner<'a> {
-    Owned(Connection),
-    Borrowed(&'a Connection),
+    Owned(RefCell<Connection>),
+    Borrowed(&'a RefCell<Connection>),
 }
-impl std::ops::Deref for ConnectionOwner<'_> {
-    type Target = Connection;
-    fn deref(&self) -> &Self::Target {
+impl ConnectionOwner<'_> {
+    fn cell(&self) -> &RefCell<Connection> {
         match self {
-            Self::Owned(conn) => conn,
-            Self::Borrowed(conn) => conn,
+            Self::Owned(connection) => connection,
+            Self::Borrowed(connection) => connection,
         }
+    }
+    fn borrow(&self) -> std::cell::Ref<'_, Connection> {
+        self.cell().borrow()
+    }
+    fn borrow_mut(&self) -> std::cell::RefMut<'_, Connection> {
+        self.cell().borrow_mut()
     }
 }
 impl<'a> Database<'a> {
@@ -82,16 +88,20 @@ impl<'a> Database<'a> {
         connection: Connection,
         budget: &'a ValidationBudget,
     ) -> Result<Self, StoreError> {
-        Self::configure(ConnectionOwner::Owned(connection), budget, true)
+        Self::configure(
+            ConnectionOwner::Owned(RefCell::new(connection)),
+            budget,
+            true,
+        )
     }
     pub(crate) fn borrow_writable(
-        connection: &'a Connection,
+        connection: &'a RefCell<Connection>,
         budget: &'a ValidationBudget,
     ) -> Result<Self, StoreError> {
         Self::configure(ConnectionOwner::Borrowed(connection), budget, false)
     }
     pub(crate) fn borrow_readonly(
-        connection: &'a Connection,
+        connection: &'a RefCell<Connection>,
         budget: &'a ValidationBudget,
     ) -> Result<Self, StoreError> {
         Self::configure(ConnectionOwner::Borrowed(connection), budget, true)
@@ -105,35 +115,41 @@ impl<'a> Database<'a> {
         if rusqlite::version() != SQLITE_VERSION {
             return Err(StoreError::SQLiteRuntimeMismatch);
         }
-        connection
-            .busy_timeout(Duration::ZERO)
-            .map_err(sqlite_error)?;
-        for (config, value) in [
-            (DbConfig::SQLITE_DBCONFIG_DEFENSIVE, true),
-            (DbConfig::SQLITE_DBCONFIG_TRUSTED_SCHEMA, false),
-            (DbConfig::SQLITE_DBCONFIG_DQS_DDL, false),
-            (DbConfig::SQLITE_DBCONFIG_DQS_DML, false),
-            (DbConfig::SQLITE_DBCONFIG_ENABLE_TRIGGER, false),
-            (DbConfig::SQLITE_DBCONFIG_ENABLE_VIEW, false),
-        ] {
-            if connection
-                .set_db_config(config, value)
-                .map_err(sqlite_error)?
-                != value
-            {
-                return Err(StoreError::InvalidDatabase);
+        {
+            // rusqlite 0.41 registers the progress handler through `&mut Connection`.
+            // The worker owns one connection; RefCell keeps that exclusive registration
+            // on the existing shared reader API.
+            let connection = connection.borrow();
+            connection
+                .busy_timeout(Duration::ZERO)
+                .map_err(sqlite_error)?;
+            for (config, value) in [
+                (DbConfig::SQLITE_DBCONFIG_DEFENSIVE, true),
+                (DbConfig::SQLITE_DBCONFIG_TRUSTED_SCHEMA, false),
+                (DbConfig::SQLITE_DBCONFIG_DQS_DDL, false),
+                (DbConfig::SQLITE_DBCONFIG_DQS_DML, false),
+                (DbConfig::SQLITE_DBCONFIG_ENABLE_TRIGGER, false),
+                (DbConfig::SQLITE_DBCONFIG_ENABLE_VIEW, false),
+            ] {
+                if connection
+                    .set_db_config(config, value)
+                    .map_err(sqlite_error)?
+                    != value
+                {
+                    return Err(StoreError::InvalidDatabase);
+                }
             }
-        }
-        // Bounds apply before schema loading/preparing any input-derived SQL.
-        for (limit, value) in [
-            (Limit::SQLITE_LIMIT_LENGTH, 8 * 1024 * 1024),
-            (Limit::SQLITE_LIMIT_SQL_LENGTH, 256 * 1024),
-            (Limit::SQLITE_LIMIT_COLUMN, 2000),
-            (Limit::SQLITE_LIMIT_ATTACHED, 0),
-            (Limit::SQLITE_LIMIT_VARIABLE_NUMBER, 128),
-            (Limit::SQLITE_LIMIT_WORKER_THREADS, 0),
-        ] {
-            connection.set_limit(limit, value).map_err(sqlite_error)?;
+            // Bounds apply before schema loading/preparing any input-derived SQL.
+            for (limit, value) in [
+                (Limit::SQLITE_LIMIT_LENGTH, 8 * 1024 * 1024),
+                (Limit::SQLITE_LIMIT_SQL_LENGTH, 256 * 1024),
+                (Limit::SQLITE_LIMIT_COLUMN, 2000),
+                (Limit::SQLITE_LIMIT_ATTACHED, 0),
+                (Limit::SQLITE_LIMIT_VARIABLE_NUMBER, 128),
+                (Limit::SQLITE_LIMIT_WORKER_THREADS, 0),
+            ] {
+                connection.set_limit(limit, value).map_err(sqlite_error)?;
+            }
         }
         let result = Self {
             connection,
@@ -281,7 +297,7 @@ impl<'a> Database<'a> {
     }
     fn cleanup_view<'b>(&'b self, budget: &'b ValidationBudget) -> Database<'b> {
         Database {
-            connection: ConnectionOwner::Borrowed(&self.connection),
+            connection: ConnectionOwner::Borrowed(self.connection.cell()),
             budget,
             resources: None,
             vm_work: None,
@@ -291,7 +307,7 @@ impl<'a> Database<'a> {
         }
     }
     pub(crate) fn rollback_for_cleanup(&self) -> Result<(), StoreError> {
-        if self.connection.is_autocommit() {
+        if self.connection.borrow().is_autocommit() {
             return Ok(());
         }
         let budget = ValidationBudget {
@@ -315,7 +331,10 @@ impl<'a> Database<'a> {
     }
     pub(crate) fn flush(&self) -> Result<(), StoreError> {
         self.check()?;
-        self.connection.cache_flush().map_err(sqlite_error)?;
+        self.connection
+            .borrow()
+            .cache_flush()
+            .map_err(sqlite_error)?;
         self.check()
     }
 
@@ -336,7 +355,7 @@ impl<'a> Database<'a> {
         }
         #[cfg(any(target_os = "macos", windows))]
         if let Some(file) = &self.writable {
-            file.verify_sqlite_connection(&self.connection, &self.io_budget())?;
+            file.verify_sqlite_connection(&self.connection.borrow(), &self.io_budget())?;
         }
         Ok(())
     }
@@ -363,7 +382,7 @@ impl<'a> Database<'a> {
     }
     pub(crate) fn summary_request(&self, steps: u64) -> Result<Database<'_>, StoreError> {
         Ok(Database {
-            connection: ConnectionOwner::Borrowed(&self.connection),
+            connection: ConnectionOwner::Borrowed(self.connection.cell()),
             budget: self.budget,
             resources: Some(Arc::new(crate::query_resources::QueryResources::new(
                 crate::ReadPoolLimits::default(),
@@ -507,6 +526,7 @@ impl<'a> Database<'a> {
         #[cfg(any(target_os = "macos", windows))]
         let mut file_callbacks = 0_u16;
         self.connection
+            .borrow_mut()
             .progress_handler(
                 PROGRESS_INTERVAL,
                 Some(move || {
@@ -566,9 +586,10 @@ impl<'a> Database<'a> {
                 }),
             )
             .map_err(sqlite_error)?;
-        let guard = ProgressGuard(&self.connection);
+        let guard = ProgressGuard(self.connection.cell());
         let outcome = (|| {
-            let mut statement = self.connection.prepare(sql).map_err(sqlite_error)?;
+            let connection = self.connection.borrow();
+            let mut statement = connection.prepare(sql).map_err(sqlite_error)?;
             let outcome = (|| {
                 let mut rows = statement.query(params).map_err(sqlite_error)?;
                 while let Some(row) = rows.next().map_err(sqlite_error)? {
@@ -591,6 +612,7 @@ impl<'a> Database<'a> {
             outcome
         })();
         self.connection
+            .borrow_mut()
             .progress_handler(0, None::<fn() -> bool>)
             .map_err(sqlite_error)?;
         drop(guard);
@@ -609,12 +631,16 @@ impl<'a> Database<'a> {
         }
     }
 }
-struct ProgressGuard<'a>(&'a Connection);
+struct ProgressGuard<'a>(&'a RefCell<Connection>);
 impl Drop for ProgressGuard<'_> {
     fn drop(&mut self) {
-        // Connection is private, never borrowed by another thread; no ownership
-        // transfer can make this reset fail. Explicit normal reset is checked.
-        let _ = self.0.progress_handler(0, None::<fn() -> bool>);
+        // The connection stays on its worker. RefCell gives the exclusive
+        // registration rusqlite 0.41 requires, including after a panic.
+        // Explicit normal reset is checked.
+        let _ = self
+            .0
+            .borrow_mut()
+            .progress_handler(0, None::<fn() -> bool>);
     }
 }
 pub(crate) fn integer(row: &Row<'_>, index: usize) -> Result<i64, StoreError> {

@@ -3,7 +3,10 @@ use crate::{ValidationBudget, database::Database};
 use arktrace_contract::{QualityCategory, TraceTimeRange};
 use arktrace_platform::CancellationToken;
 use rusqlite::Connection;
-use std::time::{Duration, Instant};
+use std::{
+    cell::RefCell,
+    time::{Duration, Instant},
+};
 const SCHEMA:&str="CREATE TABLE trace_range(start_ts INTEGER,end_ts INTEGER);INSERT INTO trace_range VALUES(1000,2000);
 CREATE TABLE process(ipid INTEGER,pid INTEGER,name TEXT,start_ts INTEGER);INSERT INTO process VALUES(-10,900,'process',1000);
 CREATE TABLE thread(itid INTEGER,tid INTEGER,name TEXT,start_ts INTEGER,ipid INTEGER);INSERT INTO thread VALUES(-11,901,'thread',1000,-10);
@@ -18,10 +21,10 @@ fn budget() -> ValidationBudget {
         cancellation: CancellationToken::default(),
     }
 }
-fn fixture(extra: &str) -> (Connection, DatabaseInspection) {
-    let c = Connection::open_in_memory().unwrap();
-    c.execute_batch(SCHEMA).unwrap();
-    c.execute_batch(extra).unwrap();
+fn fixture(extra: &str) -> (RefCell<Connection>, DatabaseInspection) {
+    let c = RefCell::new(Connection::open_in_memory().unwrap());
+    c.borrow().execute_batch(SCHEMA).unwrap();
+    c.borrow().execute_batch(extra).unwrap();
     let i = Database::borrow_writable(&c, &budget())
         .unwrap()
         .inspect()
@@ -36,7 +39,7 @@ fn query(start: i64, end: i64, limit: usize) -> TraceFrameQuery {
     }
 }
 fn frames(
-    c: &Connection,
+    c: &RefCell<Connection>,
     i: &DatabaseInspection,
     q: &TraceFrameQuery,
 ) -> Result<EventPage<TraceFrame>, StoreError> {

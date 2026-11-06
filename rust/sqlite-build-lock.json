@@ -1,27 +1,27 @@
 {
   "version": 1,
   "crate": "libsqlite3-sys",
-  "crateVersion": "0.38.2",
-  "sqliteVersion": "3.53.2",
-  "sqliteSourceID": "2026-06-03 19:12:13 d6e03d8c777cfa2d35e3b60d8ec3e0187f3e9f99d8e2ee9cac695fd6fcdf1a24",
+  "crateVersion": "0.39.1",
+  "sqliteVersion": "3.54.1",
+  "sqliteSourceID": "2026-10-16 14:45:20 555e07ef33f69a0957d24d8e555b702464a131d6f1607f4c3c1e4551e8e6ca76",
   "sourceFiles": [
     {
       "path": "sqlite3/sqlite3.c",
-      "byteCount": 9507037,
-      "sha256": "0a409f1633283fa31a9126b11fbfd64a1991c5d30defad07e5745d4667f5e23d"
+      "byteCount": 9582521,
+      "sha256": "0c657666d819f261cc4007526ad57e1669de9949df7a8ea847aa284a2bf0ee52"
     },
     {
       "path": "sqlite3/sqlite3.h",
-      "byteCount": 690725,
-      "sha256": "9e69a1353a4288450b0d5239ede11fc7f1f4c8e5eb07491fc8317eacb5b7de7e"
+      "byteCount": 695729,
+      "sha256": "d6c84557261893439b341d2e6c35187ae3ea24fbfd843ad94616f72d89242b8c"
     }
   ],
   "publicDomainDeclaration": {
-    "path": "rust/licenses/libsqlite3-sys-0.38.2/SQLITE-PUBLIC-DOMAIN",
+    "path": "rust/licenses/libsqlite3-sys-0.39.1/SQLITE-PUBLIC-DOMAIN",
     "byteCount": 1485,
     "sha256": "85806d613cfda5901f848b3b5b4b04396c8c64e89c97c0af3706c42b0c44bb47"
   },
-  "rusqliteVersion": "0.40.2",
+  "rusqliteVersion": "0.41.1",
   "features": [
     "bundled",
     "hooks",
@@ -29,6 +29,7 @@
   ],
   "defaultFeatures": false,
   "defines": [
-    "SQLITE_ENABLE_FILESTAT=1"
+    "SQLITE_ENABLE_FILESTAT=1",
+    "SQLITE_ENABLE_WALSTAT=1"
   ]
 }

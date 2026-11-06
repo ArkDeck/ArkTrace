@@ -497,7 +497,8 @@ mod tests {
     }
     #[test]
     fn query_bounds_and_request_cancellation_do_not_poison_next_request() {
-        let connection = fixture("INSERT INTO process VALUES(1,1,'ok',100)");
+        let connection =
+            std::cell::RefCell::new(fixture("INSERT INTO process VALUES(1,1,'ok',100)"));
         let first = budget();
         let db = Database::borrow_readonly(&connection, &first).unwrap();
         let inspection = db.inspect().unwrap();

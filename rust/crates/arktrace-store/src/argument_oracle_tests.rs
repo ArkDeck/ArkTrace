@@ -8,7 +8,10 @@ use arktrace_contract::{DirectoryNameMatch, PublicError, TraceArgumentQuery, Tra
 use arktrace_platform::CancellationToken;
 use rusqlite::Connection;
 use serde_json::{Value, json};
-use std::time::{Duration, Instant};
+use std::{
+    cell::RefCell,
+    time::{Duration, Instant},
+};
 
 #[test]
 fn actual_swift_argument_pages_match_all_controlled_rows_handles_and_closed_errors() {
@@ -26,11 +29,13 @@ fn actual_swift_argument_pages_match_all_controlled_rows_handles_and_closed_erro
             .iter()
             .find(|v| v["id"] == case["fixture"])
             .unwrap();
-        let connection = Connection::open_in_memory().unwrap();
+        let connection = RefCell::new(Connection::open_in_memory().unwrap());
         connection
+            .borrow()
             .execute_batch(input["schemaSQL"].as_str().unwrap())
             .unwrap();
         connection
+            .borrow()
             .execute_batch(fixture["sql"].as_str().unwrap())
             .unwrap();
         let budget = ValidationBudget {

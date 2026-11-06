@@ -7,7 +7,10 @@ use arktrace_contract::TraceDensityQuery;
 use arktrace_platform::CancellationToken;
 use rusqlite::Connection;
 use serde_json::{Value, json};
-use std::time::{Duration, Instant};
+use std::{
+    cell::RefCell,
+    time::{Duration, Instant},
+};
 
 #[test]
 fn actual_swift_density_results_match_every_controlled_source_bucket_identity_quality_and_error() {
@@ -18,11 +21,13 @@ fn actual_swift_density_results_match_every_controlled_source_bucket_identity_qu
     assert_eq!(expected.len(), 190);
     let mut checked = 0;
     for fixture in input["fixtures"].as_array().unwrap() {
-        let connection = Connection::open_in_memory().unwrap();
+        let connection = RefCell::new(Connection::open_in_memory().unwrap());
         connection
+            .borrow()
             .execute_batch(input["schemaSQL"].as_str().unwrap())
             .unwrap();
         connection
+            .borrow()
             .execute_batch(fixture["sql"].as_str().unwrap())
             .unwrap();
         let budget = ValidationBudget {

@@ -84,9 +84,12 @@ def main():
             assert len(data) == license_text["byteCount"]
             assert hashlib.sha256(data).hexdigest() == license_text["sha256"], str(path.relative_to(ROOT))
     sqlite_lock = json.loads((ROOT / "rust/sqlite-build-lock.json").read_text(encoding="utf-8"))
-    assert sqlite_lock["defines"] == ["SQLITE_ENABLE_FILESTAT=1"], "SQLite descriptor metadata support drift"
+    assert sqlite_lock["defines"] == [
+        "SQLITE_ENABLE_FILESTAT=1",
+        "SQLITE_ENABLE_WALSTAT=1",
+    ], "SQLite descriptor metadata support drift"
     runner_source = (ROOT / "hack/run-cargo.py").read_text(encoding="utf-8")
-    assert 'environment["LIBSQLITE3_FLAGS"] = "-DSQLITE_ENABLE_FILESTAT=1"' in runner_source
+    assert 'environment["LIBSQLITE3_FLAGS"] = "-DSQLITE_ENABLE_FILESTAT=1 -DSQLITE_ENABLE_WALSTAT=1"' in runner_source
     sqlite_dependency = workspace["workspace"]["dependencies"]["rusqlite"]
     assert sqlite_dependency == {
         "version": "=" + sqlite_lock["rusqliteVersion"],

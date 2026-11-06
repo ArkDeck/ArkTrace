@@ -70,11 +70,13 @@ query errors and the existing signal/output-pressure matrix are retained in
 [query CLI evidence](../docs/migration-runs/AT-RUST-010-2026-10-03-query-cli.md).
 
 `arktrace-store` now inspects macOS immutable snapshots using a retained private
-readonly descriptor and bundled SQLite **3.53.2** via exact rusqlite **0.40.2**.
+readonly descriptor and bundled SQLite **3.54.1** via exact rusqlite **0.41.1**.
 `sqlite-build-lock.json` freezes the source ID, C/header digests and public-domain
 declaration in addition to all 35 crate license identities. The runner rejects
 ambient libsqlite3 build overrides; the native probe records actual compile options.
-The runner injects frozen `SQLITE_ENABLE_FILESTAT=1`. The macOS writable port
+The runner injects frozen `SQLITE_ENABLE_FILESTAT=1` and `SQLITE_ENABLE_WALSTAT=1`.
+SQLite 3.54 registers `sqlite_walstat` from the FILESTAT gate while its body is
+compiled only with WALSTAT. The macOS writable port
 reads native FILESTAT metadata before any SQL and compares SQLite's actual file
 descriptor's device/inode with the owned candidate. Runtime availability is
 tested separately because this SQLite version omits FILESTAT from compile_options.

@@ -3,7 +3,10 @@ use crate::ValidationBudget;
 use arktrace_platform::CancellationToken;
 use rusqlite::Connection;
 use serde_json::Value;
-use std::time::{Duration, Instant};
+use std::{
+    cell::RefCell,
+    time::{Duration, Instant},
+};
 
 fn budget() -> ValidationBudget {
     ValidationBudget {
@@ -19,10 +22,10 @@ fn query() -> TraceSummaryQuery {
         maximum_events_per_section: 100_000,
     }
 }
-fn connection(sql: &str) -> Connection {
+fn connection(sql: &str) -> RefCell<Connection> {
     let conn = Connection::open_in_memory().unwrap();
     conn.execute_batch(sql).unwrap();
-    conn
+    RefCell::new(conn)
 }
 const TEMPORAL: &str = include_str!("../../tests/fixtures/summary-temporal.sql");
 const EMPTY: &str = include_str!("../../tests/fixtures/summary-empty.sql");
@@ -122,7 +125,7 @@ fn vm_budget_interrupts_sql_and_short_statements_share_credit_without_poisoning_
 #[test]
 fn stat_preserves_raw_utf8_source_identity_and_rejects_overflow_without_partial_result() {
     let conn = connection(TEMPORAL);
-    conn.execute_batch("DELETE FROM stat; INSERT INTO stat VALUES('a','received',1,'info','é'); INSERT INTO stat VALUES('a','received',2,'info','é'); INSERT INTO stat VALUES('a','received',3,'info',CAST(x'610062' AS TEXT)); INSERT INTO stat VALUES('a','received',4,'info',CAST(x'ff' AS TEXT));").unwrap();
+    conn.borrow().execute_batch("DELETE FROM stat; INSERT INTO stat VALUES('a','received',1,'info','é'); INSERT INTO stat VALUES('a','received',2,'info','é'); INSERT INTO stat VALUES('a','received',3,'info',CAST(x'610062' AS TEXT)); INSERT INTO stat VALUES('a','received',4,'info',CAST(x'ff' AS TEXT));").unwrap();
     let budget = budget();
     let inspection = Database::borrow_writable(&conn, &budget)
         .unwrap()
@@ -148,7 +151,7 @@ fn stat_preserves_raw_utf8_source_identity_and_rejects_overflow_without_partial_
     );
     drop(db);
     Database::borrow_writable(&conn, &budget).unwrap();
-    conn.execute_batch("DELETE FROM stat; INSERT INTO stat VALUES('a','received',9223372036854775807,'info','trace'); INSERT INTO stat VALUES('b','received',1,'info','trace');").unwrap();
+    conn.borrow().execute_batch("DELETE FROM stat; INSERT INTO stat VALUES('a','received',9223372036854775807,'info','trace'); INSERT INTO stat VALUES('b','received',1,'info','trace');").unwrap();
     let db = Database::borrow_readonly(&conn, &budget).unwrap();
     assert_eq!(
         schema.facts(&db, &inspection, &counters, &query()),
@@ -224,7 +227,7 @@ fn without_rowid_and_shadowed_aliases_sample_physical_storage_before_lifecycle_f
         "CREATE TABLE process(ipid INTEGER,pid INTEGER,name TEXT,start_ts INTEGER,end_ts INTEGER,rowid INTEGER,_rowid_ INTEGER,oid INTEGER)",
     ] {
         let conn = connection(TEMPORAL);
-        conn.execute_batch(&format!("DROP TABLE process;{replacement};INSERT INTO process(ipid,pid,name,start_ts,end_ts) VALUES(1,1,'out',1500,1900),(2,2,'in',1200,1300);")).unwrap();
+        conn.borrow().execute_batch(&format!("DROP TABLE process;{replacement};INSERT INTO process(ipid,pid,name,start_ts,end_ts) VALUES(1,1,'out',1500,1900),(2,2,'in',1200,1300);")).unwrap();
         let budget = budget();
         // This checks the sampler against existing admitted inspection. Required
         // relationships are not weakened to manufacture an alternate Ready DB.

@@ -241,11 +241,11 @@
     },
     {
       "name": "libsqlite3-sys",
-      "version": "0.38.2",
+      "version": "0.39.1",
       "license": "MIT",
       "licenseTexts": [
         {
-          "path": "rust/licenses/libsqlite3-sys-0.38.2/LICENSE",
+          "path": "rust/licenses/libsqlite3-sys-0.39.1/LICENSE",
           "byteCount": 1067,
           "sha256": "c10c1f27337546471e5f7e4e97fdd398b35b9d4e126115dcd22de8d8e65abf6f"
         }
@@ -326,11 +326,11 @@
     },
     {
       "name": "rusqlite",
-      "version": "0.40.2",
+      "version": "0.41.1",
       "license": "MIT",
       "licenseTexts": [
         {
-          "path": "rust/licenses/rusqlite-0.40.2/LICENSE",
+          "path": "rust/licenses/rusqlite-0.41.1/LICENSE",
           "byteCount": 1067,
           "sha256": "c10c1f27337546471e5f7e4e97fdd398b35b9d4e126115dcd22de8d8e65abf6f"
         }
