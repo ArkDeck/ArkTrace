@@ -1,7 +1,10 @@
 use super::*;
 use crate::database::{DEFAULT_VM_BUDGET, Database, integer};
 use rusqlite::Connection;
-use std::time::{Duration, Instant};
+use std::{
+    cell::RefCell,
+    time::{Duration, Instant},
+};
 
 const SCHEMA: &str = "
 CREATE TABLE trace_range(start_ts INTEGER,end_ts INTEGER);
@@ -334,7 +337,7 @@ fn batch_memory_is_charged_before_row_mapping_and_resets_for_the_next_request() 
     use crate::query_resources::QueryResources;
     use std::{cell::Cell, sync::Arc};
     let request = budget();
-    let connection = fixture("");
+    let connection = RefCell::new(fixture(""));
     let resources = Arc::new(
         QueryResources::new(ReadPoolLimits {
             maximum_workers: 1,
@@ -379,7 +382,7 @@ fn batch_abort_interrupts_active_sql_without_cancelling_the_parent_or_next_reque
     use crate::query_resources::QueryResources;
     use std::sync::Arc;
     let request = budget();
-    let connection = fixture("");
+    let connection = RefCell::new(fixture(""));
     let resources = Arc::new(QueryResources::new(ReadPoolLimits::default()).unwrap());
     let db = Database::borrow_readonly(&connection, &request)
         .unwrap()
@@ -584,7 +587,7 @@ fn runtime_identity_and_private_readonly_configuration_are_enforced() {
 }
 
 pub(super) struct SQLiteDiskFixture {
-    pub(super) connection: Option<Connection>,
+    pub(super) connection: Option<RefCell<Connection>>,
     directory: std::path::PathBuf,
 }
 impl SQLiteDiskFixture {
@@ -604,7 +607,7 @@ impl SQLiteDiskFixture {
         transaction.execute_batch(extra).unwrap();
         transaction.commit().unwrap();
         Self {
-            connection: Some(connection),
+            connection: Some(RefCell::new(connection)),
             directory,
         }
     }
@@ -619,7 +622,7 @@ impl Drop for SQLiteDiskFixture {
 #[test]
 fn disk_fixture_commits_schema_and_rows_before_index_transactions() {
     let disk = SQLiteDiskFixture::new("INSERT INTO process VALUES(1,2,'process',100)");
-    assert!(disk.connection.as_ref().unwrap().is_autocommit());
+    assert!(disk.connection.as_ref().unwrap().borrow().is_autocommit());
     let reader = Connection::open(disk.directory.join("unit.db")).unwrap();
     let row = reader
         .query_row("SELECT ipid,pid FROM process", [], |row| {
@@ -726,10 +729,12 @@ fn index_transaction_rolls_back_before_returning_cancellation() {
         }
     });
     assert_eq!(result, Err(StoreError::Cancelled));
+    let connection = connection.borrow();
     assert!(connection.is_autocommit());
-    let names = connection
+    let mut statement = connection
         .prepare("SELECT name FROM sqlite_master WHERE type='index'")
-        .unwrap()
+        .unwrap();
+    let names = statement
         .query_map([], |row| row.get::<_, String>(0))
         .unwrap()
         .collect::<rusqlite::Result<Vec<_>>>()

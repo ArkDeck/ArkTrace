@@ -11,12 +11,17 @@ use arktrace_contract::{
     TraceProcess, TraceSlice, TraceSliceQuery, TraceThread,
 };
 use arktrace_platform::{ContinuousDeadline, HeldFile};
-use std::{cell::Cell, marker::PhantomData, rc::Rc, sync::Arc};
+use std::{
+    cell::{Cell, RefCell},
+    marker::PhantomData,
+    rc::Rc,
+    sync::Arc,
+};
 
 /// One immutable snapshot and one private SQLite connection, owned by the
 /// calling worker. A connection cannot move between threads or expose SQL.
 pub struct StoreReader {
-    connection: rusqlite::Connection,
+    connection: RefCell<rusqlite::Connection>,
     snapshot: Arc<HeldFile>,
     inspection: IndexedDatabaseInspection,
     directory: DirectorySchema,
@@ -75,7 +80,7 @@ impl StoreReader {
         resources: Option<Arc<crate::query_resources::QueryResources>>,
         verified_inspection: Option<&IndexedDatabaseInspection>,
     ) -> Result<Self, StoreError> {
-        let connection = open_snapshot_connection(&snapshot, budget)?;
+        let connection = RefCell::new(open_snapshot_connection(&snapshot, budget)?);
         let prepared = (|| {
             let db =
                 Database::borrow_readonly(&connection, budget)?.with_resources(resources.clone());
@@ -105,7 +110,10 @@ impl StoreReader {
             match prepared {
                 Ok(value) => value,
                 Err(error) => {
-                    connection.close().map_err(|_| StoreError::CleanupFailed)?;
+                    connection
+                        .into_inner()
+                        .close()
+                        .map_err(|_| StoreError::CleanupFailed)?;
                     return Err(error);
                 }
             };
@@ -350,6 +358,7 @@ impl StoreReader {
     }
     pub fn close(self) -> Result<(), StoreError> {
         self.connection
+            .into_inner()
             .close()
             .map_err(|_| StoreError::CleanupFailed)
     }

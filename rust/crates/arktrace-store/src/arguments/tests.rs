@@ -2,7 +2,10 @@ use super::*;
 use crate::{ValidationBudget, database::Database};
 use arktrace_platform::CancellationToken;
 use rusqlite::Connection;
-use std::time::{Duration, Instant};
+use std::{
+    cell::RefCell,
+    time::{Duration, Instant},
+};
 
 const SCHEMA: &str = "CREATE TABLE callstack(id INTEGER,ts INTEGER,dur INTEGER,callid INTEGER,name TEXT,argsetid INTEGER);
 CREATE TABLE args(id INTEGER,key INTEGER,datatype INTEGER,value INTEGER,argset INTEGER);
@@ -17,11 +20,11 @@ fn budget() -> ValidationBudget {
         cancellation: CancellationToken::default(),
     }
 }
-fn fixture(sql: &str) -> Connection {
+fn fixture(sql: &str) -> RefCell<Connection> {
     let c = Connection::open_in_memory().unwrap();
     c.execute_batch(SCHEMA).unwrap();
     c.execute_batch(sql).unwrap();
-    c
+    RefCell::new(c)
 }
 fn query(id: i64, limit: usize) -> TraceArgumentQuery {
     TraceArgumentQuery {
@@ -30,7 +33,7 @@ fn query(id: i64, limit: usize) -> TraceArgumentQuery {
     }
 }
 fn arguments(
-    c: &Connection,
+    c: &RefCell<Connection>,
     q: &TraceArgumentQuery,
 ) -> Result<EventPage<TraceEventArgument>, StoreError> {
     let b = budget();

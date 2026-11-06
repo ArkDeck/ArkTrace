@@ -242,7 +242,9 @@ def managed_workspace(command, options):
     workspace.mkdir(exist_ok=True)
     environment = os.environ.copy()
     environment.update(CARGO_HOME=str(dependency), CARGO_TARGET_DIR=str(cache / "target"), ARKTRACE_EXPECT_NATIVE_HOST=host)
-    environment["LIBSQLITE3_FLAGS"] = "-DSQLITE_ENABLE_FILESTAT=1"
+    # SQLite 3.54 registers sqlite_walstat inside the FILESTAT gate but defines
+    # walstatFunc only for SQLITE_ENABLE_WALSTAT. Both defines stay frozen.
+    environment["LIBSQLITE3_FLAGS"] = "-DSQLITE_ENABLE_FILESTAT=1 -DSQLITE_ENABLE_WALSTAT=1"
     capture = os.environ.get("ARKTRACE_CARGO_CAPTURE_STATICLIB")
     if capture:
         capture = Path(capture)

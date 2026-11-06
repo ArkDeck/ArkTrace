@@ -3,7 +3,10 @@ use crate::ValidationBudget;
 use arktrace_contract::DirectoryNameMatch;
 use arktrace_platform::CancellationToken;
 use rusqlite::Connection;
-use std::time::{Duration, Instant};
+use std::{
+    cell::RefCell,
+    time::{Duration, Instant},
+};
 
 const SCHEMA: &str = "CREATE TABLE trace_range(start_ts INTEGER,end_ts INTEGER);INSERT INTO trace_range VALUES(1000,2000);
 CREATE TABLE process(ipid INTEGER,pid INTEGER,name TEXT,start_ts INTEGER);INSERT INTO process VALUES(-10,900,'process',1000);
@@ -22,14 +25,14 @@ fn budget() -> ValidationBudget {
         cancellation: CancellationToken::default(),
     }
 }
-fn fixture(extra: &str) -> (Connection, DatabaseInspection) {
-    let conn = Connection::open_in_memory().unwrap();
-    conn.execute_batch(SCHEMA).unwrap();
+fn fixture(extra: &str) -> (RefCell<Connection>, DatabaseInspection) {
+    let conn = RefCell::new(Connection::open_in_memory().unwrap());
+    conn.borrow().execute_batch(SCHEMA).unwrap();
     let inspection = Database::borrow_writable(&conn, &budget())
         .unwrap()
         .inspect()
         .unwrap();
-    conn.execute_batch(extra).unwrap();
+    conn.borrow().execute_batch(extra).unwrap();
     (conn, inspection)
 }
 fn query(start: i64, end: i64, limit: usize) -> CounterQuery {
@@ -46,7 +49,7 @@ fn query(start: i64, end: i64, limit: usize) -> CounterQuery {
     }
 }
 fn counters(
-    conn: &Connection,
+    conn: &RefCell<Connection>,
     inspection: &DatabaseInspection,
     q: &CounterQuery,
 ) -> Result<EventPage<CounterSeries>, StoreError> {
@@ -55,7 +58,7 @@ fn counters(
     CounterSchema::read(&db, inspection)?.counters(&db, inspection, q)
 }
 fn series(
-    conn: &Connection,
+    conn: &RefCell<Connection>,
     inspection: &DatabaseInspection,
     limit: usize,
 ) -> Result<EventPage<CounterSeriesDescriptor>, StoreError> {
@@ -274,8 +277,12 @@ fn scope_pid_filter_identity_and_like_literals_stay_parameterized() {
 }
 #[test]
 fn sample_identity_uses_unshadowed_alias_and_rejects_without_rowid() {
-    let (conn, i) =
-        fixture("ALTER TABLE measure ADD COLUMN RoWiD INTEGER;UPDATE measure SET RoWiD=999;");
+    // SQLite 3.54 rejects ALTER TABLE ADD COLUMN for any rowid-alias spelling.
+    // Creating the column in the table declaration still leaves it an ordinary
+    // column, so the other alias spellings keep addressing the real rowid.
+    let (conn, i) = fixture(
+        "DROP TABLE measure;CREATE TABLE measure(ts INTEGER,value INTEGER,filter_id INTEGER,dur INTEGER,RoWiD INTEGER);INSERT INTO measure VALUES(1000,1,10,0,999);",
+    );
     assert_eq!(
         counters(&conn, &i, &query(0, 1000, 20)).unwrap().items[0].samples[0]
             .key
@@ -283,7 +290,7 @@ fn sample_identity_uses_unshadowed_alias_and_rejects_without_rowid() {
         1
     );
     let (conn, i) = fixture(
-        "ALTER TABLE measure ADD COLUMN RoWiD INTEGER;ALTER TABLE measure ADD COLUMN _rowid_ INTEGER;ALTER TABLE measure ADD COLUMN oid INTEGER;",
+        "DROP TABLE measure;CREATE TABLE measure(ts INTEGER,value INTEGER,filter_id INTEGER,dur INTEGER,RoWiD INTEGER,_rowid_ INTEGER,oid INTEGER);INSERT INTO measure VALUES(1000,1,10,0,NULL,NULL,NULL);",
     );
     assert_eq!(
         counters(
@@ -456,12 +463,17 @@ fn unindexed_series_discovery_does_not_rescan_samples_for_each_empty_filter() {
     );
     // Do not let an implicit temporary index conceal the repeated scan. The
     // production query also has to fit when no filter-prefix seek is present.
-    conn.pragma_update(None, "automatic_index", false).unwrap();
+    conn.borrow()
+        .pragma_update(None, "automatic_index", false)
+        .unwrap();
     let unindexed = series(&conn, &inspection, 2000).unwrap();
     assert_eq!(unindexed.items.len(), 2);
     assert!(!unindexed.truncated);
-    conn.pragma_update(None, "query_only", false).unwrap();
-    conn.execute_batch("CREATE INDEX filter_seek ON process_measure(filter_id,ts)")
+    conn.borrow()
+        .pragma_update(None, "query_only", false)
+        .unwrap();
+    conn.borrow()
+        .execute_batch("CREATE INDEX filter_seek ON process_measure(filter_id,ts)")
         .unwrap();
     assert_eq!(series(&conn, &inspection, 2000).unwrap(), unindexed);
 }

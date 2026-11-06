@@ -101,7 +101,7 @@ impl WritableFile {
     pub fn with_sqlite_connection<T, E>(
         &self,
         budget: &IoBudget,
-        body: impl FnOnce(&rusqlite::Connection) -> Result<T, E>,
+        body: impl FnOnce(&std::cell::RefCell<rusqlite::Connection>) -> Result<T, E>,
     ) -> Result<T, E>
     where
         E: From<HostError>,
@@ -110,15 +110,18 @@ impl WritableFile {
         self.require_no_sidecars()?;
         let flags =
             rusqlite::OpenFlags::SQLITE_OPEN_READ_WRITE | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX;
-        let connection = rusqlite::Connection::open_with_flags(self.path(), flags)
-            .map_err(|_| HostError::InvalidEvidence)?;
-        self.verify_sqlite_connection(&connection, budget)?;
+        let connection = std::cell::RefCell::new(
+            rusqlite::Connection::open_with_flags(self.path(), flags)
+                .map_err(|_| HostError::InvalidEvidence)?,
+        );
+        self.verify_sqlite_connection(&connection.borrow(), budget)?;
         let result = body(&connection);
         let cleanup = IoBudget {
             maximum_bytes: budget.maximum_bytes,
             deadline: Instant::now() + Duration::from_secs(2),
             cancellation: crate::CancellationToken::default(),
         };
+        let connection = connection.into_inner();
         let binding = self.verify_sqlite_connection(&connection, &cleanup);
         connection.close().map_err(|_| HostError::CleanupFailed)?;
         binding?;

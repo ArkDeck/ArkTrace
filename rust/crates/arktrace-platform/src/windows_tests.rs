@@ -424,9 +424,11 @@ fn writable_sqlite_binds_its_own_handle_and_seals() {
     assert!(facts.byte_count > 0);
     let rows: i64 = writable
         .with_sqlite_connection(&budget(), |db| {
-            db.execute("INSERT INTO t VALUES (2)", [])
+            db.borrow()
+                .execute("INSERT INTO t VALUES (2)", [])
                 .map_err(|_| HostError::InvalidEvidence)?;
-            db.query_row("SELECT count(*) FROM t", [], |row| row.get(0))
+            db.borrow()
+                .query_row("SELECT count(*) FROM t", [], |row| row.get(0))
                 .map_err(|_| HostError::InvalidEvidence)
         })
         .unwrap();

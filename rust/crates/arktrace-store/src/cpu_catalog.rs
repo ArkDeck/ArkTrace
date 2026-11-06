@@ -129,7 +129,10 @@ mod tests {
     use arktrace_contract::TraceTimeRange;
     use arktrace_platform::CancellationToken;
     use rusqlite::Connection;
-    use std::time::{Duration, Instant};
+    use std::{
+        cell::RefCell,
+        time::{Duration, Instant},
+    };
 
     fn budget() -> ValidationBudget {
         ValidationBudget {
@@ -138,9 +141,9 @@ mod tests {
             cancellation: CancellationToken::default(),
         }
     }
-    fn fixture() -> (Connection, DatabaseInspection) {
-        let c = Connection::open_in_memory().unwrap();
-        c.execute_batch("CREATE TABLE trace_range(start_ts INTEGER,end_ts INTEGER); INSERT INTO trace_range VALUES(1000,2000);
+    fn fixture() -> (RefCell<Connection>, DatabaseInspection) {
+        let c = RefCell::new(Connection::open_in_memory().unwrap());
+        c.borrow().execute_batch("CREATE TABLE trace_range(start_ts INTEGER,end_ts INTEGER); INSERT INTO trace_range VALUES(1000,2000);
             CREATE TABLE process(ipid INTEGER,pid INTEGER,name TEXT,start_ts INTEGER);
             INSERT INTO process VALUES(-10,900,'process',1000);
             CREATE TABLE thread(itid INTEGER,tid INTEGER,name TEXT,start_ts INTEGER,ipid INTEGER);
@@ -166,14 +169,15 @@ mod tests {
     #[test]
     fn late_sparse_signed_identities_do_not_depend_on_activity_sample() {
         let (c, inspection) = fixture();
-        c.execute_batch(
-            "WITH RECURSIVE n(i) AS (VALUES(2) UNION ALL SELECT i+1 FROM n WHERE i<21000)
+        c.borrow()
+            .execute_batch(
+                "WITH RECURSIVE n(i) AS (VALUES(2) UNION ALL SELECT i+1 FROM n WHERE i<21000)
             INSERT INTO sched_slice SELECT i,1001,1,0,NULL,-10 FROM n;
             INSERT INTO sched_slice VALUES(21001,1800,0,-9223372036854775808,NULL,-10);
             INSERT INTO sched_slice VALUES(21002,1900,NULL,9223372036854775807,NULL,NULL);
             INSERT INTO sched_slice VALUES(21003,1999,-1,99,NULL,5);",
-        )
-        .unwrap();
+            )
+            .unwrap();
         let b = budget();
         let db = Database::borrow_writable(&c, &b).unwrap();
         let result = query(&db, &inspection, &request(4096, 20_000)).unwrap();
@@ -206,16 +210,17 @@ mod tests {
     #[test]
     fn ranges_keep_instant_open_ended_and_invalid_cpu_semantics() {
         let (c, inspection) = fixture();
-        c.execute_batch(
-            "INSERT INTO sched_slice VALUES(2,1100,0,1,NULL,2);
+        c.borrow()
+            .execute_batch(
+                "INSERT INTO sched_slice VALUES(2,1100,0,1,NULL,2);
             INSERT INTO sched_slice VALUES(3,1200,-1,2,NULL,-10);
             INSERT INTO sched_slice VALUES(4,1300,NULL,3,NULL,0);
             INSERT INTO sched_slice VALUES(5,1500,0,4,NULL,2);
             INSERT INTO sched_slice VALUES(6,1450,1,'bad',NULL,2);
             INSERT INTO sched_slice VALUES(7,'bad',1,5,NULL,2);
             INSERT INTO sched_slice VALUES(8,1400,'bad',6,NULL,2);",
-        )
-        .unwrap();
+            )
+            .unwrap();
         let mut q = request(4096, 20_000);
         q.range = TraceTimeRange::query(100, 500).unwrap();
         let b = budget();
@@ -248,7 +253,8 @@ mod tests {
     #[test]
     fn malformed_identity_and_expired_or_cancelled_queries_fail_closed() {
         let (c, inspection) = fixture();
-        c.execute_batch("INSERT INTO sched_slice VALUES('bad',1001,1,1,NULL,2)")
+        c.borrow()
+            .execute_batch("INSERT INTO sched_slice VALUES('bad',1001,1,1,NULL,2)")
             .unwrap();
         let b = budget();
         let db = Database::borrow_writable(&c, &b).unwrap();
@@ -280,7 +286,7 @@ mod tests {
     #[test]
     fn scanning_out_of_range_rows_does_not_reset_vm_budget_or_return_unavailable() {
         let (c, inspection) = fixture();
-        c.execute_batch("DELETE FROM sched_slice; WITH RECURSIVE n(i) AS (VALUES(1) UNION ALL SELECT i+1 FROM n WHERE i<100000)
+        c.borrow().execute_batch("DELETE FROM sched_slice; WITH RECURSIVE n(i) AS (VALUES(1) UNION ALL SELECT i+1 FROM n WHERE i<100000)
             INSERT INTO sched_slice SELECT i,1001,1,0,NULL,-10 FROM n;").unwrap();
         let mut q = request(4096, 1);
         q.range = TraceTimeRange::query(900, 1000).unwrap();

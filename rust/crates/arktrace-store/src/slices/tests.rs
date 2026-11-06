@@ -3,7 +3,10 @@ use crate::{ValidationBudget, database::Database};
 use arktrace_contract::{DirectoryNameMatch, QualityCategory, TraceTimeRange};
 use arktrace_platform::CancellationToken;
 use rusqlite::Connection;
-use std::time::{Duration, Instant};
+use std::{
+    cell::RefCell,
+    time::{Duration, Instant},
+};
 
 const SCHEMA:&str="CREATE TABLE trace_range(start_ts INTEGER,end_ts INTEGER);INSERT INTO trace_range VALUES(1000,2000);
 CREATE TABLE process(ipid INTEGER,pid INTEGER,name TEXT,start_ts INTEGER);INSERT INTO process VALUES(-10,900,'process',1000);
@@ -18,14 +21,14 @@ fn budget() -> ValidationBudget {
         cancellation: CancellationToken::default(),
     }
 }
-fn fixture(extra: &str) -> (Connection, DatabaseInspection) {
-    let conn = Connection::open_in_memory().unwrap();
-    conn.execute_batch(SCHEMA).unwrap();
+fn fixture(extra: &str) -> (RefCell<Connection>, DatabaseInspection) {
+    let conn = RefCell::new(Connection::open_in_memory().unwrap());
+    conn.borrow().execute_batch(SCHEMA).unwrap();
     let inspection = Database::borrow_writable(&conn, &budget())
         .unwrap()
         .inspect()
         .unwrap();
-    conn.execute_batch(extra).unwrap();
+    conn.borrow().execute_batch(extra).unwrap();
     (conn, inspection)
 }
 fn query(start: i64, end: i64, limit: usize) -> TraceSliceQuery {
@@ -46,7 +49,7 @@ fn query(start: i64, end: i64, limit: usize) -> TraceSliceQuery {
     }
 }
 fn slices(
-    conn: &Connection,
+    conn: &RefCell<Connection>,
     inspection: &DatabaseInspection,
     q: &TraceSliceQuery,
 ) -> Result<EventPage<TraceSlice>, StoreError> {
@@ -67,8 +70,10 @@ fn unattributed_scope_selects_before_limit_and_focus_cannot_cross_lanes() {
         "../../../arktrace-viewer/tests/fixtures/scoped-slices-inputs.json"
     ))
     .unwrap();
-    let conn = Connection::open_in_memory().unwrap();
-    conn.execute_batch(input["sql"].as_str().unwrap()).unwrap();
+    let conn = RefCell::new(Connection::open_in_memory().unwrap());
+    conn.borrow()
+        .execute_batch(input["sql"].as_str().unwrap())
+        .unwrap();
     let inspection = Database::borrow_readonly(&conn, &budget())
         .unwrap()
         .inspect()

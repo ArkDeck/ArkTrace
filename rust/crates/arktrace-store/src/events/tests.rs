@@ -2,7 +2,10 @@ use super::*;
 use crate::{ValidationBudget, database::Database};
 use arktrace_platform::CancellationToken;
 use rusqlite::Connection;
-use std::time::{Duration, Instant};
+use std::{
+    cell::RefCell,
+    time::{Duration, Instant},
+};
 
 const SCHEMA: &str = "
 CREATE TABLE trace_range(start_ts INTEGER,end_ts INTEGER); INSERT INTO trace_range VALUES(1000,2000);
@@ -22,16 +25,16 @@ fn budget() -> ValidationBudget {
         cancellation: CancellationToken::default(),
     }
 }
-fn fixture(extra: &str) -> (Connection, DatabaseInspection) {
-    let conn = Connection::open_in_memory().unwrap();
-    conn.execute_batch(SCHEMA).unwrap();
+fn fixture(extra: &str) -> (RefCell<Connection>, DatabaseInspection) {
+    let conn = RefCell::new(Connection::open_in_memory().unwrap());
+    conn.borrow().execute_batch(SCHEMA).unwrap();
     let inspection = Database::borrow_writable(&conn, &budget())
         .unwrap()
         .inspect()
         .unwrap();
     // Deliberately mutate only synthetic fixtures after inspection to exercise
     // row degradation independently of the schema probe's earlier warnings.
-    conn.execute_batch(extra).unwrap();
+    conn.borrow().execute_batch(extra).unwrap();
     (conn, inspection)
 }
 fn cpu_query(start: i64, end: i64, limit: usize) -> CpuSliceQuery {
@@ -59,7 +62,7 @@ fn state_query(start: i64, end: i64, limit: usize) -> ThreadStateQuery {
     }
 }
 fn cpu(
-    conn: &Connection,
+    conn: &RefCell<Connection>,
     inspection: &DatabaseInspection,
     q: &CpuSliceQuery,
 ) -> Result<EventPage<CpuSlice>, StoreError> {
@@ -68,7 +71,7 @@ fn cpu(
     EventSchema::read(&db)?.cpu_slices(&db, inspection, q)
 }
 fn states(
-    conn: &Connection,
+    conn: &RefCell<Connection>,
     inspection: &DatabaseInspection,
     q: &ThreadStateQuery,
 ) -> Result<EventPage<ThreadStateInterval>, StoreError> {

@@ -3,7 +3,10 @@ use crate::{ValidationBudget, database::Database};
 use arktrace_platform::CancellationToken;
 use rusqlite::Connection;
 use serde_json::{Value, json};
-use std::time::{Duration, Instant};
+use std::{
+    cell::RefCell,
+    time::{Duration, Instant},
+};
 
 #[test]
 fn physical_family_scope_is_applied_before_sample_limit_without_optional_owners() {
@@ -15,8 +18,10 @@ fn physical_family_scope_is_applied_before_sample_limit_without_optional_owners(
         "../../../arktrace-viewer/tests/fixtures/swift-scoped-counters.json"
     ))
     .unwrap();
-    let conn = Connection::open_in_memory().unwrap();
-    conn.execute_batch(input["sql"].as_str().unwrap()).unwrap();
+    let conn = RefCell::new(Connection::open_in_memory().unwrap());
+    conn.borrow()
+        .execute_batch(input["sql"].as_str().unwrap())
+        .unwrap();
     let budget = ValidationBudget {
         maximum_database_bytes: 256 * 1024 * 1024,
         deadline: Instant::now() + Duration::from_secs(10),

@@ -278,7 +278,10 @@ class CargoRunnerTests(unittest.TestCase):
         self.assertEqual(self.invoke("build", "--workspace"), 0)
         self.assertEqual(self.invoke("test", "--workspace"), 0)
         for _, kwargs in self.calls:
-            self.assertEqual(kwargs["env"]["LIBSQLITE3_FLAGS"], "-DSQLITE_ENABLE_FILESTAT=1")
+            self.assertEqual(
+                kwargs["env"]["LIBSQLITE3_FLAGS"],
+                "-DSQLITE_ENABLE_FILESTAT=1 -DSQLITE_ENABLE_WALSTAT=1",
+            )
 
     def test_cache_must_be_absolute_and_external(self):
         for cache in ["relative", str(self.root / "cache")]:

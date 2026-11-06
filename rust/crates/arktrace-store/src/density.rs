@@ -514,18 +514,21 @@ mod cpu_stream_tests {
     use crate::ValidationBudget;
     use arktrace_platform::CancellationToken;
     use rusqlite::Connection;
-    use std::time::{Duration, Instant};
+    use std::{
+        cell::RefCell,
+        time::{Duration, Instant},
+    };
 
-    fn fixture(extra: &str) -> (Connection, DatabaseInspection) {
-        let c = Connection::open_in_memory().unwrap();
-        c.execute_batch("CREATE TABLE trace_range(start_ts INTEGER,end_ts INTEGER); INSERT INTO trace_range VALUES(1000,1000000);
+    fn fixture(extra: &str) -> (RefCell<Connection>, DatabaseInspection) {
+        let c = RefCell::new(Connection::open_in_memory().unwrap());
+        c.borrow().execute_batch("CREATE TABLE trace_range(start_ts INTEGER,end_ts INTEGER); INSERT INTO trace_range VALUES(1000,1000000);
             CREATE TABLE process(ipid INTEGER,pid INTEGER,name TEXT,start_ts INTEGER); INSERT INTO process VALUES(1,42,'process',1000);
             CREATE TABLE thread(itid INTEGER,tid INTEGER,name TEXT,start_ts INTEGER,ipid INTEGER); INSERT INTO thread VALUES(1,43,'thread',1000,1);
             CREATE TABLE sched_slice(id INTEGER,ts INTEGER,dur INTEGER,cpu INTEGER,itid INTEGER,ipid INTEGER);
             CREATE INDEX arktrace_v3_sched_slice_cpu_ts_dur ON sched_slice(cpu,ts,dur);
             CREATE TABLE thread_state(id INTEGER,ts INTEGER,dur INTEGER,itid INTEGER,state TEXT);
             CREATE TABLE callstack(id INTEGER,ts INTEGER,dur INTEGER,callid INTEGER,name TEXT);").unwrap();
-        c.execute_batch(extra).unwrap();
+        c.borrow().execute_batch(extra).unwrap();
         let b = budget();
         let inspection = Database::borrow_writable(&c, &b)
             .unwrap()
